@@ -1,0 +1,78 @@
+{% extends "repository/base.html" %}
+
+{% block content %}
+<div class="container-fluid p-3">
+    <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr .75fr;">
+      <div>
+      <div class="bg-body-tertiary border rounded-3 p-3">
+        <div class="container">
+            <h2 class="text-center">Upload Satellite Observations</h2>
+            <p>Insert explanatory text here about how to upload observations,
+                 information about the basic data format, and a link to the full data
+                 format page and possibly a sample file with the correct headers. 
+                 Also include what happens if the data upload fails, 
+                 and what kind of error messages to expect.</p>
+
+            <form method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+                <div class="row">
+                  <input type="file" class="form-control " name="uploaded_file" accept=".csv">
+                </div>
+                <div class="row pt-3">
+                  <div class="">
+                    <input type="submit" class="btn btn-primary fs-6" value="Upload File" name="submit">
+                  </div>
+                </div>
+            </form>
+
+          {% if error %}
+            <p class="text-warning">Error: {{ error }}</a></p>
+          {% endif %}
+
+          {% if obs_id %}
+          <div class="container-md border rounded-3 ">
+            <p class="text-success">Upload successful</p>
+            <p>Observation ID(s):<br />
+              {% for id in obs_id %}
+                {{ id }} <br/>
+              {% endfor %}
+            </p>
+            <p>Email sent to: test@email.com</p>
+          </div>
+          {% endif %}
+
+        </div>
+      </div>
+      </div>
+      <div class="container">
+        <div class="bg-body-tertiary border rounded-3 p-3 mb-3" style="min-height: 250px;">
+          <div>
+            Recent observations:
+          </div>
+          {% if latest_sat_list %}
+            <ul>
+            {% for sat in latest_sat_list %}
+                <li>{{ sat.sat_name }}</li>
+            {% endfor %}
+            </ul>
+          {% else %}
+            <p>No observations are available.</p>
+          {% endif %}
+        </div>
+
+        <div class="bg-body-tertiary border rounded-3 p-3" style="min-height: 250px;">
+          {% if latest_sat_list %}
+            <ul>
+            {% for sat in latest_sat_list %}
+                <li>{{ sat.sat_name }}</li>
+            {% endfor %}
+            </ul>
+          {% else %}
+            <p>No satellites are available.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}

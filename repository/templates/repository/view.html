@@ -1,0 +1,51 @@
+{% extends "repository/base.html" %}
+
+{% block content %}
+<div class="container-fluid p-3">     
+    <div class="container-md">
+    <h2 class="text-center p-2">Recent Observations</h2>
+    <table class="table table-hover">
+        <thead >
+            <tr>
+                <th scope="col">ID</th>
+                <th scope="col">Date</th>
+                <th scope="col">Apparent Mag.</th>
+            </tr>
+        </thead>
+        <tbody class="table-group-divider">
+        {% for observation in observations %}
+            <tr>
+                <th scope="row">{{observation.id}}</th>
+                <td scope="row">{{ observation.obs_time_utc }}</td>
+                <td scope="row">{{ observation.apparent_mag }}</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+    </div>
+</div>
+  {% if observations.has_other_pages %}
+    <nav  >
+        <ul class="pagination justify-content-center">
+            {% if observations.has_previous %}
+            <li class="page-item"><a class="page-link" href="?page={{ observations.previous_page_number }}">&laquo;</a></li>
+            {% else %}
+            <li class="page-link disabled"><span>&laquo;</span></li>
+            {% endif %}
+            {% for i in observations.paginator.page_range %}
+            {% if observations.number == i %}
+                <li class="page-link active"><span>{{ i }} <span class="sr-only">(current)</span></span></li>
+            {% else %}
+                <li class="page-item"><a class="page-link" href="?page={{ i }}">{{ i }}</a></li>
+            {% endif %}
+            {% endfor %}
+            {% if observations.has_next %}
+            <li class="page-item"><a class="page-link" href="?page={{ observations.next_page_number }}">&raquo;</a></li>
+            {% else %}
+            <li class="page-link disabled"><span>&raquo;</span></li>
+            {% endif %}
+        </ul>
+    </nav>
+{% endif %}
+
+{% endblock %}

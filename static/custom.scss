@@ -1,0 +1,27 @@
+// Custom.scss
+// Option A: Include all of Bootstrap
+
+// Include any default variable overrides here (though functions won't be available)
+
+
+// Then add additional custom code here
+$primary: #0d1f4d;
+$success: #20671d;
+
+$dark: #191d26;
+
+$font-family-sans-serif: 'Helvetica', sans-serif;
+$font-size-base: .9rem;
+
+.btn.btn-primary:focus,
+.btn.btn-primary:active,
+.btn.btn-primary:hover {
+  background-color: #133079;
+  border-color: #f3feff;
+}
+
+$form-file-button-color:         #f3feff;
+$form-file-button-bg:             $primary;
+$form-file-button-hover-bg:       #133079;
+
+@import "scss/bootstrap";
