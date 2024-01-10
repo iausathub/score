@@ -1,6 +1,6 @@
 from django.contrib import admin
 
-from .models import Satellite, Location, Image, Observation
+from .models import Image, Location, Observation, Satellite
 
 admin.site.register(Satellite)
 admin.site.register(Location)

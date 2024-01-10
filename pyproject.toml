@@ -1,0 +1,16 @@
+[tool.black]
+line-length = 88
+target-version = ['py311']
+exclude = '''
+/(
+    \.git
+  | \.github
+  | \.pytest_cache
+  | \.vscode
+  | \.venv
+  | env
+)/
+'''
+
+[tool.ruff]
+select = ["E", "F", "I", "N", "UP", "S", "B"]

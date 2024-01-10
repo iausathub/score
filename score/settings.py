@@ -20,7 +20,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = "django-insecure-3w&h&zckrwdztf+qvjpo1&qprrak2_gt0ni!avka#ok-0pb9d1"
+SECRET_KEY = (
+    "django-insecure-3w&h&zckrwdztf+qvjpo1&qprrak2_gt0ni!avka#ok-0pb9d1"  # noqa: S105
+)
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -92,7 +94,7 @@ DATABASES = {
 
 AUTH_PASSWORD_VALIDATORS = [
     {
-        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",
+        "NAME": "django.contrib.auth.password_validation.UserAttributeSimilarityValidator",  # noqa: E501
     },
     {
         "NAME": "django.contrib.auth.password_validation.MinimumLengthValidator",
@@ -127,9 +129,9 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "static"
 
-STATICFILES_FINDERS = [ "compressor.finders.CompressorFinder" ]
+STATICFILES_FINDERS = ["compressor.finders.CompressorFinder"]
 
-COMPRESS_PRECOMPILERS = ( ("text/x-scss", "django_libsass.SassCompiler"),)
+COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
