@@ -1,5 +1,6 @@
 import datetime
 import io
+import zipfile
 from django.forms import ValidationError
 from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.http import HttpResponse, HttpResponseRedirect
@@ -11,15 +12,14 @@ from .models import Satellite, Location, Image, Observation
 from .forms import UploadObservationFileForm
 
 def index(request):
+    if request.method == "POST" and not request.FILES:
+        return render(request, "repository/index.html", {"error": "Please select a file to upload."})
     if request.method == "POST" and request.FILES['uploaded_file']:
-        form = UploadObservationFileForm(request.POST, request.FILES)
         uploaded_file = request.FILES['uploaded_file']
-        filename = uploaded_file.name
         #parse csv file into models
         data_set = uploaded_file.read().decode('UTF-8')
         io_string = io.StringIO(data_set)
         #check if first row is header or not
-
 
         next(io_string)  # Skip the header
         obs_ids = []
@@ -125,14 +125,47 @@ def data_format(request):
 
 def view_data(request):
     observation_list = Observation.objects.all()
-    paginator = Paginator(observation_list, 10)
+    return render(request, "repository/view.html",  { 'observations': observation_list })
 
-    page = request.GET.get('page', 1)
-    try:
-        observations = paginator.page(page)
-    except PageNotAnInteger:
-        observations = paginator.page(1)
-    except EmptyPage:
-        observations = paginator.page(paginator.num_pages)
+def download_all(request):
+    #create csv from observation models (All)
+    header=["satellite_name", "norad_cat_id", "observation_time_utc", 
+            "observation_time_uncertainty_sec", "apparent_magnitude",
+            "apparent_magnitude_uncertainty", "observer_latitude_deg",
+            "observer_longitude_deg", "observer_altitude_m", "instrument",
+            "observing_mode", "observing_filter", "observer_email", "observer_orcid",
+            "satellite_right_ascension_deg", "satellite_right_ascension_uncertainty_deg",
+            "satellite_declination_deg", "satellite_declination_uncertainty_deg", 
+            "range_to_satellite_km", "range_to_satellite_uncertainty_km", 
+            "range_rate_of_satellite_km_per_sec", "range_rate_of_satellite_uncertainty_km_per_sec",
+            "comments", "data_archive_link"]
+    
+    observations = Observation.objects.all()
 
-    return render(request, "repository/view.html",  { 'observations': observations })
+    csv_lines = []
+    for observation in observations:
+        csv_lines.append([observation.satellite_id.sat_name, observation.satellite_id.sat_number, observation.obs_time_utc, 
+            observation.obs_time_uncert_sec, observation.apparent_mag, observation.apparent_mag_uncert, observation.location_id.obs_lat_deg,
+            observation.location_id.obs_long_deg, observation.location_id.obs_alt_m, observation.instrument, observation.obs_mode,
+            observation.obs_filter, observation.obs_email, observation.obs_orc_id, observation.sat_ra_deg, observation.sat_ra_uncert_deg,
+            observation.sat_dec_deg, observation.sat_dec_uncert_deg, observation.range_to_sat_km, observation.range_to_sat_uncert_km,
+            observation.range_rate_sat_km_s, observation.range_rate_sat_uncert_km_s, observation.comments, observation.data_archive_link])
+        
+    
+    output = io.StringIO()
+    writer = csv.writer(output)
+    writer.writerow(header)
+    writer.writerows(csv_lines)
+
+    zipfile_name = "satellite_observations.zip"
+    zipped_file = io.BytesIO()
+
+    with zipfile.ZipFile(zipped_file, 'w') as zip:
+        zip.writestr("observations.csv", output.getvalue())
+    zipped_file.seek(0)
+
+    response = HttpResponse(zipped_file, content_type="application/zip")
+    
+    response['Content-Disposition'] = f'attachment; filename={zipfile_name}'
+    return response
+    

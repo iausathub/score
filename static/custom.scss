@@ -19,9 +19,20 @@ $font-size-base: .9rem;
   background-color: #133079;
   border-color: #f3feff;
 }
+.btn.btn-primary:disabled{
+  background-color: #3c1a51;
+  border-color: #f3feff;
+  opacity: 0.5;
+
+}
+.page-item.active .page-link{
+  background-color: $primary;
+  border-color: #7b7b7b;
+}
 
 $form-file-button-color:         #f3feff;
 $form-file-button-bg:             $primary;
 $form-file-button-hover-bg:       #133079;
+
 
 @import "scss/bootstrap";
