@@ -7,6 +7,7 @@ from django.db import models
 class Satellite(models.Model):
     sat_name = models.CharField(max_length=200)
     sat_number = models.IntegerField(default=0)
+    constellation = models.CharField(max_length=100, default="", null=True)
     date_added = models.DateTimeField("date added", default=datetime.now)
 
     def __str__(self):

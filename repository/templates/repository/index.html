@@ -41,7 +41,7 @@
           {% endif %}
 
           {% if obs_id %}
-          <div class="container-md border rounded-3 ">
+          <div class="container-md border rounded-3 mt-3 pt-2 ">
 
             <p>Observation ID(s):<br />
               {% for id in obs_id %}
@@ -57,13 +57,13 @@
       </div>
       <div class="container">
         <div class="bg-body-tertiary border rounded-3 p-3 mb-3" style="min-height: 250px;">
-          <div>
-            Recent observations:
+          <div class="text-center">
+            <p class="fw-bold fs-5">Recent observations:</p>
           </div>
           {% if latest_obs_list %}
             <ul>
-            {% for sat in latest_obs_list %}
-                <li>{{ sat.sat_name }}</li>
+            {% for obs in latest_obs_list %}
+                <li>{{ obs.date_added }} - {{ obs.satellite_id.sat_name}}</li>
             {% endfor %}
             </ul>
           {% else %}
@@ -72,15 +72,28 @@
         </div>
 
         <div class="bg-body-tertiary border rounded-3 p-3" style="min-height: 250px;">
-          {% if latest_sat_list %}
-            <ul>
-            {% for sat in latest_sat_list %}
-                <li>{{ sat.sat_name }}</li>
-            {% endfor %}
-            </ul>
-          {% else %}
-            <p>No satellites are available.</p>
+          <div class="text-center">
+            <p class="fw-bold fs-5">Stats:</p>
+          </div>
+
+          {% if observation_count %}
+          <p>Observations: {{ observation_count }}</p>
           {% endif %}
+          {% if satellite_count %}
+          <p>Satellites: {{ satellite_count }}</p>
+          {% endif %}
+          {% if observer_count %}
+          <p>Observers: {{ observer_count }}</p>
+          {% endif %}
+          {% if avg_mag %}
+          <p>Average magnitude: {{ avg_mag }}</p>
+          {% endif %}
+
+
+          {% if not observation_count and not satellite_count %}
+            <p>No stats are available.</p>
+          {% endif %}
+
         </div>
       </div>
     </div>

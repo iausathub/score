@@ -9,26 +9,35 @@
             data-search="true"
             data-page-list="[25, 50, 100, 200, All]"
             data-page-size="25"
-            class=" fs-6">
+            data-sort-name="added"
+            data-sort-order="desc"
+            data-classes="table"
+            class="table table-hover fs-6">
         <thead >
             <tr>
-                <th scope="col" data-sortable="true">ID</th>
+                <th scope="col" data-sortable="true" data-visible="true" >Date added</th>
+                <th data-field="added"  scope="col" data-sortable="true" data-visible="false" >Date_added_timestamp</th>
                 <th scope="col" data-sortable="true">Satellite</th>
-                <th scope="col" data-sortable="true">Date</th>
+                <th scope="col" data-sortable="true">Date observed</th>
                 <th scope="col" data-sortable="true">Apparent Mag.</th>
+                <th scope="col" data-sortable="true">Obs. Mode</th>
             </tr>
         </thead>
         <tbody class="table-group-divider">
         {% for observation in observations %}
             <tr>
-                <th scope="row">{{observation.id}}</th>
+                <td scope="row">{{ observation.date_added }}</td>
+                <td scope="row">{{ observation.date_added.timestamp }}</td>
                 <td scope="row">{{ observation.satellite_id.sat_name }}</td>
                 <td scope="row">{{ observation.obs_time_utc }}</td>
                 <td scope="row">{{ observation.apparent_mag }}</td>
+                <td scope="row">{{ observation.obs_mode }}</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+
     </div>
 </div>
 
@@ -37,6 +46,5 @@
         <i class="fas fa-download"></i>  <a href="{% url 'download-all' %}">Download all data</a>
     </div>
 </div>
-
 
 {% endblock %}
