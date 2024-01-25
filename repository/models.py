@@ -1,3 +1,4 @@
+import re
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
@@ -62,18 +63,6 @@ class Location(models.Model):
             raise ValidationError("Altitude must be greater than 0 meters.")
 
 
-class Image(models.Model):
-    image_name = models.TextField()
-    image_path = models.TextField()
-    date_added = models.DateTimeField("date added", default=datetime.now)
-
-    def __str__(self):
-        return self.image_name
-
-    class Meta:
-        db_table = "image"
-
-
 class Observation(models.Model):
     obs_time_utc = models.DateTimeField("observation time")
     obs_time_uncert_sec = models.FloatField(default=0)
@@ -83,21 +72,20 @@ class Observation(models.Model):
     obs_mode = models.CharField(max_length=200)
     obs_filter = models.CharField(max_length=200)
     obs_email = models.TextField()
-    obs_orc_id = models.CharField(max_length=200, null=True)
-    sat_ra_deg = models.FloatField(default=0, null=True)
-    sat_ra_uncert_deg = models.FloatField(default=0, null=True)
-    sat_dec_deg = models.FloatField(default=0, null=True)
-    sat_dec_uncert_deg = models.FloatField(default=0, null=True)
-    range_to_sat_km = models.FloatField(default=0, null=True)
-    range_to_sat_uncert_km = models.FloatField(default=0, null=True)
-    range_rate_sat_km_s = models.FloatField(default=0, null=True)
-    range_rate_sat_uncert_km_s = models.FloatField(default=0, null=True)
-    comments = models.TextField(null=True)
-    data_archive_link = models.TextField(null=True)
-    flag = models.CharField(max_length=100, null=True)
+    obs_orc_id = models.CharField(max_length=200)
+    sat_ra_deg = models.FloatField(default=0, null=True, blank=True)
+    sat_ra_uncert_deg = models.FloatField(default=0, null=True, blank=True)
+    sat_dec_deg = models.FloatField(default=0, null=True, blank=True)
+    sat_dec_uncert_deg = models.FloatField(default=0, null=True, blank=True)
+    range_to_sat_km = models.FloatField(default=0, null=True, blank=True)
+    range_to_sat_uncert_km = models.FloatField(default=0, null=True, blank=True)
+    range_rate_sat_km_s = models.FloatField(default=0, null=True, blank=True)
+    range_rate_sat_uncert_km_s = models.FloatField(default=0, null=True, blank=True)
+    comments = models.TextField(null=True, blank=True)
+    data_archive_link = models.TextField(null=True, blank=True)
+    flag = models.CharField(max_length=100, null=True, blank=True)
     satellite_id = models.ForeignKey(Satellite, on_delete=models.CASCADE)
     location_id = models.ForeignKey(Location, on_delete=models.CASCADE)
-    image_id = models.ForeignKey(Image, on_delete=models.CASCADE, null=True)
     date_added = models.DateTimeField("date added", default=datetime.now)
 
     def __str__(self):
@@ -115,19 +103,29 @@ class Observation(models.Model):
     def clean(self):
         if not self.obs_time_utc:
             raise ValidationError("Observation time is required.")
-        if not self.obs_time_uncert_sec:
+        if self.obs_time_uncert_sec is None:
             raise ValidationError("Observation time uncertainty is required.")
-        if not self.apparent_mag:
+        if self.obs_time_uncert_sec < 0:
+            raise ValidationError("Observation time uncertainty must be positive.")
+        if self.apparent_mag is None:
             raise ValidationError("Apparent magnitude is required.")
-        if not self.apparent_mag_uncert:
+        if self.apparent_mag_uncert is None:
             raise ValidationError("Apparent magnitude uncertainty is required.")
+        if self.apparent_mag_uncert < 0:
+            raise ValidationError("Apparent magnitude uncertainty must be positive.")
         if not self.obs_mode:
             raise ValidationError("Observation mode is required.")
         if not self.obs_filter:
             raise ValidationError("Observation filter is required.")
         if not self.obs_email:
             raise ValidationError("Observer email is required.")
+        if not re.match(
+            r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", self.obs_email
+        ):
+            raise ValidationError("Observer email is not correctly formatted.")
         if not self.instrument:
             raise ValidationError("Instrument is required.")
         if not self.obs_orc_id:
             raise ValidationError("Observer ORCID is required.")
+        if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", self.obs_orc_id):
+            raise ValidationError("Observer ORCID not correctly formatted.")
