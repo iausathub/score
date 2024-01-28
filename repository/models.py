@@ -115,6 +115,11 @@ class Observation(models.Model):
             raise ValidationError("Apparent magnitude uncertainty must be positive.")
         if not self.obs_mode:
             raise ValidationError("Observation mode is required.")
+        if self.obs_mode not in ["VISUAL", "BINOCULARS", "CCD", "CMOS", "OTHER"]:
+            raise ValidationError(
+                "Observation mode must be one of the following: VISUAL,\
+                                  BINOCULARS, CCD, CMOS, OTHER"
+            )
         if not self.obs_filter:
             raise ValidationError("Observation filter is required.")
         if not self.obs_email:

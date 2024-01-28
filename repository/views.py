@@ -107,7 +107,12 @@ def index(request):
                     },
                 )
                 obs_ids.append(observation.id)
-
+        except IndexError as e:
+            return render(
+                request,
+                "repository/index.html",
+                {"error": str(e) + " - check number of fields in csv file."},
+            )
         except ValueError as e:
             return render(request, "repository/index.html", {"error": e})
         except ValidationError as e:
@@ -121,7 +126,8 @@ def index(request):
                     message_text += f"{key}: {e.message_dict[key][0]}\n"
 
                 return render(request, "repository/index.html", {"error": message_text})
-            return render(request, "repository/index.html", {"error": e.messages[0]})
+        except Exception as e:
+            return render(request, "repository/index.html", {"error": e})
         stats = get_stats()
         return render(
             request,
@@ -386,8 +392,11 @@ def get_stats():
         ],
     )
 
-    satellite_count = Satellite.objects.count()
     observation_count = Observation.objects.count()
+    if observation_count == 0:
+        return stats(0, 0, 0, [], 0)
+    satellite_count = Satellite.objects.count()
+
     observer_count = (
         Observation.objects.values("location_id", "obs_email").distinct().count()
     )

@@ -129,7 +129,10 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = BASE_DIR / "static"
 
-STATICFILES_FINDERS = ["compressor.finders.CompressorFinder"]
+STATICFILES_FINDERS = [
+    "compressor.finders.CompressorFinder",
+    "django.contrib.staticfiles.finders.AppDirectoriesFinder",
+]
 
 COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
 

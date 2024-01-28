@@ -149,7 +149,7 @@ class ObservationTest(TestCase):
         obs_time_uncert_sec=0.0,
         apparent_mag=0.0,
         apparent_mag_uncert=0.0,
-        obs_mode="test",
+        obs_mode="VISUAL",
         obs_filter="test",
         instrument="test",
         obs_orc_id="0000-1234-5678-9101",
@@ -269,6 +269,11 @@ class ObservationTest(TestCase):
         with transaction.atomic():
             with self.assertRaises(IntegrityError):
                 obs = self.create_observation(obs_mode=None)
+
+        # field is required
+        with self.assertRaises(ValidationError):
+            obs = self.create_observation(obs_mode="test")
+            obs.full_clean()
 
         # field is required
         with self.assertRaises(ValidationError):
