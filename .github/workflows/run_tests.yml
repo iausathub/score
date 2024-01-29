@@ -33,6 +33,16 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    services:
+      postgres:
+        image: postgres:11
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: postgres
+        ports: ['5432:5432']
+        options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
+
     steps:
     - uses: actions/checkout@v3
     - name: Set up Python 3.11
@@ -47,5 +57,7 @@ jobs:
       run: |
         pip install pytest pytest-mock pytest-cov
     - name: Test with pytest
+      env:
+        DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
         python -m pytest
