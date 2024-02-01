@@ -2,13 +2,14 @@ import re
 from datetime import datetime
 
 from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 from django.db import models
 
 
 class Satellite(models.Model):
     sat_name = models.CharField(max_length=200)
     sat_number = models.IntegerField(default=0)
-    constellation = models.CharField(max_length=100, default="", null=True)
+    constellation = models.CharField(max_length=100, default="", null=True, blank=True)
     date_added = models.DateTimeField("date added", default=datetime.now)
 
     def __str__(self):
@@ -62,14 +63,26 @@ class Location(models.Model):
         if self.obs_alt_m < 0:
             raise ValidationError("Altitude must be greater than 0 meters.")
 
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
+
 
 class Observation(models.Model):
+    OBS_MODE_CHOICES = [
+        ("VISUAL", "Visual"),
+        ("BINOCULARS", "Binoculars"),
+        ("CCD", "CCD"),
+        ("CMOS", "CMOS"),
+        ("OTHER", "Other"),
+    ]
+
     obs_time_utc = models.DateTimeField("observation time")
     obs_time_uncert_sec = models.FloatField(default=0)
     apparent_mag = models.FloatField(default=0)
     apparent_mag_uncert = models.FloatField(default=0)
     instrument = models.CharField(max_length=200)
-    obs_mode = models.CharField(max_length=200)
+    obs_mode = models.CharField(max_length=200, choices=OBS_MODE_CHOICES)
     obs_filter = models.CharField(max_length=200)
     obs_email = models.TextField()
     obs_orc_id = models.CharField(max_length=200)
@@ -134,3 +147,26 @@ class Observation(models.Model):
             raise ValidationError("Observer ORCID is required.")
         if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", self.obs_orc_id):
             raise ValidationError("Observer ORCID not correctly formatted.")
+        if self.sat_ra_deg and (self.sat_ra_deg < 0 or self.sat_ra_deg > 360):
+            raise ValidationError("Right ascension must be between 0 and 360 degrees.")
+        if self.sat_ra_uncert_deg and (self.sat_ra_uncert_deg < 0):
+            raise ValidationError("Right ascension uncertainty must be positive.")
+        if self.sat_dec_deg and (self.sat_dec_deg < -90 or self.sat_dec_deg > 90):
+            raise ValidationError("Declination must be between -90 and 90 degrees.")
+        if self.sat_dec_uncert_deg and (self.sat_dec_uncert_deg < 0):
+            raise ValidationError("Declination uncertainty must be positive.")
+        if self.range_to_sat_km and (self.range_to_sat_km < 0):
+            raise ValidationError("Range to satellite must be positive.")
+        if self.range_to_sat_uncert_km and (self.range_to_sat_uncert_km < 0):
+            raise ValidationError("Range to satellite uncertainty must be positive.")
+        if self.range_rate_sat_km_s and (self.range_rate_sat_km_s < 0):
+            raise ValidationError("Range rate must be positive.")
+        if self.range_rate_sat_uncert_km_s and (self.range_rate_sat_uncert_km_s < 0):
+            raise ValidationError("Range rate uncertainty must be positive.")
+        validate = URLValidator()
+        if self.data_archive_link and not validate(self.data_archive_link):
+            raise ValidationError("Data archive link is not correctly formatted.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

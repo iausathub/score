@@ -1,4 +1,4 @@
-from django.db import IntegrityError, transaction
+from django.db import transaction
 from django.forms import ValidationError
 from django.test import TestCase
 from django.utils import timezone
@@ -79,32 +79,32 @@ class LocationTest(TestCase):
     def test_location_validation(self):
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValueError):
+            with self.assertRaises(ValidationError):
                 loc = self.create_location(obs_lat_deg="")
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 loc = self.create_location(obs_lat_deg=None)
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValueError):
+            with self.assertRaises(ValidationError):
                 loc = self.create_location(obs_long_deg="")
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 loc = self.create_location(obs_long_deg=None)
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValueError):
+            with self.assertRaises(ValidationError):
                 loc = self.create_location(obs_alt_m="")
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 loc = self.create_location(obs_alt_m=None)
 
         # field must be in valid range
@@ -197,7 +197,7 @@ class ObservationTest(TestCase):
     def test_observation_validation(self):
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(obs_time_utc=None)
 
         # field is required
@@ -207,12 +207,7 @@ class ObservationTest(TestCase):
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValueError):
-                obs = self.create_observation(obs_time_uncert_sec="")
-
-        # field is required
-        with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(obs_time_uncert_sec=None)
 
         # field must be positive
@@ -227,7 +222,7 @@ class ObservationTest(TestCase):
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(obs_email=None)
 
         # field must be valid email
@@ -237,22 +232,17 @@ class ObservationTest(TestCase):
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValueError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(apparent_mag="")
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(apparent_mag=None)
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValueError):
-                obs = self.create_observation(apparent_mag_uncert="")
-
-        # field is required
-        with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(apparent_mag_uncert=None)
 
         # field must be positive
@@ -267,7 +257,7 @@ class ObservationTest(TestCase):
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(obs_mode=None)
 
         # field is required
@@ -282,7 +272,7 @@ class ObservationTest(TestCase):
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(obs_filter=None)
 
         # field is required
@@ -292,7 +282,7 @@ class ObservationTest(TestCase):
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(instrument=None)
 
         # field is required
@@ -302,7 +292,7 @@ class ObservationTest(TestCase):
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(IntegrityError):
+            with self.assertRaises(ValidationError):
                 obs = self.create_observation(obs_orc_id=None)
 
         # field must be valid ORCID

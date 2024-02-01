@@ -42,13 +42,26 @@
 
           {% if obs_id %}
           <div class="container-md border rounded-3 mt-3 pt-2 ">
-
-            <p>Observation ID(s):<br />
-              {% for id in obs_id %}
-                {{ id }} <br/>
-              {% endfor %}
-            </p>
             <p>Email sent to: test@email.com</p>
+
+            <button class="btn btn-primary btn-sm mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseObsIds" aria-expanded="false" aria-controls="collapseObsIds">
+              Show Observation IDs
+            </button>
+
+            <div class="collapse" id="collapseObsIds">
+              <div class="card card-body mb-2">
+                <p>Observation ID(s):<br />
+                  {% for id in obs_id %}
+                    {% if forloop.last %}
+                    {{ id }}
+                    {% else %}
+                    {{ id }} <br />
+                    {% endif %}
+                  {% endfor %}
+                </p>
+              </div>
+            </div>
+
           </div>
           {% endif %}
 

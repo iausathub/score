@@ -30,9 +30,10 @@ $font-size-base: .9rem;
   border-color: #7b7b7b;
 }
 
-$form-file-button-color:         #f3feff;
-$form-file-button-bg:             $primary;
-$form-file-button-hover-bg:       #133079;
+$form-file-button-color:         #000000;
+$form-file-button-bg:             #FFC02E;
+$form-file-button-hover-bg:       #fdce60;
+
 
 
 @import "scss/bootstrap";

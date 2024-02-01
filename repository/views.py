@@ -10,18 +10,27 @@ from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
 
-from repository.forms import SearchForm
+from repository.forms import SearchForm, SingleObservationForm
 
 from .models import Location, Observation, Satellite
 
 
 def index(request):
+    stats = get_stats()
+    template = loader.get_template("repository/index.html")
+    context = {
+        "filename": "",
+        "satellite_count": stats.satellite_count,
+        "observation_count": stats.observation_count,
+        "observer_count": stats.observer_count,
+        "latest_obs_list": stats.latest_obs_list,
+        "avg_mag": stats.avg_mag,
+    }
+
     if request.method == "POST" and not request.FILES:
-        return render(
-            request,
-            "repository/index.html",
-            {"error": "Please select a file to upload."},
-        )
+        context["error"] = "Please select a file to upload."
+        return HttpResponse(template.render(context, request))
+
     if request.method == "POST" and request.FILES["uploaded_file"]:
         uploaded_file = request.FILES["uploaded_file"]
         # parse csv file into models
@@ -108,43 +117,30 @@ def index(request):
                 )
                 obs_ids.append(observation.id)
         except IndexError as e:
-            return render(
-                request,
-                "repository/index.html",
-                {"error": str(e) + " - check number of fields in csv file."},
-            )
+            context["error"] = str(e) + " - check number of fields in csv file."
+            return HttpResponse(template.render(context, request))
         except ValueError as e:
-            return render(request, "repository/index.html", {"error": e})
+            context["error"] = e
+            return HttpResponse(template.render(context, request))
         except ValidationError as e:
             if len(e.messages) > 1:
-                return render(
-                    request, "repository/index.html", {"error": e.messages[1]}
-                )
+                context["error"] = e.messages[1]
+                return HttpResponse(template.render(context, request))
             else:
                 message_text = ""
                 for key in e.message_dict.keys():
                     message_text += f"{key}: {e.message_dict[key][0]}\n"
-
-                return render(request, "repository/index.html", {"error": message_text})
+                context["error"] = message_text
+                return HttpResponse(template.render(context, request))
         except Exception as e:
-            return render(request, "repository/index.html", {"error": e})
-        stats = get_stats()
-        return render(
-            request,
-            "repository/index.html",
-            {
-                "obs_id": obs_ids,
-                "satellite_count": stats.satellite_count,
-                "observation_count": stats.observation_count,
-                "observer_count": stats.observer_count,
-                "latest_obs_list": stats.latest_obs_list,
-                "avg_mag": stats.avg_mag,
-            },
-        )
+            context["error"] = e
+            return HttpResponse(template.render(context, request))
+
+        context["obs_id"] = obs_ids
+        return HttpResponse(template.render(context, request))
     # else:
     #     form = UploadObservationFileForm()
-    stats = get_stats()
-    template = loader.get_template("repository/index.html")
+
     context = {
         "filename": "",
         "satellite_count": stats.satellite_count,
@@ -258,12 +254,13 @@ def search(request):
             end_date_range = form.cleaned_data["end_date_range"]
             constellation = form.cleaned_data["constellation"]
             observation_id = form.cleaned_data["observation_id"]
+            observer_orcid = form.cleaned_data["observer_orcid"]
 
             # filter observations based on search criteria
             observations = Observation.objects.all()
             if sat_name:
                 observations = observations.filter(
-                    satellite_id__sat_name__icontains=sat_name
+                    satellite_id__sat_name__iexact=sat_name
                 )
             if sat_number:
                 observations = observations.filter(satellite_id__sat_number=sat_number)
@@ -279,6 +276,8 @@ def search(request):
                 )
             if observation_id:
                 observations = observations.filter(id=observation_id)
+            if observer_orcid:
+                observations = observations.filter(obs_orc_id__icontains=observer_orcid)
 
             if observations.count() == 0:
                 return render(
@@ -292,8 +291,8 @@ def search(request):
                 "repository/search.html",
                 {"observations": observations, "form": SearchForm},
             )
-        # handle search form
-        return render(request, "repository/search.html", {"form": SearchForm})
+        else:
+            return render(request, "repository/search.html", {"form": form})
 
     return render(request, "repository/search.html", {"form": SearchForm})
 
@@ -378,6 +377,129 @@ def download_results(request):
 
     response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
     return response
+
+
+def upload(request):
+    if request.method == "POST":
+        form = SingleObservationForm(request.POST)
+        if form.is_valid():
+            sat_name = form.cleaned_data["sat_name"]
+            sat_number = form.cleaned_data["sat_number"]
+            obs_mode = form.cleaned_data["obs_mode"]
+            obs_date = form.cleaned_data["obs_date"]
+            obs_date_uncert = form.cleaned_data["obs_date_uncert"]
+            apparent_mag = form.cleaned_data["apparent_mag"]
+            apparent_mag_uncert = form.cleaned_data["apparent_mag_uncert"]
+            instrument = form.cleaned_data["instrument"]
+            filter = form.cleaned_data["filter"]
+            observer_email = form.cleaned_data["observer_email"]
+            constellation = form.cleaned_data["constellation"]
+            observer_orcid = form.cleaned_data["observer_orcid"]
+            obs_lat_deg = form.cleaned_data["observer_latitude_deg"]
+            obs_long_deg = form.cleaned_data["observer_longitude_deg"]
+            obs_alt_m = form.cleaned_data["observer_altitude_m"]
+            sat_ra_deg = form.cleaned_data["sat_ra_deg"]
+            sat_ra_uncert_deg = form.cleaned_data["sat_ra_uncert_deg"]
+            sat_dec_deg = form.cleaned_data["sat_dec_deg"]
+            sat_dec_uncert_deg = form.cleaned_data["sat_dec_uncert_deg"]
+            range_to_sat_km = form.cleaned_data["range_to_sat_km"]
+            range_to_sat_uncert_km = form.cleaned_data["range_to_sat_uncert_km"]
+            range_rate_sat_km_s = form.cleaned_data["range_rate_sat_km_s"]
+            range_rate_sat_uncert_km_s = form.cleaned_data["range_rate_sat_uncert_km_s"]
+            comments = form.cleaned_data["comments"]
+            data_archive_link = form.cleaned_data["data_archive_link"]
+
+            satellite, sat_created = Satellite.objects.update_or_create(
+                sat_name=sat_name,
+                sat_number=sat_number,
+                constellation=constellation,
+                defaults={
+                    "sat_name": sat_name,
+                    "sat_number": sat_number,
+                    "constellation": constellation,
+                    "date_added": datetime.datetime.now(),
+                },
+            )
+
+            location, loc_created = Location.objects.update_or_create(
+                obs_lat_deg=obs_lat_deg,
+                obs_long_deg=obs_long_deg,
+                obs_alt_m=obs_alt_m,
+                defaults={
+                    "obs_lat_deg": obs_lat_deg,
+                    "obs_long_deg": obs_long_deg,
+                    "obs_alt_m": obs_alt_m,
+                    "date_added": datetime.datetime.now(),
+                },
+            )
+
+            observation, obs_created = Observation.objects.update_or_create(
+                obs_time_utc=obs_date,
+                obs_time_uncert_sec=obs_date_uncert,
+                apparent_mag=apparent_mag,
+                apparent_mag_uncert=apparent_mag_uncert,
+                instrument=instrument,
+                obs_mode=obs_mode,
+                obs_filter=filter,
+                obs_email=observer_email,
+                obs_orc_id=observer_orcid,
+                sat_ra_deg=sat_ra_deg,
+                sat_ra_uncert_deg=sat_ra_uncert_deg,
+                sat_dec_deg=sat_dec_deg,
+                sat_dec_uncert_deg=sat_dec_uncert_deg,
+                range_to_sat_km=range_to_sat_km,
+                range_to_sat_uncert_km=range_to_sat_uncert_km,
+                range_rate_sat_km_s=range_rate_sat_km_s,
+                range_rate_sat_uncert_km_s=range_rate_sat_uncert_km_s,
+                comments=comments,
+                data_archive_link=data_archive_link,
+                satellite_id=satellite,
+                location_id=location,
+                defaults={
+                    "obs_time_utc": obs_date,
+                    "obs_time_uncert_sec": obs_date_uncert,
+                    "apparent_mag": apparent_mag,
+                    "apparent_mag_uncert": apparent_mag_uncert,
+                    "instrument": instrument,
+                    "obs_mode": obs_mode,
+                    "obs_filter": filter,
+                    "obs_email": observer_email,
+                    "obs_orc_id": observer_orcid,
+                    "sat_ra_deg": sat_ra_deg,
+                    "sat_ra_uncert_deg": sat_ra_uncert_deg,
+                    "sat_dec_deg": sat_dec_deg,
+                    "sat_dec_uncert_deg": sat_dec_uncert_deg,
+                    "range_to_sat_km": range_to_sat_km,
+                    "range_to_sat_uncert_km": range_to_sat_uncert_km,
+                    "range_rate_sat_km_s": range_rate_sat_km_s,
+                    "range_rate_sat_uncert_km_s": range_rate_sat_uncert_km_s,
+                    "comments": comments,
+                    "data_archive_link": data_archive_link,
+                    "flag": None,
+                    "satellite_id": satellite,
+                    "location_id": location,
+                    "date_added": datetime.datetime.now(),
+                },
+            )
+
+            obs_id = observation.id
+            # confirm observation uploaded
+            return render(
+                request,
+                "repository/upload-obs.html",
+                {
+                    "status": "Upload successful",
+                    "obs_id": obs_id,
+                    "obs_email": observer_email,
+                    "form": SingleObservationForm,
+                },
+            )
+        else:
+            return render(request, "repository/upload-obs.html", {"form": form})
+
+    return render(
+        request, "repository/upload-obs.html", {"form": SingleObservationForm}
+    )
 
 
 def get_stats():

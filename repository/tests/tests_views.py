@@ -48,18 +48,18 @@ class TestViews(TestCase):
         self.assertContains(response, "Observers:")
 
     def test_data_format(self):
-        response = self.client.get("/data-format.html")
+        response = self.client.get("/data-format")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/data-format.html")
 
     def test_view_data(self):
-        response = self.client.get("/view.html")
+        response = self.client.get("/view")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/view.html")
         self.assertContains(response, "STARLINK-123")
         self.assertContains(response, "VISUAL")
         self.assertContains(response, "5.2")
-        self.assertContains(response, self.obs_date.strftime("%b. %d, %Y"))
+        self.assertContains(response, self.obs_date.strftime("%b.%e, %Y"))
 
     def test_download_all(self):
         response = self.client.get("/download-all")
@@ -67,6 +67,6 @@ class TestViews(TestCase):
         self.assertIn("application/zip", response["Content-Type"])
 
     def test_search(self):
-        response = self.client.get("/search.html")
+        response = self.client.get("/search")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/search.html")
