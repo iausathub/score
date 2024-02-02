@@ -218,10 +218,13 @@ class SingleObservationForm(Form):
     def clean(self):
         cleaned_data = super().clean()
         errors = {}
-        if not cleaned_data.get("sat_ra_deg") and cleaned_data.get("sat_ra_uncert_deg"):
+        # fmt: off
+        if not cleaned_data.get("sat_ra_deg") and \
+               cleaned_data.get("sat_ra_uncert_deg"):
             errors[
                 "sat_ra_uncert_deg"
             ] = "Right ascension uncertainty requires right ascension."
+        # fmt: on
         if not cleaned_data.get("sat_dec_deg") and cleaned_data.get(
             "sat_dec_uncert_deg"
         ):
