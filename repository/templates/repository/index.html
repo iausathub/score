@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container-fluid p-3">
-    <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr .75fr;">
+    <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.1fr .9fr;">
       <div>
       <div class="bg-body-tertiary border rounded-3 p-3">
         <div class="container">
@@ -42,13 +42,26 @@
 
           {% if obs_id %}
           <div class="container-md border rounded-3 mt-3 pt-2 ">
-
-            <p>Observation ID(s):<br />
-              {% for id in obs_id %}
-                {{ id }} <br/>
-              {% endfor %}
-            </p>
             <p>Email sent to: test@email.com</p>
+
+            <button class="btn btn-primary btn-sm mb-3" type="button" data-bs-toggle="collapse" data-bs-target="#collapseObsIds" aria-expanded="false" aria-controls="collapseObsIds">
+              Show Observation IDs
+            </button>
+
+            <div class="collapse" id="collapseObsIds">
+              <div class="card card-body mb-2">
+                <p>Observation ID(s):<br />
+                  {% for id in obs_id %}
+                    {% if forloop.last %}
+                    {{ id }}
+                    {% else %}
+                    {{ id }} <br />
+                    {% endif %}
+                  {% endfor %}
+                </p>
+              </div>
+            </div>
+
           </div>
           {% endif %}
 
@@ -58,7 +71,7 @@
       <div class="container">
         <div class="bg-body-tertiary border rounded-3 p-3 mb-3" style="min-height: 250px;">
           <div class="text-center">
-            <p class="fw-bold fs-5">Recent observations:</p>
+            <p class="fw-bold fs-5">Recent observations</p>
           </div>
           {% if latest_obs_list %}
             <ul>
@@ -71,32 +84,65 @@
           {% endif %}
         </div>
 
-        <div class="bg-body-tertiary border rounded-3 p-3" style="min-height: 250px;">
+        <div class="bg-body-tertiary border rounded-3 p-3" style="min-height: 200px;">
           <div class="text-center">
-            <p class="fw-bold fs-5">Stats:</p>
+            <p class="fw-bold fs-5">Statistics</p>
           </div>
 
-          {% if observation_count %}
-          <p>Observations: {{ observation_count }}</p>
-          {% endif %}
-          {% if satellite_count %}
-          <p>Satellites: {{ satellite_count }}</p>
-          {% endif %}
-          {% if observer_count %}
-          <p>Observers: {{ observer_count }}</p>
-          {% endif %}
-          {% if avg_mag %}
-          <p>Average magnitude: {{ avg_mag }}</p>
-          {% endif %}
+          <div class="container ">
 
+            {% if not observation_count and not satellite_count %}
+              <p>No stats are available.</p>
+            {% endif %}
 
-          {% if not observation_count and not satellite_count %}
-            <p>No stats are available.</p>
-          {% endif %}
+            {% if observation_count %}
+            <div class="row">
+              <div class="col text-end py-1 px-1">
+                Observations:
+              </div>
+              <div class="col py-1 px-0" >
+                 {{ observation_count }}
+              </div>
+            </div>
+            {% endif %}
 
+            {% if satellite_count %}
+            <div class="row">
+              <div class="col text-end py-1 px-1">
+                Satellites:
+              </div>
+              <div class="col  py-1 px-0" >
+                {{ satellite_count }}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if observer_count %}
+            <div class="row">
+              <div class="col text-end py-1 px-1">
+                Observers:
+              </div>
+              <div class="col py-1 px-0">
+                {{ observer_count }}
+              </div>
+            </div>
+            {% endif %}
+
+            {% if avg_mag %}
+            <div class="row">
+              <div class="col text-end py-1 px-1">
+                Avg apparent mag.:
+              </div>
+              <div class="col py-1 px-0">
+                {{ avg_mag }}
+              </div>
+            </div>
+            {% endif %}
+          </div>
         </div>
       </div>
     </div>
   </div>
+</div>
 
 {% endblock %}

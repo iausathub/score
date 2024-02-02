@@ -17,16 +17,16 @@
                 </div>
                 <div class="col">
                     <div class=" pb-4">
-                        {{ form.start_date_range.label_tag}}
-                        {{ form.start_date_range }}
+                        {{ form.sat_number.label_tag }}
+                        {{ form.sat_number }}
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
                     <div class=" pb-4">
-                        {{ form.sat_number.label_tag }}
-                        {{ form.sat_number }}
+                        {{ form.start_date_range.label_tag}}
+                        {{ form.start_date_range }}
                     </div>
                 </div>
                 <div class="col">
@@ -55,6 +55,13 @@
                 {{ form.observation_id.label_tag}}
                 {{ form.observation_id }}
             </div>
+            <div class="pb-4">
+                {{ form.observer_orcid.label_tag}}
+                {{ form.observer_orcid }}
+                <div class="text-danger">
+                    {{ form.observer_orcid.errors }}
+                </div>
+            </div>
             <div class="form-group">
                 <input class="btn btn-primary" type="submit" value="Submit">
             </div>
@@ -82,8 +89,12 @@
                             <th data-field="added"  scope="col" data-sortable="true" data-visible="false" >Date_added_timestamp</th>
                             <th scope="col" data-sortable="true">Satellite</th>
                             <th scope="col" data-sortable="true">Date observed</th>
-                            <th scope="col" data-sortable="true">Apparent Mag.</th>
-                            <th scope="col" data-sortable="true">Obs. Mode</th>
+                            <th scope="col" data-sortable="true">Mag.</th>
+                            <th scope="col" data-sortable="true">Latitude</th>
+                            <th scope="col" data-sortable="true">Longitude</th>
+                            <th scope="col" data-sortable="true">Altitude</th>
+                            <th scope="col" data-sortable="true">Obs. mode</th>
+                            <th scope="col" data-sortable="true">Obs. ORCID</th>
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">
@@ -94,7 +105,11 @@
                             <td scope="row">{{ observation.satellite_id.sat_name }}</td>
                             <td scope="row">{{ observation.obs_time_utc }}</td>
                             <td scope="row">{{ observation.apparent_mag }}</td>
+                            <td scope="row">{{ observation.location_id.obs_lat_deg }}</td>
+                            <td scope="row">{{ observation.location_id.obs_long_deg }}</td>
+                            <td scope="row">{{ observation.location_id.obs_alt_m }}</td>
                             <td scope="row">{{ observation.obs_mode }}</td>
+                            <td scope="row">{{ observation.obs_orc_id }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
