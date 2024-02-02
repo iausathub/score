@@ -41,7 +41,6 @@ def index(request):
         next(io_string)  # Skip the header
         obs_ids = []
         try:
-
             for column in csv.reader(io_string, delimiter=",", quotechar="|"):
                 satellite, sat_created = Satellite.objects.update_or_create(
                     sat_name=column[0],
