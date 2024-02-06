@@ -34,10 +34,10 @@
                 <td scope="row">{{ observation.date_added.timestamp }}</td>
                 <td scope="row">{{ observation.satellite_id.sat_name }}</td>
                 <td scope="row">{{ observation.obs_time_utc }}</td>
-                <td scope="row">{{ observation.apparent_mag }}</td>
-                <td scope="row">{{ observation.location_id.obs_lat_deg }}</td>
-                <td scope="row">{{ observation.location_id.obs_long_deg }}</td>
-                <td scope="row">{{ observation.location_id.obs_alt_m }}</td>
+                <td scope="row" class="text-end">{{ observation.apparent_mag }}</td>
+                <td scope="row"class="text-end">{{ observation.location_id.obs_lat_deg }}</td>
+                <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg }}</td>
+                <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m }}</td>
                 <td scope="row">{{ observation.obs_mode }}</td>
                 <td scope="row">{{ observation.obs_orc_id }}</td>
             </tr>
@@ -51,7 +51,7 @@
 
 <div class="col p-3">
     <div class="float-end">
-        <i class="fas fa-download"></i>  <a href="{% url 'download-all' %}">Download all data</a>
+        <i class="fas fa-download"></i>  <a href="{% url 'download-all' %}" class="link-dark">Download all data</a>
     </div>
 </div>
 

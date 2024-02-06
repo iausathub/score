@@ -24,7 +24,6 @@ def index(request):
         "observation_count": stats.observation_count,
         "observer_count": stats.observer_count,
         "latest_obs_list": stats.latest_obs_list,
-        "avg_mag": stats.avg_mag,
     }
 
     if request.method == "POST" and not request.FILES:

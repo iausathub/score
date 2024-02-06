@@ -3,24 +3,28 @@
 {% block content %}
 
 <div class="container-fluid p-3">
-    <div class="container-sm" >
+    <div class="container-sm " >
         <h2 class="text-center p-2 pb-4">Upload Single Observation</h2>
         <div class="container-fluid">
             {% if obs_id %}
             <div class="alert alert-success" role="alert">
                 <h4 class="alert-heading">Upload successful</h4>
                 Observation ID: {{ obs_id }}<br/>
-                Email sent to: {{ obs_email }}
+                Confirmation email sent to: {{ obs_email }}
             </div>
             {% endif %}
         </div>
-        <div class="text-end">
+        <div class="text-end my-3">
             <span class="text-danger">*</span> denotes required field
         </div>
-        <div class="justify-content-center ">
+        <div class="justify-content-center px-5">
             <form action="{% url 'upload-obs' %}" method="post" enctype="multipart/form-data">
                 {% csrf_token %}
+            <div class="row"><hr/></div>
             <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold">
+                    Basic data
+                </div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.sat_name.label_tag }} <span class="text-danger">*</span>
@@ -38,6 +42,7 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.obs_date.label_tag}} <span class="text-danger">*</span>
@@ -61,6 +66,7 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.obs_mode.label_tag}} <span class="text-danger">*</span>
@@ -75,6 +81,7 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.apparent_mag.label_tag}} <span class="text-danger">*</span>
@@ -92,6 +99,7 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.instrument.label_tag}} <span class="text-danger">*</span>
@@ -105,9 +113,13 @@
                     </div>
                 </div>
             </div>
+            <div class="row mt-3"><hr/></div>
             <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold">
+                    Observer information
+                </div>
                 <div class="col">
-                    <div class=" pb-4">
+                    <div class="pb-4">
                         {{ form.observer_latitude_deg.label_tag}} <span class="text-danger">*</span>
                         {{ form.observer_latitude_deg }}
                         <div class="text-danger">
@@ -136,6 +148,7 @@
             </div>
 
             <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.observer_email.label_tag}} <span class="text-danger">*</span>
@@ -155,7 +168,11 @@
                     </div>
                 </div>
             </div>
+            <div class="row mt-3"><hr/></div>
             <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold">
+                    Advanced data
+                </div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.sat_ra_deg.label_tag}}
@@ -173,6 +190,7 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.sat_dec_deg.label_tag}}
@@ -190,6 +208,7 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.range_to_sat_km.label_tag}}
@@ -207,6 +226,7 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.range_rate_sat_km_s.label_tag}}
@@ -224,6 +244,7 @@
                 </div>
             </div>
             <div class="row">
+                <div class="col-4 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
                         {{ form.comments.label_tag}}

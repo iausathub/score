@@ -28,12 +28,12 @@
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Upload
+                Submit data
               </a>
               <ul class="dropdown-menu">
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'index' %}">Upload file</a></li>
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'upload-obs' %}">Upload single obs.</a></li>
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'data-format' %}">Upload format</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'index' %}">Upload observation file</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'upload-obs' %}">Submit single observation</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'data-format' %}">Data format</a></li>
               </ul>
             </li>
 
@@ -120,7 +120,7 @@
                 style="width: 60px; background-color: #4d85ff; height: 2px"
                 />
             <p><i class="fab fa-github"></i> <a href="#" class="text-white">Github</a></p>
-            <p><i class="fas fa-envelope mr-3"></i> sathub@iau.cps.org</p>
+            <p><i class="fas fa-envelope mr-3"></i> sathub@cps.iau.org</p>
           </div>
           <!-- Grid column -->
         </div>
