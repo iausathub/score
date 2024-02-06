@@ -224,7 +224,6 @@ class SingleObservationForm(Form):
             errors[
                 "sat_ra_uncert_deg"
             ] = "Right ascension uncertainty requires right ascension."
-        # fmt: on
         if not cleaned_data.get("sat_dec_deg") and cleaned_data.get(
             "sat_dec_uncert_deg"
         ):
@@ -248,5 +247,6 @@ class SingleObservationForm(Form):
             cleaned_data.get("observer_email"),
         ):
             errors["observer_email"] = "Observer email is not correctly formatted."
+        # fmt: on
         if errors:
             raise forms.ValidationError(errors)
