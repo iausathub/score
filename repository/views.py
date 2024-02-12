@@ -4,15 +4,15 @@ import io
 import zipfile
 from collections import namedtuple
 
-from django.db.models import Avg
 from django.forms import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
+from rest_framework.renderers import JSONRenderer
 
 from repository.forms import SearchForm, SingleObservationForm
 
-from .models import Location, Observation, Satellite
+from .models import Location, Observation, ObservationSerializer, Satellite
 
 
 def index(request):
@@ -135,6 +135,7 @@ def index(request):
             return HttpResponse(template.render(context, request))
 
         context["obs_id"] = obs_ids
+        context["date_added"] = datetime.datetime.now()
         return HttpResponse(template.render(context, request))
     # else:
     #     form = UploadObservationFileForm()
@@ -145,7 +146,6 @@ def index(request):
         "observation_count": stats.observation_count,
         "observer_count": stats.observer_count,
         "latest_obs_list": stats.latest_obs_list,
-        "avg_mag": stats.avg_mag,
     }
     return HttpResponse(template.render(context, request))
 
@@ -157,8 +157,17 @@ def data_format(request):
 
 
 def view_data(request):
-    observation_list = Observation.objects.all()
-    return render(request, "repository/view.html", {"observations": observation_list})
+    observation_list = Observation.objects.order_by("-date_added")[:500]
+    observation_list_json = [
+        (JSONRenderer().render(ObservationSerializer(observation).data))
+        for observation in observation_list
+    ]
+    observations_and_json = zip(observation_list, observation_list_json)
+    return render(
+        request,
+        "repository/view.html",
+        {"observations_and_json": observations_and_json},
+    )
 
 
 def download_all(request):
@@ -241,6 +250,46 @@ def download_all(request):
     return response
 
 
+def download_obs_ids(request):
+    if request.method == "POST":
+        observation_ids = request.POST.get("obs_ids").split(", ")
+        observation_ids = [int(i) for i in observation_ids]
+        header = [
+            "observation_id",
+            "satellite_name",
+            "date_observed",
+        ]
+
+        csv_lines = []
+        for observation_id in observation_ids:
+            observation = Observation.objects.get(id=observation_id)
+            csv_lines.append(
+                [
+                    observation.id,
+                    observation.satellite_id.sat_name,
+                    observation.obs_time_utc,
+                ]
+            )
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(header)
+        writer.writerows(csv_lines)
+
+        zipfile_name = "satellite_observations_ids.zip"
+        zipped_file = io.BytesIO()
+
+        with zipfile.ZipFile(zipped_file, "w") as zip:
+            zip.writestr("submission.csv", output.getvalue())
+        zipped_file.seek(0)
+
+        response = HttpResponse(zipped_file, content_type="application/zip")
+
+        response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
+        return response
+    return HttpResponse()
+
+
 def search(request):
     if request.method == "POST":
         form = SearchForm(request.POST)
@@ -277,6 +326,12 @@ def search(request):
             if observer_orcid:
                 observations = observations.filter(obs_orc_id__icontains=observer_orcid)
 
+            observation_list_json = [
+                (JSONRenderer().render(ObservationSerializer(observation).data))
+                for observation in observations
+            ]
+            observations_and_json = zip(observations, observation_list_json)
+
             if observations.count() == 0:
                 return render(
                     request,
@@ -287,7 +342,7 @@ def search(request):
             return render(
                 request,
                 "repository/search.html",
-                {"observations": observations, "form": SearchForm},
+                {"observations": observations_and_json, "form": SearchForm},
             )
         else:
             return render(request, "repository/search.html", {"form": form})
@@ -508,7 +563,6 @@ def get_stats():
             "observation_count",
             "observer_count",
             "latest_obs_list",
-            "avg_mag",
         ],
     )
 
@@ -521,12 +575,13 @@ def get_stats():
         Observation.objects.values("location_id", "obs_email").distinct().count()
     )
     latest_obs_list = Observation.objects.order_by("-date_added")[:7]
-    avg_mag = float(
-        "{:.2f}".format(
-            Observation.objects.aggregate(Avg("apparent_mag"))["apparent_mag__avg"]
-        )
-    )
+
+    observation_list_json = [
+        (JSONRenderer().render(ObservationSerializer(observation).data))
+        for observation in latest_obs_list
+    ]
+    observations_and_json = zip(latest_obs_list, observation_list_json)
 
     return stats(
-        satellite_count, observation_count, observer_count, latest_obs_list, avg_mag
+        satellite_count, observation_count, observer_count, observations_and_json
     )

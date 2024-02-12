@@ -2,7 +2,7 @@
 
 {% block content %}
 <div class="container-fluid p-3">
-    <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr 375px;">
+    <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr 380px;">
       <div>
         <div class="container p-3 mb-3">
         Insert explanatory text here about the purpose of the database, something about the
@@ -47,30 +47,18 @@
             style="--bs-bg-opacity: .2;">
             <span class="fw-bold">Upload successful!</span>
 
-            <p>{{ obs_id|length }} observation(s) added to the database.</p>
+            <p>{{ obs_id|length }} observation(s) added to the database at {{ date_added }}.</p>
             <p class="mb-3">Confirmation email with observation ID(s) sent to: test@email.com</p>
             <p>Observation ID(s) with corresponding satellite name and observation date/time
               can also be downloaded as a .txt file:</p>
-            <button class="btn btn-primary btn-sm mb-3" type="button"
-             data-bs-toggle="collapse" data-bs-target="#collapseObsIds"
-              aria-expanded="false" aria-controls="collapseObsIds">
-              Download file
-            </button>
-
-            <div class="collapse" id="collapseObsIds">
-              <div class="card card-body mb-2">
-                <p>Observation ID(s):<br />
-                  {% for id in obs_id %}
-                    {% if forloop.last %}
-                    {{ id }}
-                    {% else %}
-                    {{ id }} <br />
-                    {% endif %}
-                  {% endfor %}
-                </p>
-              </div>
-            </div>
-
+            <form action="/download-ids" method="post">
+              {% csrf_token %}
+              <input type="hidden" name="obs_ids" value="{{ obs_id|join:', ' }}">
+              <button class="btn btn-primary btn-sm mb-3" type="submit"
+               aria-controls="downloadObsIds">
+                Download file
+              </button>
+            </form>
           </div>
           {% endif %}
 
@@ -81,21 +69,23 @@
         <div class="shadow rounded-2 mb-3" style="min-height:50px;">
           <h5 class="card-title text-center bg-accent1 p-3 rounded-top-2 ">Recent observations</h5>
           <div class="card-body bg-light rounded-bottom-2 p-3">
-          {% if latest_obs_list %}
-            <ul>
-            {% for obs in latest_obs_list %}
-                <li>{{ obs.date_added }} - {{ obs.satellite_id.sat_name}}</li>
-            {% endfor %}
-            </ul>
-          {% else %}
-            <p>No observations are available.</p>
-          {% endif %}
+            {% if latest_obs_list %}
+              {% for obs, obs_json in latest_obs_list %}
+
+              <a href="#obsModal" id="showObsModal" class="btn btn-custom" data-content="{{obs_json|escapejs|safe}}" data-bs-toggle="modal"  role="button">
+                {{ obs.date_added }} - {{ obs.satellite_id.sat_name}}</a>
+              {% endfor %}
+
+            {% else %}
+              <p>No observations are available.</p>
+            {% endif %}
           </div>
+          {% include "repository/modal.html" %}
         </div>
 
         <div class="shadow bg-body rounded-2 mb-3" style="min-height: 50px;">
           <h5 class="card-title text-center bg-accent1 rounded-top-3 p-3">Statistics</h5>
-          <div class="card-body bg-light p-3 rounded-bottom-2">
+          <div class="card-body bg-light p-3 rounded-bottom-2 text-center">
 
             {% if not observation_count and not satellite_count %}
               <p>No stats are available.</p>
