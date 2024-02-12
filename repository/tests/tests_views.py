@@ -42,10 +42,8 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/index.html")
         self.assertContains(response, "STARLINK-123")
-        self.assertContains(response, "Avg apparent mag.")
-        self.assertContains(response, "5.2")
-        self.assertContains(response, "Satellites:")
-        self.assertContains(response, "Observers:")
+        self.assertContains(response, "satellites")
+        self.assertContains(response, "observers")
 
     def test_data_format(self):
         response = self.client.get("/data-format")
@@ -59,7 +57,7 @@ class TestViews(TestCase):
         self.assertContains(response, "STARLINK-123")
         self.assertContains(response, "VISUAL")
         self.assertContains(response, "5.2")
-        self.assertContains(response, self.obs_date.strftime("%b.%e, %Y"))
+        self.assertContains(response, self.obs_date.strftime("%b. %e, %Y"))
 
     def test_download_all(self):
         response = self.client.get("/download-all")

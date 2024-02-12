@@ -10,4 +10,5 @@ urlpatterns = [
     path("download-results", views.download_results, name="download-results"),
     path("search", views.search, name="search"),
     path("upload", views.upload, name="upload-obs"),
+    path("download-ids", views.download_obs_ids, name="download-obs-ids"),
 ]
