@@ -57,7 +57,7 @@ class TestViews(TestCase):
         self.assertContains(response, "STARLINK-123")
         self.assertContains(response, "VISUAL")
         self.assertContains(response, "5.2")
-        self.assertContains(response, self.obs_date.strftime("%b.%e, %Y"))
+        self.assertContains(response, self.obs_date.strftime("%b. %e, %Y"))
 
     def test_download_all(self):
         response = self.client.get("/download-all")

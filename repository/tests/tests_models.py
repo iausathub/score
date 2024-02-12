@@ -187,11 +187,13 @@ class ObservationTest(TestCase):
         self.assertTrue(isinstance(obs, Observation))
         self.assertEqual(
             obs.__str__(),
-            str(obs.obs_time_utc)
+            str(obs.id)
             + ", "
-            + obs.obs_email
+            + obs.satellite_id.sat_name
             + ", "
-            + obs.satellite_id.sat_name,
+            + str(obs.obs_time_utc)
+            + ", "
+            + obs.obs_email,
         )
 
     def test_observation_validation(self):
