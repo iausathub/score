@@ -1,6 +1,6 @@
 asgiref==3.7.2
 beautifulsoup4==4.12.2
-black==23.12.1
+black==24.1.1
 cfgv==3.4.0
 click==8.1.7
 coverage==7.4.0
@@ -12,6 +12,7 @@ django-bootstrap-v5==1.0.11
 django-composer==0.0.5
 django-compressor==4.4
 django-libsass==0.9
+djangorestframework==3.14.0
 filelock==3.13.1
 identify==2.5.33
 iniconfig==2.0.0
@@ -26,6 +27,7 @@ pre-commit==3.6.0
 psycopg2==2.9.9
 pytest==7.4.4
 pytest-django==4.7.0
+pytz==2024.1
 PyYAML==6.0.1
 rcssmin==1.1.1
 rjsmin==1.2.1
