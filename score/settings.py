@@ -10,7 +10,35 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import json
 from pathlib import Path
+
+import boto3
+from botocore.exceptions import ClientError
+
+
+def get_secret(secret_name):
+    region_name = "us-east-1"
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(service_name="secretsmanager", region_name=region_name)
+
+    get_secret_value_response = None
+    try:
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+    except ClientError as e:
+        # For a list of exceptions thrown, see
+        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+        print(e)
+        raise e
+
+    if get_secret_value_response is None:
+        raise Exception("No secret value response")
+    secrets = json.loads(get_secret_value_response["SecretString"])
+
+    return secrets
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -20,9 +48,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    "django-insecure-3w&h&zckrwdztf+qvjpo1&qprrak2_gt0ni!avka#ok-0pb9d1"  # noqa: S105
-)
+SECRET_KEY = get_secret("score-secret-key")["secret-key"]
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -80,13 +106,21 @@ WSGI_APPLICATION = "score.wsgi.application"
 
 DATABASES = {
     "default": {
+        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "NAME": get_secret("score_prod_db")["dbname"],
+        "USER": get_secret("score_prod_db")["username"],
+        "PASSWORD": get_secret("score_prod_db")["password"],
+        "HOST": get_secret("score_prod_db")["host"],
+        "PORT": get_secret("score_prod_db")["port"],
+    },
+    "secondary": {
         "ENGINE": "django.db.backends.postgresql",
         "NAME": "score_test",
         "USER": "postgres",
         "PASSWORD": "postgres",
         "HOST": "localhost",
         "PORT": "5432",
-    }
+    },
 }
 
 
