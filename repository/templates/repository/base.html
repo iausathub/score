@@ -60,14 +60,15 @@
         <!-- Grid row -->
         <div class="row mt-3">
           <!-- Grid column -->
-          <div class="col-auto text-center align-items-center d-flex mx-auto mb-4">
+          <div class="col-3 text-center align-items-center d-flex mx-auto mb-4">
             <!-- Content -->
-            <img src="../../../static/CPS_Logo_Col.png" class="img-fluid" width="125px">
+            <img src="{% static 'CPS_Logo_Col.png' %}" alt="IAU CPS logo"
+            class="img-fluid" width="125px">
           </div>
           <!-- Grid column -->
 
           <!-- Grid column -->
-          <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
+          <div class="col-md-3   mx-auto mb-4">
             <!-- Links -->
             <h6 class="text-uppercase fw-bold">Data</h6>
             <hr
@@ -75,51 +76,34 @@
                 style="width: 60px; background-color: #4d85ff; height: 2px"
                 />
             <p>
-              <a href="#" class="text-white">Link 1</a>
+              <a href="index" class="text-white">Upload observation file</a>
             </p>
             <p>
-              <a href="#" class="text-white">Link 2</a>
+              <a href="upload-obs" class="text-white">Submit single observation</a>
             </p>
             <p>
-              <a href="#" class="text-white">Link 3</a>
+              <a href="search" class="text-white">Search</a>
             </p>
             <p>
-              <a href="#" class="text-white">Link 4</a>
+              <a href="view" class="text-white">View recent observations</a>
             </p>
           </div>
           <!-- Grid column -->
 
           <!-- Grid column -->
-          <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+          <div class="col-md-3 mx-auto mb-md-0 mb-4">
             <!-- Links -->
             <h6 class="text-uppercase fw-bold">Resources</h6>
             <hr
                 class="mb-4 mt-0 d-inline-block mx-auto"
                 style="width: 60px; background-color: #4d85ff; height: 2px"
                 />
-            <p>
-              <a href="data-format" class="text-white">Upload format</a>
-            </p>
-            <p>
-              <a href="#" class="text-white">Link 1</a>
-            </p>
-            <p>
-              <a href="#" class="text-white">Link 2</a>
-            </p>
-            <p>
-              <a href="#" class="text-white">Link 3</a>
-            </p>
-          </div>
-          <!-- Grid column -->
-
-          <!-- Grid column -->
-          <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
-            <!-- Links -->
-            <h6 class="text-uppercase fw-bold">Contact</h6>
-            <hr
-                class="mb-4 mt-0 d-inline-block mx-auto"
-                style="width: 60px; background-color: #4d85ff; height: 2px"
-                />
+                <p>
+                  <a href="data-format" class="text-white">Upload format</a>
+                </p>
+                <p>
+                  <a href="about" class="text-white">About</a>
+                </p>
             <p><i class="fab fa-github"></i> <a href="https://github.com/iausathub/score" class="text-white">Github</a></p>
             <p><i class="fas fa-envelope mr-3"></i> sathub@cps.iau.org</p>
           </div>

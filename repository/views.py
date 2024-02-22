@@ -1,6 +1,7 @@
 import csv
 import datetime
 import io
+import logging
 import zipfile
 from collections import namedtuple
 
@@ -12,7 +13,10 @@ from rest_framework.renderers import JSONRenderer
 
 from repository.forms import SearchForm, SingleObservationForm
 
-from .models import Location, Observation, ObservationSerializer, Satellite
+from .models import Location, Observation, Satellite
+from .serializers import ObservationSerializer
+
+logger = logging.getLogger(__name__)
 
 
 def index(request):
@@ -116,24 +120,30 @@ def index(request):
                 obs_ids.append(observation.id)
         except IndexError as e:
             context["error"] = str(e) + " - check number of fields in csv file."
+            logger.exception(e)
             return HttpResponse(template.render(context, request))
         except ValueError as e:
             context["error"] = e
+            logger.exception(e)
             return HttpResponse(template.render(context, request))
         except ValidationError as e:
             if len(e.messages) > 1:
                 context["error"] = e.messages[1]
+                logger.exception(e)
                 return HttpResponse(template.render(context, request))
             else:
                 message_text = ""
                 for key in e.message_dict.keys():
                     message_text += f"{key}: {e.message_dict[key][0]}\n"
                 context["error"] = message_text
+                logger.exception(e)
                 return HttpResponse(template.render(context, request))
         except Exception as e:
             context["error"] = e
+            logger.exception(e)
             return HttpResponse(template.render(context, request))
 
+        logger.info(f"Uploaded {len(obs_ids)} observations")
         context["obs_id"] = obs_ids
         context["date_added"] = datetime.datetime.now()
         return HttpResponse(template.render(context, request))
@@ -555,6 +565,16 @@ def upload(request):
     )
 
 
+def health(request):
+    return HttpResponse("OK")
+
+
+def about(request):
+    template = loader.get_template("repository/about.html")
+    context = {"": ""}
+    return HttpResponse(template.render(context, request))
+
+
 def get_stats():
     stats = namedtuple(
         "stats",
@@ -568,7 +588,7 @@ def get_stats():
 
     observation_count = Observation.objects.count()
     if observation_count == 0:
-        return stats(0, 0, 0, [], 0)
+        return stats(0, 0, 0, [])
     satellite_count = Satellite.objects.count()
 
     observer_count = (
