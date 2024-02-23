@@ -37,7 +37,7 @@ def get_secret(secret_name):
         print(e)
         return {
             "secret-key": "testsecretkey",
-            "score-prod-alb": "localhost",
+            "score-prod-alb": "http://127.0.0.1",
             "dbname": "score_test",
             "username": "postgres",
             "password": "postgres",
