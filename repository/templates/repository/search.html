@@ -69,11 +69,6 @@
         </div>
             <div class="container-md">
             {% if observations %}
-            <div class="col p-3">
-<!--                 <div class="float-start">
-                    <i class="fas fa-download"></i>  <a href="{% url 'download-results' %}">Download search results</a>
-                </div> -->
-            </div>
                 <table data-toggle="table"
                 data-pagination="true"
                 data-search="true"
@@ -115,6 +110,19 @@
                     {% endfor %}
                     </tbody>
                 </table>
+                <div class="col p-3">
+                    {% if obs_ids %}
+                     <div class="float-end">
+                        <form action="{% url 'download-results' %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="obs_ids" value="{{ obs_ids }}">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-download"></i> Download search results
+                            </button>
+                        </form>
+                    </div>
+                    {% endif %}
+                </div>
                 {% include "repository/modal.html" %}
             {% endif %}
             {% if error %}

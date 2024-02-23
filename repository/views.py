@@ -117,6 +117,7 @@ def index(request):
                         "date_added": datetime.datetime.now(),
                     },
                 )
+                logger.info(f"Uploaded observation {observation.id}")
                 obs_ids.append(observation.id)
         except IndexError as e:
             context["error"] = str(e) + " - check number of fields in csv file."
@@ -182,32 +183,7 @@ def view_data(request):
 
 def download_all(request):
     # create csv from observation models (All)
-    header = [
-        "satellite_name",
-        "norad_cat_id",
-        "observation_time_utc",
-        "observation_time_uncertainty_sec",
-        "apparent_magnitude",
-        "apparent_magnitude_uncertainty",
-        "observer_latitude_deg",
-        "observer_longitude_deg",
-        "observer_altitude_m",
-        "instrument",
-        "observing_mode",
-        "observing_filter",
-        "observer_orcid",
-        "satellite_right_ascension_deg",
-        "satellite_right_ascension_uncertainty_deg",
-        "satellite_declination_deg",
-        "satellite_declination_uncertainty_deg",
-        "range_to_satellite_km",
-        "range_to_satellite_uncertainty_km",
-        "range_rate_of_satellite_km_per_sec",
-        "range_rate_of_satellite_uncertainty_km_per_sec",
-        "comments",
-        "data_archive_link",
-        "constellation",
-    ]
+    header = get_csv_header()
 
     observations = Observation.objects.all()
 
@@ -341,6 +317,7 @@ def search(request):
                 for observation in observations
             ]
             observations_and_json = zip(observations, observation_list_json)
+            observation_ids = [observation.id for observation in observations]
 
             if observations.count() == 0:
                 return render(
@@ -352,7 +329,11 @@ def search(request):
             return render(
                 request,
                 "repository/search.html",
-                {"observations": observations_and_json, "form": SearchForm},
+                {
+                    "observations": observations_and_json,
+                    "obs_ids": observation_ids,
+                    "form": SearchForm,
+                },
             )
         else:
             return render(request, "repository/search.html", {"form": form})
@@ -361,85 +342,62 @@ def search(request):
 
 
 def download_results(request):
-    # create csv from observation models (All)
-    header = [
-        "satellite_name",
-        "norad_cat_id",
-        "observation_time_utc",
-        "observation_time_uncertainty_sec",
-        "apparent_magnitude",
-        "apparent_magnitude_uncertainty",
-        "observer_latitude_deg",
-        "observer_longitude_deg",
-        "observer_altitude_m",
-        "instrument",
-        "observing_mode",
-        "observing_filter",
-        "observer_email",
-        "observer_orcid",
-        "satellite_right_ascension_deg",
-        "satellite_right_ascension_uncertainty_deg",
-        "satellite_declination_deg",
-        "satellite_declination_uncertainty_deg",
-        "range_to_satellite_km",
-        "range_to_satellite_uncertainty_km",
-        "range_rate_of_satellite_km_per_sec",
-        "range_rate_of_satellite_uncertainty_km_per_sec",
-        "comments",
-        "data_archive_link",
-        "constellation",
-    ]
+    if request.method == "POST":
+        observation_ids = request.POST.get("obs_ids").split(", ")
+        observation_ids = [int(i.strip("[]")) for i in observation_ids]
 
-    observations = []
+        observations = Observation.objects.filter(id__in=observation_ids)
+        # create csv from observation models (All)
+        header = get_csv_header()
 
-    csv_lines = []
-    for observation in observations:
-        csv_lines.append(
-            [
-                observation.satellite_id.sat_name,
-                observation.satellite_id.sat_number,
-                observation.obs_time_utc,
-                observation.obs_time_uncert_sec,
-                observation.apparent_mag,
-                observation.apparent_mag_uncert,
-                observation.location_id.obs_lat_deg,
-                observation.location_id.obs_long_deg,
-                observation.location_id.obs_alt_m,
-                observation.instrument,
-                observation.obs_mode,
-                observation.obs_filter,
-                observation.obs_email,
-                observation.obs_orc_id,
-                observation.sat_ra_deg,
-                observation.sat_ra_uncert_deg,
-                observation.sat_dec_deg,
-                observation.sat_dec_uncert_deg,
-                observation.range_to_sat_km,
-                observation.range_to_sat_uncert_km,
-                observation.range_rate_sat_km_s,
-                observation.range_rate_sat_uncert_km_s,
-                observation.comments,
-                observation.data_archive_link,
-                observation.satellite_id.constellation,
-            ]
-        )
+        csv_lines = []
+        for observation in observations:
+            csv_lines.append(
+                [
+                    observation.satellite_id.sat_name,
+                    observation.satellite_id.sat_number,
+                    observation.obs_time_utc,
+                    observation.obs_time_uncert_sec,
+                    observation.apparent_mag,
+                    observation.apparent_mag_uncert,
+                    observation.location_id.obs_lat_deg,
+                    observation.location_id.obs_long_deg,
+                    observation.location_id.obs_alt_m,
+                    observation.instrument,
+                    observation.obs_mode,
+                    observation.obs_filter,
+                    observation.obs_orc_id,
+                    observation.sat_ra_deg,
+                    observation.sat_ra_uncert_deg,
+                    observation.sat_dec_deg,
+                    observation.sat_dec_uncert_deg,
+                    observation.range_to_sat_km,
+                    observation.range_to_sat_uncert_km,
+                    observation.range_rate_sat_km_s,
+                    observation.range_rate_sat_uncert_km_s,
+                    observation.comments,
+                    observation.data_archive_link,
+                    observation.satellite_id.constellation,
+                ]
+            )
 
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(header)
-    writer.writerows(csv_lines)
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(header)
+        writer.writerows(csv_lines)
 
-    zipfile_name = "satellite_observations_search_results.zip"
-    zipped_file = io.BytesIO()
+        zipfile_name = "satellite_observations_search_results.zip"
+        zipped_file = io.BytesIO()
 
-    with zipfile.ZipFile(zipped_file, "w") as zip:
-        zip.writestr("observations.csv", output.getvalue())
-    zipped_file.seek(0)
+        with zipfile.ZipFile(zipped_file, "w") as zip:
+            zip.writestr("observations.csv", output.getvalue())
+        zipped_file.seek(0)
 
-    response = HttpResponse(zipped_file, content_type="application/zip")
+        response = HttpResponse(zipped_file, content_type="application/zip")
 
-    response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
-    return response
+        response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
+        return response
+    return HttpResponse()
 
 
 def upload(request):
@@ -605,3 +563,33 @@ def get_stats():
     return stats(
         satellite_count, observation_count, observer_count, observations_and_json
     )
+
+
+def get_csv_header():
+    header = [
+        "satellite_name",
+        "norad_cat_id",
+        "observation_time_utc",
+        "observation_time_uncertainty_sec",
+        "apparent_magnitude",
+        "apparent_magnitude_uncertainty",
+        "observer_latitude_deg",
+        "observer_longitude_deg",
+        "observer_altitude_m",
+        "instrument",
+        "observing_mode",
+        "observing_filter",
+        "observer_orcid",
+        "satellite_right_ascension_deg",
+        "satellite_right_ascension_uncertainty_deg",
+        "satellite_declination_deg",
+        "satellite_declination_uncertainty_deg",
+        "range_to_satellite_km",
+        "range_to_satellite_uncertainty_km",
+        "range_rate_of_satellite_km_per_sec",
+        "range_rate_of_satellite_uncertainty_km_per_sec",
+        "comments",
+        "data_archive_link",
+        "constellation",
+    ]
+    return header
