@@ -35,7 +35,7 @@ def get_secret(secret_name):
         raise e
     except Exception as e:
         print(e)
-        return {"secret-key": "testsecretkey"}
+        return {"secret-key": "testsecretkey", "score-prod-alb": "localhost"}
 
     if get_secret_value_response is None:
         raise Exception("No secret value response")
