@@ -57,7 +57,7 @@ jobs:
       env:
         DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
-        python -m pytest
+        python -m pytest --ignore=score/settings
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
