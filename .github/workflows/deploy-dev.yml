@@ -5,10 +5,8 @@
 name: Deploy to Amazon ECS - Dev.
 
 on:
-  workflow_run:
-    workflows: ["Run tests"]
-    types:
-      - completed
+  release:
+    types: [ published ]
     branches: [ "develop" ]
     
   workflow_dispatch:
