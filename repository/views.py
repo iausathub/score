@@ -45,6 +45,12 @@ def index(request):
         obs_ids = []
         try:
             for column in csv.reader(io_string, delimiter=",", quotechar="|"):
+                if "SATHUB-SATELLITE" in column[0]:
+                    context[
+                        "error"
+                    ] = "File contains sample data. Please upload a valid file."
+                    return HttpResponse(template.render(context, request))
+
                 satellite, sat_created = Satellite.objects.update_or_create(
                     sat_name=column[0],
                     sat_number=column[1],
