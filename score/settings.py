@@ -53,9 +53,9 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = get_secret("score-secret-key")["secret-key"]
 
-DEBUG = True
+DEBUG = False
 DEBUG_PROPAGATE_EXCEPTIONS = True
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [get_secret("score-allowed-hosts")["score-prod-alb"]]
 ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 ALLOWED_HOSTS.append("127.0.0.1")
 
@@ -109,6 +109,8 @@ WSGI_APPLICATION = "score.wsgi.application"
 # CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 
+CSRF_TRUSTED_ORIGINS = [get_secret("score-allowed-hosts")["score-prod-alb"]]
+CSRF_TRUSTED_ORIGINS.append("http://127.0.0.1")
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
