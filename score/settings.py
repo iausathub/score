@@ -10,7 +10,47 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+import json
 from pathlib import Path
+from socket import gethostbyname, gethostname
+
+import boto3
+from botocore.exceptions import ClientError
+
+
+def get_secret(secret_name):
+    region_name = "us-east-1"
+
+    # Create a Secrets Manager client
+    session = boto3.session.Session()
+    client = session.client(service_name="secretsmanager", region_name=region_name)
+
+    get_secret_value_response = None
+    try:
+        get_secret_value_response = client.get_secret_value(SecretId=secret_name)
+    except ClientError as e:
+        # For a list of exceptions thrown, see
+        # https://docs.aws.amazon.com/secretsmanager/latest/apireference/API_GetSecretValue.html
+        print(e)
+        raise e
+    except Exception as e:
+        print(e)
+        return {
+            "secret-key": "testsecretkey",
+            "score-prod-alb": "http://127.0.0.1",
+            "dbname": "score_test",
+            "username": "postgres",
+            "password": "postgres",
+            "host": "localhost",
+            "port": "5432",
+        }
+
+    if get_secret_value_response is None:
+        raise Exception("No secret value response")
+    secrets = json.loads(get_secret_value_response["SecretString"])
+
+    return secrets
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -19,15 +59,13 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-# SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = (
-    "django-insecure-3w&h&zckrwdztf+qvjpo1&qprrak2_gt0ni!avka#ok-0pb9d1"  # noqa: S105
-)
+SECRET_KEY = get_secret("score-secret-key")["secret-key"]
 
-# SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
-
-ALLOWED_HOSTS = []
+DEBUG = False
+DEBUG_PROPAGATE_EXCEPTIONS = True
+ALLOWED_HOSTS = [get_secret("score-allowed-hosts")["score-prod-alb"]]
+ALLOWED_HOSTS.append(gethostbyname(gethostname()))
+ALLOWED_HOSTS.append("127.0.0.1")
 
 
 # Application definition
@@ -74,20 +112,39 @@ TEMPLATES = [
 
 WSGI_APPLICATION = "score.wsgi.application"
 
+# SECURE_SSL_REDIRECT = True
+# SESSION_COOKIE_SECURE = True
+# CSRF_COOKIE_SECURE = True
+SECURE_BROWSER_XSS_FILTER = True
+
+CSRF_TRUSTED_ORIGINS = [get_secret("score-allowed-hosts")["score-prod-alb"]]
+CSRF_TRUSTED_ORIGINS.append("http://127.0.0.1")
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql",
-        "NAME": "score_test",
-        "USER": "postgres",
-        "PASSWORD": "postgres",
-        "HOST": "localhost",
-        "PORT": "5432",
+if DEBUG:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql",
+            "NAME": "score_test",
+            "USER": "postgres",
+            "PASSWORD": "postgres",
+            "HOST": "localhost",
+            "PORT": "5432",
+        },
     }
-}
+else:
+    DATABASES = {
+        "default": {
+            "ENGINE": "django.db.backends.postgresql_psycopg2",
+            "NAME": get_secret("score_prod_db")["dbname"],
+            "USER": get_secret("score_prod_db")["username"],
+            "PASSWORD": get_secret("score_prod_db")["password"],
+            "HOST": get_secret("score_prod_db")["host"],
+            "PORT": get_secret("score_prod_db")["port"],
+        },
+    }
 
 
 # Password validation
@@ -124,7 +181,7 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
-STATIC_URL = "/static/"
+STATIC_URL = "https://d14txihk1czyln.cloudfront.net/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
@@ -141,3 +198,24 @@ COMPRESS_PRECOMPILERS = (("text/x-scss", "django_libsass.SassCompiler"),)
 # https://docs.djangoproject.com/en/5.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = "django.db.models.BigAutoField"
+
+LOGGING = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "handlers": {
+        "console": {
+            "class": "logging.StreamHandler",
+        },
+    },
+    "root": {
+        "handlers": ["console"],
+        "level": "INFO",
+    },
+    "loggers": {
+        "django": {
+            "handlers": ["console"],
+            "level": "INFO",
+            "propagate": False,
+        },
+    },
+}

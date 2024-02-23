@@ -11,4 +11,6 @@ urlpatterns = [
     path("search", views.search, name="search"),
     path("upload", views.upload, name="upload-obs"),
     path("download-ids", views.download_obs_ids, name="download-obs-ids"),
+    path("health", views.health, name="health"),
+    path("about", views.about, name="about"),
 ]
