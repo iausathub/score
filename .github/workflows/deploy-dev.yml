@@ -5,8 +5,12 @@
 name: Deploy to Amazon ECS - Dev.
 
 on:
-  push:
+  workflow_run:
+    workflows: ["Run tests"]
+    types:
+      - completed
     branches: [ "develop" ]
+    
   workflow_dispatch:
     inputs:
       logLevel:
@@ -43,23 +47,6 @@ jobs:
       uses: actions/setup-python@v3
       with:
         python-version: '3.11'
-
-    - name: Install dependencies
-      run: |
-        python -m pip install --upgrade pip
-        pip install pytest
-        pip install -r requirements.txt
-    - name: Check migrations
-      env:
-        DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
-      run: |
-          python manage.py makemigrations
-          python manage.py migrate
-    - name: Test with pytest
-      env:
-        DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
-      run: |
-        python -m pytest --ignore=score/settings
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
