@@ -1,4 +1,5 @@
 FROM --platform=linux/amd64 python:3.11
+ARG SETTINGS=score.settings.production
 
 WORKDIR /usr/src/app
 
@@ -14,4 +15,4 @@ COPY . .
 EXPOSE 8000
 
 RUN chmod +x /usr/src/app/start.sh
-CMD ["/usr/src/app/start.sh"]
+CMD ["/usr/src/app/start.sh ${SETTINGS}"]

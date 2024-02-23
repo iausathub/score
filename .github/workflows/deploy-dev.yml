@@ -49,11 +49,15 @@ jobs:
         python -m pip install --upgrade pip
         pip install pytest
         pip install -r requirements.txt;
+    - name: Check migrations
+      run: |
+          python manage.py makemigrations
+          python manage.py migrate
     - name: Test with pytest
       env:
         DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
-        python -m pytest
+        python -m pytest --ignore=score/settings
 
     - name: Configure AWS credentials
       uses: aws-actions/configure-aws-credentials@v1
@@ -78,7 +82,7 @@ jobs:
         # push it to ECR so that it can
         # be deployed to ECS.
 
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG .
+        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg="SETTINGS=score.settings.test" .
         docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
 
