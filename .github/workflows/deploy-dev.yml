@@ -7,8 +7,8 @@ name: Deploy to Amazon ECS - Dev.
 on:
   release:
     types: [ published ]
-    branches: [ "develop" ]
-    
+    branches: [ develop ]
+
   workflow_dispatch:
     inputs:
       logLevel:

@@ -1,5 +1,5 @@
-FROM --platform=linux/amd64 python:3.11
 ARG SETTINGS=score.settings.production
+FROM --platform=linux/amd64 python:3.11
 
 WORKDIR /usr/src/app
 
@@ -14,5 +14,8 @@ COPY . .
 
 EXPOSE 8000
 
+ARG SETTINGS
+ENV SETTINGS_CONFIG=${SETTINGS}
+ENV DJANGO_SETTINGS_MODULE=${SETTINGS}
 RUN chmod +x /usr/src/app/start.sh
-CMD ["/usr/src/app/start.sh ${SETTINGS}"]
+CMD /bin/bash -c "/usr/src/app/start.sh" ${SETTINGS_CONFIG}

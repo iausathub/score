@@ -104,7 +104,7 @@ WSGI_APPLICATION = "score.wsgi.application"
 # CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 
-CSRF_TRUSTED_ORIGINS = [get_secret("score-allowed-hosts")["score-prod-alb"]]
+CSRF_TRUSTED_ORIGINS = [get_secret("score-allowed-hosts")["score-prod-alb-csrf"]]
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -159,7 +159,7 @@ STATIC_URL = "https://d14txihk1czyln.cloudfront.net/static/"
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
-STATIC_ROOT = BASE_DIR / "static"
+STATIC_ROOT = "static"
 
 STATICFILES_FINDERS = [
     "compressor.finders.CompressorFinder",
