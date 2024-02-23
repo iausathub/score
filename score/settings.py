@@ -35,7 +35,15 @@ def get_secret(secret_name):
         raise e
     except Exception as e:
         print(e)
-        return {"secret-key": "testsecretkey", "score-prod-alb": "localhost"}
+        return {
+            "secret-key": "testsecretkey",
+            "score-prod-alb": "localhost",
+            "dbname": "score_test",
+            "username": "postgres",
+            "password": "postgres",
+            "host": "localhost",
+            "port": "5432",
+        }
 
     if get_secret_value_response is None:
         raise Exception("No secret value response")
