@@ -5,6 +5,8 @@ import logging
 import zipfile
 from collections import namedtuple
 
+import requests
+from astropy.time import Time
 from django.forms import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import render
@@ -49,6 +51,13 @@ def index(request):
                     context[
                         "error"
                     ] = "File contains sample data. Please upload a valid file."
+                    return HttpResponse(template.render(context, request))
+
+                is_valid = validate_position(
+                    column[0], column[1], column[2], column[6], column[7], column[8]
+                )
+                if is_valid is not True:
+                    context["error"] = is_valid
                     return HttpResponse(template.render(context, request))
 
                 satellite, sat_created = Satellite.objects.update_or_create(
@@ -599,3 +608,34 @@ def get_csv_header():
         "constellation",
     ]
     return header
+
+
+def validate_position(
+    satellite_name, sat_number, observation_time, latitude, longitude, altitude
+):
+    if (
+        not satellite_name
+        or not sat_number
+        or not observation_time
+        or not latitude
+        or not longitude
+        or not altitude
+    ):
+        return False
+    obs_time = Time(observation_time, format="isot", scale="utc")
+    url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
+    params = {
+        "catalog": sat_number,
+        "latitude": latitude,
+        "longitude": longitude,
+        "elevation": altitude,
+        "julian_date": obs_time.jd,
+    }
+    r = requests.get(url, params=params, timeout=10)
+    if r.status_code != 200 or not r.json():
+        return "Satellite not visible at this time and location"
+    if r.json()[0]["NAME"] != satellite_name:
+        return "Satellite name and number do not match"
+    if float(r.json()[0]["ALTITUDE-DEG"]) < -5:
+        return "Satellite below horizon"
+    return True
