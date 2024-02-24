@@ -47,12 +47,14 @@ def index(request):
         obs_ids = []
         try:
             for column in csv.reader(io_string, delimiter=",", quotechar="|"):
-                if "SATHUB-SATELLITE" in column[0]:
-                    context[
-                        "error"
-                    ] = "File contains sample data. Please upload a valid file."
-                    return HttpResponse(template.render(context, request))
 
+                if "SATHUB-SATELLITE" in column[0]:
+                    # fmt: off
+                    context["error"] = (
+                        "File contains sample data. Please upload a valid file."
+                    )
+                    return HttpResponse(template.render(context, request))
+                    # fmt: on
                 is_valid = validate_position(
                     column[0], column[1], column[2], column[6], column[7], column[8]
                 )
