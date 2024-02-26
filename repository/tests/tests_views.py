@@ -33,7 +33,7 @@ class TestViews(TestCase):
             obs_mode="VISUAL",
             obs_filter="CLEAR",
             instrument="none",
-            obs_orc_id="0123-4567-8910-1112",
+            obs_orc_id=["0123-4567-8910-1112"],
         )
 
     def test_index(self):

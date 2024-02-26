@@ -11,6 +11,7 @@ from django.forms import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
+from django.utils import timezone
 from rest_framework.renderers import JSONRenderer
 
 from repository.forms import SearchForm, SingleObservationForm
@@ -46,7 +47,7 @@ def index(request):
         next(io_string)  # Skip the header
         obs_ids = []
         try:
-            for column in csv.reader(io_string, delimiter=",", quotechar="|"):
+            for column in csv.reader(io_string, delimiter=","):
 
                 if "SATHUB-SATELLITE" in column[0]:
                     # fmt: off
@@ -70,7 +71,7 @@ def index(request):
                         "sat_name": column[0],
                         "sat_number": column[1],
                         "constellation": column[24],
-                        "date_added": datetime.datetime.now(),
+                        "date_added": timezone.now(),
                     },
                 )
 
@@ -82,10 +83,11 @@ def index(request):
                         "obs_lat_deg": column[6],
                         "obs_long_deg": column[7],
                         "obs_alt_m": column[8],
-                        "date_added": datetime.datetime.now(),
+                        "date_added": timezone.now(),
                     },
                 )
 
+                orc_id_list = [item.strip() for item in column[13].split(",")]
                 observation, obs_created = Observation.objects.update_or_create(
                     obs_time_utc=column[2],
                     obs_time_uncert_sec=column[3],
@@ -95,7 +97,7 @@ def index(request):
                     obs_mode=column[10],
                     obs_filter=column[11],
                     obs_email=column[12],
-                    obs_orc_id=column[13],
+                    obs_orc_id=orc_id_list,
                     sat_ra_deg=column[14],
                     sat_ra_uncert_deg=column[15],
                     sat_dec_deg=column[16],
@@ -117,7 +119,7 @@ def index(request):
                         "obs_mode": column[10],
                         "obs_filter": column[11],
                         "obs_email": column[12],
-                        "obs_orc_id": column[13],
+                        "obs_orc_id": orc_id_list,
                         "sat_ra_deg": column[14],
                         "sat_ra_uncert_deg": column[15],
                         "sat_dec_deg": column[16],
@@ -131,7 +133,7 @@ def index(request):
                         "flag": None,
                         "satellite_id": satellite,
                         "location_id": location,
-                        "date_added": datetime.datetime.now(),
+                        "date_added": timezone.now(),
                     },
                 )
                 logger.info(f"Uploaded observation {observation.id}")

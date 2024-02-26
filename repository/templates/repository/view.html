@@ -40,7 +40,7 @@
                     <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg }}</td>
                     <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m }}</td>
                     <td scope="row">{{ observation.obs_mode }}</td>
-                    <td scope="row">{{ observation.obs_orc_id }}</td>
+                    <td scope="row">{{ observation.obs_orc_id|first }}</td>
                 </tr>
             {% endfor %}
 

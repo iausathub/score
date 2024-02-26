@@ -138,6 +138,7 @@ class LocationTest(TestCase):
 
 class ObservationTest(TestCase):
     timestamp = timezone.now()
+    orc_id = ["0000-1234-5678-9101"]
 
     def create_observation(
         self,
@@ -152,7 +153,7 @@ class ObservationTest(TestCase):
         obs_mode="VISUAL",
         obs_filter="test",
         instrument="test",
-        obs_orc_id="0000-1234-5678-9101",
+        obs_orc_id=orc_id,
     ):
         sat = Satellite.objects.create(
             sat_name="STARLINK-123",
@@ -289,7 +290,7 @@ class ObservationTest(TestCase):
 
         # field is required
         with self.assertRaises(ValidationError):
-            obs = self.create_observation(obs_orc_id="")
+            obs = self.create_observation(obs_orc_id=[""])
             obs.full_clean()
 
         # field is required
@@ -298,13 +299,13 @@ class ObservationTest(TestCase):
                 obs = self.create_observation(obs_orc_id=None)
 
         # field must be valid ORCID
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(TypeError):
             obs = self.create_observation(obs_orc_id=1)
             obs.full_clean()
 
         # field must be valid ORCID
         with self.assertRaises(ValidationError):
-            obs = self.create_observation(obs_orc_id="n/a")
+            obs = self.create_observation(obs_orc_id=["n/a"])
             obs.full_clean()
 
         # valid values successful

@@ -155,7 +155,7 @@
               $('#obs_mode').text(observation.obs_mode);
               $('#obs_filter').text(observation.obs_filter);
               $('#obs_instrument').text(observation.obs_instrument);
-              $('#obs_orc_id').text(observation.obs_orc_id);
+              $('#obs_orc_id').text(observation.obs_orc_id.toString().replace(/,/g, ', '));
               $('#obs_comments').text(observation.obs_comments);
               $('#sat_ra_deg').text(observation.sat_ra_deg);
               $('#sat_ra_uncert_deg').text(observation.sat_ra_uncert_deg);
