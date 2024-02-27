@@ -1,3 +1,4 @@
+from django.forms import ValidationError
 from django.test import Client, TestCase
 
 from repository.forms import SingleObservationForm
@@ -17,8 +18,6 @@ class SingleObservationFormTest(TestCase):
                 "sat_number": ["This field is required."],
                 "obs_date": ["This field is required."],
                 "obs_date_uncert": ["This field is required."],
-                "apparent_mag": ["This field is required."],
-                "apparent_mag_uncert": ["This field is required."],
                 "instrument": ["This field is required."],
                 "observer_latitude_deg": ["This field is required."],
                 "observer_longitude_deg": ["This field is required."],
@@ -166,8 +165,29 @@ class SingleObservationFormTest(TestCase):
             form_in_response.errors,
             {
                 "observer_email": ["Observer email is not correctly formatted."],
-                "apparent_mag_uncert": ["This field is required."],
                 "instrument": ["This field is required."],
                 "filter": ["This field is required."],
             },
         )
+
+    def test_abs_mag_uncert(self):
+        with self.assertRaises(ValidationError):
+            response = self.client.post(  # noqa: F841
+                "/upload",
+                {
+                    "sat_name": "STARLINK-123",
+                    "sat_number": 12345,
+                    "obs_date": "2024-01-02T23:59:59.123Z",
+                    "obs_date_uncert": 0.01,
+                    "apparent_mag_uncert": 0.01,
+                    "observer_latitude_deg": 33,
+                    "observer_longitude_deg": -117,
+                    "observer_altitude_m": 100,
+                    "obs_mode": "VISUAL",
+                    "filter": "CLEAR",
+                    "instrument": "n/a",
+                    "observer_email": "abc@123.com",
+                    "observer_orcid": "0123-4567-8910-1112",
+                    "not_detected": "false",
+                },
+            )

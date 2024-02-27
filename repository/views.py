@@ -88,6 +88,9 @@ def index(request):
                 )
 
                 orc_id_list = [item.strip() for item in column[13].split(",")]
+                if column[4] == "" and column[5] == "":
+                    column[4] = None
+                    column[5] = None
                 observation, obs_created = Observation.objects.update_or_create(
                     obs_time_utc=column[2],
                     obs_time_uncert_sec=column[3],
@@ -423,6 +426,11 @@ def upload(request):
     if request.method == "POST":
         form = SingleObservationForm(request.POST)
         if form.is_valid():
+            orc_id_list = [
+                orc_id.strip()
+                for orc_id in form.cleaned_data["observer_orcid"].split(",")
+            ]
+
             sat_name = form.cleaned_data["sat_name"]
             sat_number = form.cleaned_data["sat_number"]
             obs_mode = form.cleaned_data["obs_mode"]
@@ -434,7 +442,7 @@ def upload(request):
             filter = form.cleaned_data["filter"]
             observer_email = form.cleaned_data["observer_email"]
             constellation = form.cleaned_data["constellation"]
-            observer_orcid = form.cleaned_data["observer_orcid"]
+            observer_orcid = orc_id_list
             obs_lat_deg = form.cleaned_data["observer_latitude_deg"]
             obs_long_deg = form.cleaned_data["observer_longitude_deg"]
             obs_alt_m = form.cleaned_data["observer_altitude_m"]
@@ -457,7 +465,7 @@ def upload(request):
                     "sat_name": sat_name,
                     "sat_number": sat_number,
                     "constellation": constellation,
-                    "date_added": datetime.datetime.now(),
+                    "date_added": timezone.now(),
                 },
             )
 
@@ -469,7 +477,7 @@ def upload(request):
                     "obs_lat_deg": obs_lat_deg,
                     "obs_long_deg": obs_long_deg,
                     "obs_alt_m": obs_alt_m,
-                    "date_added": datetime.datetime.now(),
+                    "date_added": timezone.now(),
                 },
             )
 
@@ -518,7 +526,7 @@ def upload(request):
                     "flag": None,
                     "satellite_id": satellite,
                     "location_id": location,
-                    "date_added": datetime.datetime.now(),
+                    "date_added": timezone.now(),
                 },
             )
 

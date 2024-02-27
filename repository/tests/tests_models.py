@@ -236,17 +236,7 @@ class ObservationTest(TestCase):
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError):
-                obs = self.create_observation(apparent_mag="")
-
-        # field is required
-        with transaction.atomic():
-            with self.assertRaises(ValidationError):
-                obs = self.create_observation(apparent_mag=None)
-
-        # field is required
-        with transaction.atomic():
-            with self.assertRaises(ValidationError):
-                obs = self.create_observation(apparent_mag_uncert=None)
+                obs = self.create_observation(apparent_mag=3, apparent_mag_uncert=None)
 
         # field must be positive
         with self.assertRaises(ValidationError):

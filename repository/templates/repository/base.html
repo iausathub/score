@@ -154,7 +154,7 @@
               $('#obs_alt_m').text(observation.location_id.obs_alt_m);
               $('#obs_mode').text(observation.obs_mode);
               $('#obs_filter').text(observation.obs_filter);
-              $('#obs_instrument').text(observation.obs_instrument);
+              $('#obs_instrument').text(observation.instrument);
               $('#obs_orc_id').text(observation.obs_orc_id.toString().replace(/,/g, ', '));
               $('#obs_comments').text(observation.obs_comments);
               $('#sat_ra_deg').text(observation.sat_ra_deg);
@@ -170,6 +170,23 @@
           });
       });
   </script>
+  <script>
+    $(document).ready(function() {
+        $('#id_not_detected').change(function() {
+            if(this.checked) {
+                $('#id_apparent_mag').prop('disabled', true);
+                $('#id_apparent_mag').prop('required', false);
+                $('#id_apparent_mag_uncert').prop('disabled', true);
+                $('#id_apparent_mag_uncert').prop('required', false);
+            } else {
+                $('#id_apparent_mag').prop('disabled', false);
+                $('#id_apparent_mag').prop('required', true);
+                $('#id_apparent_mag_uncert').prop('disabled', false);
+                $('#id_apparent_mag_uncert').prop('required', true);
+            }
+        });
+    });
+    </script>
   </body>
 
   </html>

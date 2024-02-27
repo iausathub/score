@@ -12,8 +12,10 @@ class UploadObservationFileForm(forms.Form):
 
 
 def validate_orcid(value):
-    if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", value):
-        raise forms.ValidationError("Invalid ORCID.")
+    orc_id_list = value.split(",")
+    for orc_id in orc_id_list:
+        if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", orc_id.strip()):
+            raise forms.ValidationError("Invalid ORCID.")
 
 
 def validate_date(value):
@@ -104,13 +106,18 @@ class SingleObservationForm(Form):
         label="Observation Date/Time Uncertainty (sec)",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
+    not_detected = forms.BooleanField(
+        required=False,
+        label="Not Detected",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
     apparent_mag = forms.FloatField(
-        required=True,
+        required=False,
         label="Apparent Magnitude",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
     apparent_mag_uncert = forms.FloatField(
-        required=True,
+        required=False,
         label="Apparent Magnitude Uncertainty",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )

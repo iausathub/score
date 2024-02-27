@@ -80,8 +80,8 @@ class Observation(models.Model):
 
     obs_time_utc = models.DateTimeField("observation time")
     obs_time_uncert_sec = models.FloatField(default=0)
-    apparent_mag = models.FloatField(default=0)
-    apparent_mag_uncert = models.FloatField(default=0)
+    apparent_mag = models.FloatField(null=True, blank=True)
+    apparent_mag_uncert = models.FloatField(null=True, blank=True)
     instrument = models.CharField(max_length=200)
     obs_mode = models.CharField(max_length=200, choices=OBS_MODE_CHOICES)
     obs_filter = models.CharField(max_length=200)
@@ -123,11 +123,17 @@ class Observation(models.Model):
             raise ValidationError("Observation time uncertainty is required.")
         if self.obs_time_uncert_sec < 0:
             raise ValidationError("Observation time uncertainty must be positive.")
-        if self.apparent_mag is None:
-            raise ValidationError("Apparent magnitude is required.")
-        if self.apparent_mag_uncert is None:
-            raise ValidationError("Apparent magnitude uncertainty is required.")
-        if self.apparent_mag_uncert < 0:
+        if self.apparent_mag is not None and self.apparent_mag_uncert is None:
+            raise ValidationError(
+                "Apparent magnitude uncertainty is required if \
+                                  apparent magnitude is provided."
+            )
+        if self.apparent_mag is None and self.apparent_mag_uncert is not None:
+            raise ValidationError(
+                "Apparent magnitude must be provided if \
+                                  uncertainty is provided."
+            )
+        if self.apparent_mag_uncert is not None and self.apparent_mag_uncert < 0:
             raise ValidationError("Apparent magnitude uncertainty must be positive.")
         if not self.obs_mode:
             raise ValidationError("Observation mode is required.")
