@@ -1,4 +1,5 @@
-from django.urls import path
+from django.conf import settings
+from django.urls import include, path
 
 from . import views
 
@@ -11,6 +12,6 @@ urlpatterns = [
     path("search", views.search, name="search"),
     path("upload", views.upload, name="upload-obs"),
     path("download-ids", views.download_obs_ids, name="download-obs-ids"),
-    path("health", views.health, name="health"),
+    path(r"ht/" + settings.SECRET_HEALTH_CHECK_TOKEN, include("health_check.urls")),
     path("about", views.about, name="about"),
 ]

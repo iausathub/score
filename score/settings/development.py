@@ -20,6 +20,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 SECRET_KEY = "score-secret-key"  # noqa: S105
+SECRET_HEALTH_CHECK_TOKEN = "health-check-token"  # noqa: S105
+SECRET_ADMIN_TOKEN = ""  # noqa: S105
 
 DEBUG = True
 DEBUG_PROPAGATE_EXCEPTIONS = True
@@ -37,6 +39,10 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "compressor",
     "rest_framework",
+    "health_check",
+    "health_check.db",
+    "health_check.storage",
+    "health_check.contrib.migrations",
 ]
 
 MIDDLEWARE = [

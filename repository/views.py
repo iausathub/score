@@ -550,10 +550,6 @@ def upload(request):
     )
 
 
-def health(request):
-    return HttpResponse("OK")
-
-
 def about(request):
     template = loader.get_template("repository/about.html")
     context = {"": ""}

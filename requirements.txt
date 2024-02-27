@@ -17,6 +17,7 @@ django-bootstrap-ui==3.0.0
 django-bootstrap-v5==1.0.11
 django-composer==0.0.5
 django-compressor==4.4
+django-health-check==3.18.1
 django-libsass==0.9
 djangorestframework==3.14.0
 filelock==3.13.1
