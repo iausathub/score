@@ -3,7 +3,7 @@ import re
 from django import forms
 from django.forms import Form
 
-from repository.models import Observation
+from repository.models import Observation, Satellite
 
 
 class UploadObservationFileForm(forms.Form):
@@ -159,11 +159,11 @@ class SingleObservationForm(Form):
         label="Observer Email",
         widget=forms.EmailInput(attrs={"class": "form-control"}),
     )
-    constellation = forms.CharField(
-        max_length=200,
-        required=False,
+    constellation = forms.ChoiceField(
+        choices=Satellite.CONSTELLATION_CHOICES,
+        required=True,
         label="Constellation",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.Select(attrs={"class": "form-select"}),
     )
     observer_orcid = forms.CharField(
         required=True,

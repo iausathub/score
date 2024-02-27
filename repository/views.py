@@ -66,11 +66,11 @@ def index(request):
                 satellite, sat_created = Satellite.objects.update_or_create(
                     sat_name=column[0],
                     sat_number=column[1],
-                    constellation=column[24],
+                    constellation=column[24].upper(),
                     defaults={
                         "sat_name": column[0],
                         "sat_number": column[1],
-                        "constellation": column[24],
+                        "constellation": column[24].upper(),
                         "date_added": timezone.now(),
                     },
                 )
@@ -97,7 +97,7 @@ def index(request):
                     apparent_mag=column[4],
                     apparent_mag_uncert=column[5],
                     instrument=column[9],
-                    obs_mode=column[10],
+                    obs_mode=column[10].upper(),
                     obs_filter=column[11],
                     obs_email=column[12],
                     obs_orc_id=orc_id_list,
@@ -119,7 +119,7 @@ def index(request):
                         "apparent_mag": column[4],
                         "apparent_mag_uncert": column[5],
                         "instrument": column[9],
-                        "obs_mode": column[10],
+                        "obs_mode": column[10].upper(),
                         "obs_filter": column[11],
                         "obs_email": column[12],
                         "obs_orc_id": orc_id_list,

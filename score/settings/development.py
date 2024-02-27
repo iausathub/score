@@ -21,7 +21,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 SECRET_KEY = "score-secret-key"  # noqa: S105
 SECRET_HEALTH_CHECK_TOKEN = "health-check-token"  # noqa: S105
-SECRET_ADMIN_TOKEN = ""  # noqa: S105
+SECRET_ADMIN_TOKEN = "test"  # noqa: S105
 
 DEBUG = True
 DEBUG_PROPAGATE_EXCEPTIONS = True
