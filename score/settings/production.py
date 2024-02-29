@@ -73,6 +73,8 @@ INSTALLED_APPS = [
     "health_check.db",
     "health_check.storage",
     "health_check.contrib.migrations",
+    "celery",
+    "celery_progress",
 ]
 
 MIDDLEWARE = [
@@ -199,3 +201,8 @@ LOGGING = {
         },
     },
 }
+
+# Celery settings
+BROKER_URL = "redis://redis:6379/0"
+CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+CELERY_RESULT_SERIALIZER = "json"

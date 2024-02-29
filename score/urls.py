@@ -5,4 +5,5 @@ from django.urls import include, path
 urlpatterns = [
     path("", include("repository.urls")),
     path(settings.SECRET_ADMIN_TOKEN + "/admin/", admin.site.urls),
+    path("celery-progress/", include("celery_progress.urls")),
 ]

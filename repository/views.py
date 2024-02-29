@@ -7,7 +7,6 @@ from collections import namedtuple
 
 import requests
 from astropy.time import Time
-from django.forms import ValidationError
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
@@ -15,6 +14,7 @@ from django.utils import timezone
 from rest_framework.renderers import JSONRenderer
 
 from repository.forms import SearchForm, SingleObservationForm
+from repository.tasks import ProcessUpload
 
 from .models import Location, Observation, Satellite
 from .serializers import ObservationSerializer
@@ -45,129 +45,17 @@ def index(request):
         # check if first row is header or not
 
         next(io_string)  # Skip the header
-        obs_ids = []
-        try:
-            for column in csv.reader(io_string, delimiter=","):
 
-                if "SATHUB-SATELLITE" in column[0]:
-                    # fmt: off
-                    context["error"] = (
-                        "File contains sample data. Please upload a valid file."
-                    )
-                    return HttpResponse(template.render(context, request))
-                    # fmt: on
-                is_valid = validate_position(
-                    column[0], column[1], column[2], column[6], column[7], column[8]
-                )
-                if is_valid is not True:
-                    context["error"] = is_valid
-                    return HttpResponse(template.render(context, request))
+        read_data = csv.reader(io_string, delimiter=",")
+        obs = list(read_data)
+        # Create Task
+        upload_task = ProcessUpload.delay(obs)
+        task_id = upload_task.task_id
+        print(f"Celery Task ID: {task_id}")
+        context["task_id"] = task_id
 
-                satellite, sat_created = Satellite.objects.update_or_create(
-                    sat_name=column[0],
-                    sat_number=column[1],
-                    constellation=column[24].upper(),
-                    defaults={
-                        "sat_name": column[0],
-                        "sat_number": column[1],
-                        "constellation": column[24].upper(),
-                        "date_added": timezone.now(),
-                    },
-                )
-
-                location, loc_created = Location.objects.update_or_create(
-                    obs_lat_deg=column[6],
-                    obs_long_deg=column[7],
-                    obs_alt_m=column[8],
-                    defaults={
-                        "obs_lat_deg": column[6],
-                        "obs_long_deg": column[7],
-                        "obs_alt_m": column[8],
-                        "date_added": timezone.now(),
-                    },
-                )
-
-                orc_id_list = [item.strip() for item in column[13].split(",")]
-                if column[4] == "" and column[5] == "":
-                    column[4] = None
-                    column[5] = None
-                observation, obs_created = Observation.objects.update_or_create(
-                    obs_time_utc=column[2],
-                    obs_time_uncert_sec=column[3],
-                    apparent_mag=column[4],
-                    apparent_mag_uncert=column[5],
-                    instrument=column[9],
-                    obs_mode=column[10].upper(),
-                    obs_filter=column[11],
-                    obs_email=column[12],
-                    obs_orc_id=orc_id_list,
-                    sat_ra_deg=column[14],
-                    sat_ra_uncert_deg=column[15],
-                    sat_dec_deg=column[16],
-                    sat_dec_uncert_deg=column[17],
-                    range_to_sat_km=column[18],
-                    range_to_sat_uncert_km=column[19],
-                    range_rate_sat_km_s=column[20],
-                    range_rate_sat_uncert_km_s=column[21],
-                    comments=column[22],
-                    data_archive_link=column[23],
-                    satellite_id=satellite,
-                    location_id=location,
-                    defaults={
-                        "obs_time_utc": column[2],
-                        "obs_time_uncert_sec": column[3],
-                        "apparent_mag": column[4],
-                        "apparent_mag_uncert": column[5],
-                        "instrument": column[9],
-                        "obs_mode": column[10].upper(),
-                        "obs_filter": column[11],
-                        "obs_email": column[12],
-                        "obs_orc_id": orc_id_list,
-                        "sat_ra_deg": column[14],
-                        "sat_ra_uncert_deg": column[15],
-                        "sat_dec_deg": column[16],
-                        "sat_dec_uncert_deg": column[17],
-                        "range_to_sat_km": column[18],
-                        "range_to_sat_uncert_km": column[19],
-                        "range_rate_sat_km_s": column[20],
-                        "range_rate_sat_uncert_km_s": column[21],
-                        "comments": column[22],
-                        "data_archive_link": column[23],
-                        "flag": None,
-                        "satellite_id": satellite,
-                        "location_id": location,
-                        "date_added": timezone.now(),
-                    },
-                )
-                logger.info(f"Uploaded observation {observation.id}")
-                obs_ids.append(observation.id)
-        except IndexError as e:
-            context["error"] = str(e) + " - check number of fields in csv file."
-            logger.exception(e)
-            return HttpResponse(template.render(context, request))
-        except ValueError as e:
-            context["error"] = e
-            logger.exception(e)
-            return HttpResponse(template.render(context, request))
-        except ValidationError as e:
-            if len(e.messages) > 1:
-                context["error"] = e.messages[1]
-                logger.exception(e)
-                return HttpResponse(template.render(context, request))
-            else:
-                message_text = ""
-                for key in e.message_dict.keys():
-                    message_text += f"{key}: {e.message_dict[key][0]}\n"
-                context["error"] = message_text
-                logger.exception(e)
-                return HttpResponse(template.render(context, request))
-        except Exception as e:
-            context["error"] = e
-            logger.exception(e)
-            return HttpResponse(template.render(context, request))
-
-        logger.info(f"Uploaded {len(obs_ids)} observations")
-        context["obs_id"] = obs_ids
+        # logger.info(f"Uploaded {len(obs_ids)} observations")
+        # context["obs_id"] = obs_ids
         context["date_added"] = datetime.datetime.now()
         return HttpResponse(template.render(context, request))
     # else:
@@ -260,8 +148,8 @@ def download_all(request):
 
 def download_obs_ids(request):
     if request.method == "POST":
-        observation_ids = request.POST.get("obs_ids").split(", ")
-        observation_ids = [int(i) for i in observation_ids]
+        observation_ids = request.POST.get("obs_ids").split(",")
+
         header = [
             "observation_id",
             "satellite_name",
@@ -284,11 +172,11 @@ def download_obs_ids(request):
         writer.writerow(header)
         writer.writerows(csv_lines)
 
-        zipfile_name = "satellite_observations_ids.zip"
+        zipfile_name = "satellite_observation_ids.zip"
         zipped_file = io.BytesIO()
 
         with zipfile.ZipFile(zipped_file, "w") as zip:
-            zip.writestr("submission.csv", output.getvalue())
+            zip.writestr("satellite_observation_ids.csv", output.getvalue())
         zipped_file.seek(0)
 
         response = HttpResponse(zipped_file, content_type="application/zip")
@@ -554,6 +442,22 @@ def about(request):
     template = loader.get_template("repository/about.html")
     context = {"": ""}
     return HttpResponse(template.render(context, request))
+
+
+def test_progress(request):
+    # If method is POST, process form data and start task
+    if request.method == "POST":
+        # Create Task
+        download_task = ProcessUpload.delay()
+        # Get ID
+        task_id = download_task.task_id
+        # Print Task ID
+        print(f"Celery Task ID: {task_id}")
+        # Return demo view with Task ID
+        return render(request, "repository/progress.html", {"task_id": task_id})
+    else:
+        # Return demo view
+        return render(request, "repository/progress.html", {})
 
 
 def get_stats():
