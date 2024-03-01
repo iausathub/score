@@ -6,7 +6,7 @@ from celery import Celery
 # Set the default Django settings module for the 'celery' program.
 os.environ.setdefault("DJANGO_SETTINGS_MODULE", "score.settings.development")
 
-app = Celery("score", broker="redis://redis:6379/0")
+app = Celery("score", broker="redis://localhost")
 
 # namespace='CELERY' means all celery-related configuration keys
 # should have a `CELERY_` prefix.

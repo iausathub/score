@@ -2,6 +2,11 @@
 
 {% block content %}
 <div class="container-fluid p-3">
+    <div class="bg-danger text-white text-center p-2">
+      <p class="fs-2">Alpha version</p>
+      <p class="fs-6">This is a test version of the database. Please do not upload data for long term storage
+        - this version will be deleted after the alpha.</p>
+    </div>
     <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr 380px;">
       <div>
         <div class="container p-3 mb-3">
@@ -80,7 +85,7 @@
               {% for obs, obs_json in latest_obs_list %}
 
               <a href="#obsModal" id="showObsModal" class="btn btn-custom" data-content="{{obs_json|escapejs|safe}}" data-bs-toggle="modal"  role="button">
-                {{ obs.date_added }} - {{ obs.satellite_id.sat_name}}</a>
+                {{ obs.date_added|date:"M. d, Y h:i A" }} - {{ obs.satellite_id.sat_name}}</a>
               {% endfor %}
 
             {% else %}

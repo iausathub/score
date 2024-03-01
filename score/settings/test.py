@@ -110,7 +110,8 @@ WSGI_APPLICATION = "score.wsgi.application"
 # SECURE_SSL_REDIRECT = True
 # SESSION_COOKIE_SECURE = True
 # CSRF_COOKIE_SECURE = True
-SECURE_BROWSER_XSS_FILTER = True
+# SECURE_BROWSER_XSS_FILTER = True
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 CSRF_TRUSTED_ORIGINS = [get_secret("score-allowed-hosts")["score-prod-alb-csrf"]]
 
@@ -203,6 +204,6 @@ LOGGING = {
 }
 
 # Celery settings
-BROKER_URL = "redis://redis:6379/0"
-CELERY_RESULT_BACKEND = "redis://redis:6379/0"
+BROKER_URL = "redis://localhost"
+CELERY_RESULT_BACKEND = "redis://localhost"
 CELERY_RESULT_SERIALIZER = "json"
