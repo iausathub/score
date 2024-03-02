@@ -1,16 +1,23 @@
 import re
-from datetime import datetime
 
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import URLValidator
 from django.db import models
+from django.utils import timezone
 
 
 class Satellite(models.Model):
+    CONSTELLATION_CHOICES = [
+        ("STARLINK", "Starlink"),
+        ("ONEWEB", "OneWeb"),
+        ("OTHER", "Other"),
+    ]
+
     sat_name = models.CharField(max_length=200)
     sat_number = models.IntegerField(default=0)
-    constellation = models.CharField(max_length=100, default="", null=True, blank=True)
-    date_added = models.DateTimeField("date added", default=datetime.now)
+    constellation = models.CharField(max_length=100, choices=CONSTELLATION_CHOICES)
+    date_added = models.DateTimeField("date added", default=timezone.now)
 
     def __str__(self):
         return self.sat_name
@@ -25,6 +32,11 @@ class Satellite(models.Model):
             raise ValidationError("Satellite number is required.")
         if len(str(self.sat_number)) > 5:
             raise ValidationError("NORAD ID must be 5 digits or less.")
+        if self.constellation not in ["STARLINK", "ONEWEB", "OTHER"]:
+            raise ValidationError(
+                "Constellation must be one of the following: STARLINK,\
+                                  ONEWEB, OTHER"
+            )
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -35,7 +47,7 @@ class Location(models.Model):
     obs_lat_deg = models.FloatField(default=0)
     obs_long_deg = models.FloatField(default=0)
     obs_alt_m = models.FloatField(default=0)
-    date_added = models.DateTimeField("date added", default=datetime.now)
+    date_added = models.DateTimeField("date added", default=timezone.now)
 
     def __str__(self):
         return (
@@ -79,13 +91,13 @@ class Observation(models.Model):
 
     obs_time_utc = models.DateTimeField("observation time")
     obs_time_uncert_sec = models.FloatField(default=0)
-    apparent_mag = models.FloatField(default=0)
-    apparent_mag_uncert = models.FloatField(default=0)
+    apparent_mag = models.FloatField(null=True, blank=True)
+    apparent_mag_uncert = models.FloatField(null=True, blank=True)
     instrument = models.CharField(max_length=200)
     obs_mode = models.CharField(max_length=200, choices=OBS_MODE_CHOICES)
     obs_filter = models.CharField(max_length=200)
     obs_email = models.TextField()
-    obs_orc_id = models.CharField(max_length=200)
+    obs_orc_id = ArrayField(models.CharField(max_length=19), default=list)
     sat_ra_deg = models.FloatField(default=0, null=True, blank=True)
     sat_ra_uncert_deg = models.FloatField(default=0, null=True, blank=True)
     sat_dec_deg = models.FloatField(default=0, null=True, blank=True)
@@ -99,7 +111,7 @@ class Observation(models.Model):
     flag = models.CharField(max_length=100, null=True, blank=True)
     satellite_id = models.ForeignKey(Satellite, on_delete=models.CASCADE)
     location_id = models.ForeignKey(Location, on_delete=models.CASCADE)
-    date_added = models.DateTimeField("date added", default=datetime.now)
+    date_added = models.DateTimeField("date added", default=timezone.now)
 
     def __str__(self):
         return (
@@ -122,11 +134,17 @@ class Observation(models.Model):
             raise ValidationError("Observation time uncertainty is required.")
         if self.obs_time_uncert_sec < 0:
             raise ValidationError("Observation time uncertainty must be positive.")
-        if self.apparent_mag is None:
-            raise ValidationError("Apparent magnitude is required.")
-        if self.apparent_mag_uncert is None:
-            raise ValidationError("Apparent magnitude uncertainty is required.")
-        if self.apparent_mag_uncert < 0:
+        if self.apparent_mag is not None and self.apparent_mag_uncert is None:
+            raise ValidationError(
+                "Apparent magnitude uncertainty is required if \
+                                  apparent magnitude is provided."
+            )
+        if self.apparent_mag is None and self.apparent_mag_uncert is not None:
+            raise ValidationError(
+                "Apparent magnitude must be provided if \
+                                  uncertainty is provided."
+            )
+        if self.apparent_mag_uncert is not None and self.apparent_mag_uncert < 0:
             raise ValidationError("Apparent magnitude uncertainty must be positive.")
         if not self.obs_mode:
             raise ValidationError("Observation mode is required.")
@@ -147,8 +165,11 @@ class Observation(models.Model):
             raise ValidationError("Instrument is required.")
         if not self.obs_orc_id:
             raise ValidationError("Observer ORCID is required.")
-        if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", self.obs_orc_id):
-            raise ValidationError("Observer ORCID not correctly formatted.")
+
+        for id in self.obs_orc_id:
+            if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", id):
+                raise ValidationError("Observer ORCID not correctly formatted.")
+
         if self.sat_ra_deg and (self.sat_ra_deg < 0 or self.sat_ra_deg > 360):
             raise ValidationError("Right ascension must be between 0 and 360 degrees.")
         if self.sat_ra_uncert_deg and (self.sat_ra_uncert_deg < 0):

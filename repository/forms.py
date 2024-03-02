@@ -3,7 +3,7 @@ import re
 from django import forms
 from django.forms import Form
 
-from repository.models import Observation
+from repository.models import Observation, Satellite
 
 
 class UploadObservationFileForm(forms.Form):
@@ -12,8 +12,10 @@ class UploadObservationFileForm(forms.Form):
 
 
 def validate_orcid(value):
-    if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", value):
-        raise forms.ValidationError("Invalid ORCID.")
+    orc_id_list = value.split(",")
+    for orc_id in orc_id_list:
+        if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", orc_id.strip()):
+            raise forms.ValidationError("Invalid ORCID.")
 
 
 def validate_date(value):
@@ -104,13 +106,18 @@ class SingleObservationForm(Form):
         label="Observation Date/Time Uncertainty (sec)",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
+    not_detected = forms.BooleanField(
+        required=False,
+        label="Not Detected",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
     apparent_mag = forms.FloatField(
-        required=True,
+        required=False,
         label="Apparent Magnitude",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
     apparent_mag_uncert = forms.FloatField(
-        required=True,
+        required=False,
         label="Apparent Magnitude Uncertainty",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
@@ -152,11 +159,11 @@ class SingleObservationForm(Form):
         label="Observer Email",
         widget=forms.EmailInput(attrs={"class": "form-control"}),
     )
-    constellation = forms.CharField(
-        max_length=200,
-        required=False,
+    constellation = forms.ChoiceField(
+        choices=Satellite.CONSTELLATION_CHOICES,
+        required=True,
         label="Constellation",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.Select(attrs={"class": "form-select"}),
     )
     observer_orcid = forms.CharField(
         required=True,

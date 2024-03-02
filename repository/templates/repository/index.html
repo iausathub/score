@@ -2,6 +2,11 @@
 
 {% block content %}
 <div class="container-fluid p-3">
+    <div class="bg-danger text-white text-center p-2">
+      <p class="fs-2">Alpha version</p>
+      <p class="fs-6">This is a test version of the database. Please do not upload data for long term storage
+        - this version will be deleted after the alpha.</p>
+    </div>
     <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr 380px;">
       <div>
         <div class="container p-3 mb-3">
@@ -29,38 +34,45 @@
                   <div class="col">
                     <input type="submit" class="btn btn-primary" value="Upload"
                             onclick="this.form.submit(); this.disabled=true;
-                            document.getElementById('loading_spinner').hidden = false;
                             return true;" name="submit_obs">
                   </div>
-                  <div class="spinner-border" id="loading_spinner" role="status" hidden>
-                    <span class="visually-hidden" >Loading...</span>
-                  </div>
+
                 </div>
+
             </form>
+            <div class="text-center">
+              <div id="progress-bar-message">
+              </div>
+            </div>
+            <div class='progress-wrapper'>
+              <div id='progress-bar' class='progress-bar progress-bar-striped' role='progressbar'>&nbsp;</div>
+            </div>
+            <div id="celery-result"></div>
 
           {% if error %}
             <p class="text-danger">Error: {{ error }}</a></p>
           {% endif %}
 
-          {% if obs_id %}
+
           <div class="container-md bg-success border border-success rounded-3 mt-3 pt-2 "
-            style="--bs-bg-opacity: .2;">
+            style="--bs-bg-opacity: .2;"
+            id="success_message" hidden>
             <span class="fw-bold">Upload successful!</span>
 
-            <p>{{ obs_id|length }} observation(s) added to the database at {{ date_added }}.</p>
+            <p id="obs_added_text"></p>
             <p class="mb-3">Confirmation email with observation ID(s) sent to: test@email.com</p>
             <p>Observation ID(s) with corresponding satellite name and observation date/time
               can also be downloaded as a .txt file:</p>
             <form action="/download-ids" method="post">
               {% csrf_token %}
-              <input type="hidden" name="obs_ids" value="{{ obs_id|join:', ' }}">
+              <input type="hidden" name="obs_ids" id="download_obs_ids">
               <button class="btn btn-primary btn-sm mb-3" type="submit"
                aria-controls="downloadObsIds">
                 Download file
               </button>
             </form>
           </div>
-          {% endif %}
+
 
         </div>
       </div>
@@ -73,7 +85,7 @@
               {% for obs, obs_json in latest_obs_list %}
 
               <a href="#obsModal" id="showObsModal" class="btn btn-custom" data-content="{{obs_json|escapejs|safe}}" data-bs-toggle="modal"  role="button">
-                {{ obs.date_added }} - {{ obs.satellite_id.sat_name}}</a>
+                {{ obs.date_added|date:"M. d, Y h:i A" }} - {{ obs.satellite_id.sat_name}}</a>
               {% endfor %}
 
             {% else %}
@@ -111,5 +123,4 @@
     </div>
   </div>
 </div>
-
 {% endblock %}

@@ -18,7 +18,7 @@ class TestViews(TestCase):
         self.satellite = Satellite.objects.create(
             sat_name="STARLINK-123",
             sat_number=12345,
-            constellation="starlink",
+            constellation="STARLINK",
             date_added=timezone.now(),
         )
         self.observation = Observation.objects.create(
@@ -33,7 +33,7 @@ class TestViews(TestCase):
             obs_mode="VISUAL",
             obs_filter="CLEAR",
             instrument="none",
-            obs_orc_id="0123-4567-8910-1112",
+            obs_orc_id=["0123-4567-8910-1112"],
         )
 
     def test_index(self):
@@ -57,7 +57,7 @@ class TestViews(TestCase):
         self.assertContains(response, "STARLINK-123")
         self.assertContains(response, "VISUAL")
         self.assertContains(response, "5.2")
-        self.assertContains(response, self.obs_date.strftime("%b. %e, %Y"))
+        self.assertContains(response, self.obs_date.strftime("%b. %d, %Y"))
 
     def test_download_all(self):
         response = self.client.get("/download-all")

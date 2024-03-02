@@ -69,9 +69,14 @@ jobs:
         # push it to ECR so that it can
         # be deployed to ECS.
 
-        docker build -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG --build-arg="SETTINGS=score.settings.test" .
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG
-        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+        export SETTINGS=score.settings.test
+        docker-compose build
+        docker tag score-web $ECR_REGISTRY/$ECR_REPOSITORY:web
+        docker tag score-celery $ECR_REGISTRY/$ECR_REPOSITORY:celery
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:web
+        docker push $ECR_REGISTRY/$ECR_REPOSITORY:celery
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:web" >> $GITHUB_OUTPUT
+        echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:celery" >> $GITHUB_OUTPUT
 
 
     - name: Force service deployment

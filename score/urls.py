@@ -1,7 +1,9 @@
+from django.conf import settings
 from django.contrib import admin
 from django.urls import include, path
 
 urlpatterns = [
     path("", include("repository.urls")),
-    path("admin/", admin.site.urls),
+    path(settings.SECRET_ADMIN_TOKEN + "/admin/", admin.site.urls),
+    path("celery-progress/", include("celery_progress.urls")),
 ]

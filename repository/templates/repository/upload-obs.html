@@ -75,7 +75,7 @@
                 </div>
                 <div class="col">
                     <div class=" pb-4">
-                        {{ form.constellation.label_tag}}
+                        {{ form.constellation.label_tag}} <span class="text-danger">*</span>
                         {{ form.constellation }}
                     </div>
                 </div>
@@ -95,6 +95,15 @@
                         <div class="text-danger">
                             {{ form.apparent_mag_uncert.errors }}
                         </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold"></div>
+                <div class="col">
+                    <div class="pb-4">
+                        {{ form.not_detected }}
+                        {{ form.not_detected.label}}
                     </div>
                 </div>
             </div>

@@ -49,6 +49,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 SECRET_KEY = get_secret("score-secret-key")["secret-key"]
+SECRET_HEALTH_CHECK_TOKEN = get_secret("score-secret-key")["health-check-token"]
+SECRET_ADMIN_TOKEN = get_secret("score-secret-key")["admin-token"]
 
 DEBUG = False
 DEBUG_PROPAGATE_EXCEPTIONS = True
@@ -67,6 +69,12 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "compressor",
     "rest_framework",
+    "health_check",
+    "health_check.db",
+    "health_check.storage",
+    "health_check.contrib.migrations",
+    "celery",
+    "celery_progress",
 ]
 
 MIDDLEWARE = [
@@ -102,9 +110,10 @@ WSGI_APPLICATION = "score.wsgi.application"
 # SECURE_SSL_REDIRECT = True
 # SESSION_COOKIE_SECURE = True
 # CSRF_COOKIE_SECURE = True
-SECURE_BROWSER_XSS_FILTER = True
+SECURE_CROSS_ORIGIN_OPENER_POLICY = None
 
 CSRF_TRUSTED_ORIGINS = [get_secret("score-allowed-hosts")["score-prod-alb-csrf"]]
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -193,3 +202,8 @@ LOGGING = {
         },
     },
 }
+
+# Celery settings
+BROKER_URL = "redis://localhost"
+CELERY_RESULT_BACKEND = "redis://localhost"
+CELERY_RESULT_SERIALIZER = "json"
