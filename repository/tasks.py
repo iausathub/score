@@ -41,11 +41,9 @@ def ProcessUpload(self, data):  # noqa: N802
             satellite, sat_created = Satellite.objects.update_or_create(
                 sat_name=column[0],
                 sat_number=column[1],
-                constellation=column[24].upper(),
                 defaults={
                     "sat_name": column[0],
                     "sat_number": column[1],
-                    "constellation": column[24].upper(),
                     "date_added": timezone.now(),
                 },
             )
@@ -166,6 +164,7 @@ def validate_position(
         "longitude": longitude,
         "elevation": altitude,
         "julian_date": obs_time.jd,
+        "min_altitude": -5,
     }
     r = requests.get(url, params=params, timeout=10)
     if r.status_code != 200 or not r.json():

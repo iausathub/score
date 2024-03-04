@@ -18,7 +18,6 @@ class TestViews(TestCase):
         self.satellite = Satellite.objects.create(
             sat_name="STARLINK-123",
             sat_number=12345,
-            constellation="STARLINK",
             date_added=timezone.now(),
         )
         self.observation = Observation.objects.create(

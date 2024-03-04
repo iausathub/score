@@ -124,7 +124,6 @@ def download_all(request):
                 observation.range_rate_sat_uncert_km_s,
                 observation.comments,
                 observation.data_archive_link,
-                observation.satellite_id.constellation,
             ]
         )
 
@@ -195,7 +194,6 @@ def search(request):
             obs_mode = form.cleaned_data["obs_mode"]
             start_date_range = form.cleaned_data["start_date_range"]
             end_date_range = form.cleaned_data["end_date_range"]
-            constellation = form.cleaned_data["constellation"]
             observation_id = form.cleaned_data["observation_id"]
             observer_orcid = form.cleaned_data["observer_orcid"]
 
@@ -213,10 +211,6 @@ def search(request):
                 observations = observations.filter(obs_time_utc__gte=start_date_range)
             if end_date_range:
                 observations = observations.filter(obs_time_utc__lte=end_date_range)
-            if constellation:
-                observations = observations.filter(
-                    satellite_id__constellation__icontains=constellation
-                )
             if observation_id:
                 observations = observations.filter(id=observation_id)
             if observer_orcid:
@@ -287,7 +281,6 @@ def download_results(request):
                     observation.range_rate_sat_uncert_km_s,
                     observation.comments,
                     observation.data_archive_link,
-                    observation.satellite_id.constellation,
                 ]
             )
 
@@ -329,7 +322,6 @@ def upload(request):
             instrument = form.cleaned_data["instrument"]
             filter = form.cleaned_data["filter"]
             observer_email = form.cleaned_data["observer_email"]
-            constellation = form.cleaned_data["constellation"]
             observer_orcid = orc_id_list
             obs_lat_deg = form.cleaned_data["observer_latitude_deg"]
             obs_long_deg = form.cleaned_data["observer_longitude_deg"]
@@ -348,11 +340,9 @@ def upload(request):
             satellite, sat_created = Satellite.objects.update_or_create(
                 sat_name=sat_name,
                 sat_number=sat_number,
-                constellation=constellation,
                 defaults={
                     "sat_name": sat_name,
                     "sat_number": sat_number,
-                    "constellation": constellation,
                     "date_added": timezone.now(),
                 },
             )
@@ -517,7 +507,6 @@ def get_csv_header():
         "range_rate_of_satellite_uncertainty_km_per_sec",
         "comments",
         "data_archive_link",
-        "constellation",
     ]
     return header
 

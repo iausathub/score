@@ -16,7 +16,6 @@ class SingleObservationFormTest(TestCase):
             {
                 "sat_name": ["This field is required."],
                 "sat_number": ["This field is required."],
-                "constellation": ["This field is required."],
                 "obs_date": ["This field is required."],
                 "obs_date_uncert": ["This field is required."],
                 "instrument": ["This field is required."],
@@ -35,7 +34,6 @@ class SingleObservationFormTest(TestCase):
             {
                 "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "constellation": "STARLINK",
                 "obs_date": "2024-01-02T23:59:59.123Z",
                 "obs_date_uncert": 0.01,
                 "apparent_mag": 8.1,
@@ -57,7 +55,6 @@ class SingleObservationFormTest(TestCase):
             {
                 "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "constellation": "STARLINK",
                 "obs_date": "2024-01-02T23:59:59.123Z",
                 "obs_date_uncert": 0.01,
                 "apparent_mag": 8.1,
@@ -90,7 +87,6 @@ class SingleObservationFormTest(TestCase):
             {
                 "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "constellation": "STARLINK",
                 "obs_date": "2024-01-02",
                 "obs_date_uncert": 0.01,
                 "apparent_mag": 8.1,
@@ -118,7 +114,6 @@ class SingleObservationFormTest(TestCase):
             {
                 "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "constellation": "STARLINK",
                 "obs_date": "2024-01-02T23:59:59.123Z",
                 "obs_date_uncert": 0.01,
                 "apparent_mag": 8.1,
@@ -149,7 +144,6 @@ class SingleObservationFormTest(TestCase):
             {
                 "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "constellation": "STARLINK",
                 "obs_date": "2024-01-02T23:59:59.123Z",
                 "obs_date_uncert": 0.01,
                 "apparent_mag": 8.1,
@@ -183,7 +177,6 @@ class SingleObservationFormTest(TestCase):
                 {
                     "sat_name": "STARLINK-123",
                     "sat_number": 12345,
-                    "constellation": "STARLINK",
                     "obs_date": "2024-01-02T23:59:59.123Z",
                     "obs_date_uncert": 0.01,
                     "apparent_mag_uncert": 0.01,
