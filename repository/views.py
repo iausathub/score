@@ -7,6 +7,7 @@ from collections import namedtuple
 
 import requests
 from astropy.time import Time
+from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponse
 from django.shortcuts import render
 from django.template import loader
@@ -51,11 +52,9 @@ def index(request):
         # Create Task
         upload_task = ProcessUpload.delay(obs)
         task_id = upload_task.task_id
-        print(f"Celery Task ID: {task_id}")
+
         context["task_id"] = task_id
 
-        # logger.info(f"Uploaded {len(obs_ids)} observations")
-        # context["obs_id"] = obs_ids
         context["date_added"] = datetime.datetime.now()
         return HttpResponse(template.render(context, request))
     # else:
@@ -409,6 +408,27 @@ def upload(request):
             )
 
             obs_id = observation.id
+            msg = EmailMultiAlternatives(
+                "SCORE Observation Upload Confirmation",
+                "text body",
+                "michelle.dadighat@noirlab.edu",
+                [observer_email],
+            )
+            email_body = "<html><h1>SCORE Observation Upload Confirmation</h1>\
+                <p>Thank you for submitting your observation.  Your observation \
+                has been successfully uploaded to the SCORE database. \
+                The observation ID is: </p></br>"
+            email_body += (
+                str(obs_id)
+                + " - "
+                + observation.satellite_id.sat_name
+                + " - "
+                + str(observation.obs_time_utc)
+            )
+            email_body += "</html>"
+            msg.attach_alternative(email_body, "text/html")
+            msg.send()
+
             # confirm observation uploaded
             return render(
                 request,

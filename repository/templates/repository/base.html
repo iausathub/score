@@ -195,6 +195,8 @@
     <script type="text/javascript">
       // Progress Bar (JQuery)
       function customResult(resultElement, result) {
+        document.getElementById('upload_btn').disabled = false;
+        document.getElementById('upload_ctrl').disabled = false;
         if(result.status == "success"){
           var date = new Date(result.date_added);
           var formattedDate = date.toUTCString().replace('GMT', 'UTC');
@@ -205,8 +207,8 @@
           //remove progress bar
           document.getElementById('progress-bar').hidden = true;
           document.getElementById('progress-bar-message').hidden = true;
-
           document.getElementById('download_obs_ids').value = result.obs_ids;
+          document.getElementById('email').innerText = result.email;
        }
        else{
         $( resultElement ).append(

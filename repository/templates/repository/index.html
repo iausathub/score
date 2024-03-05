@@ -28,13 +28,23 @@
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="row">
-                  <input type="file" class="form-control " name="uploaded_file" accept=".csv" required="required">
+                  {% if task_id %}
+                  <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv" required="required" disabled="true">
+                  {% else %}
+                  <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv" required="required">
+                  {% endif %}
                 </div>
                 <div class="row d-inline-flex flex-row pt-3 align-items-center ">
                   <div class="col">
+                    {% if task_id %}
+                    <input type="submit" class="btn btn-primary" value="Upload"
+                            name="submit_obs" id="upload_btn" disabled="true">
+                    {% else %}
                     <input type="submit" class="btn btn-primary" value="Upload"
                             onclick="this.form.submit(); this.disabled=true;
-                            return true;" name="submit_obs">
+                            return true;" name="submit_obs" id="upload_btn">
+                    {% endif %}
+
                   </div>
 
                 </div>
@@ -60,7 +70,7 @@
             <span class="fw-bold">Upload successful!</span>
 
             <p id="obs_added_text"></p>
-            <p class="mb-3">Confirmation email with observation ID(s) sent to: test@email.com</p>
+            <p class="mb-3">Confirmation email with observation ID(s) sent to: <span id="email"></span></p>
             <p>Observation ID(s) with corresponding satellite name and observation date/time
               can also be downloaded as a .txt file:</p>
             <form action="/download-ids" method="post">

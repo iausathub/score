@@ -2,6 +2,7 @@ import requests
 from astropy.time import Time
 from celery import shared_task
 from celery_progress.backend import ProgressRecorder
+from django.core.mail import EmailMultiAlternatives
 from django.forms import ValidationError
 from django.utils import timezone
 
@@ -22,7 +23,7 @@ def ProcessUpload(self, data):  # noqa: N802
     # data = list(readCSV)
     observation_count = len(data)
     obs_num = 0
-
+    confirmation_email = False
     try:
         for column in data:
             if "SATHUB-SATELLITE" in column[0]:
@@ -38,7 +39,7 @@ def ProcessUpload(self, data):  # noqa: N802
             if is_valid is not True:
                 raise UploadError(is_valid)
 
-            satellite, sat_created = Satellite.objects.update_or_create(
+            satellite, sat_created = Satellite.objects.get_or_create(
                 sat_name=column[0],
                 sat_number=column[1],
                 defaults={
@@ -47,7 +48,7 @@ def ProcessUpload(self, data):  # noqa: N802
                     "date_added": timezone.now(),
                 },
             )
-            location, loc_created = Location.objects.update_or_create(
+            location, loc_created = Location.objects.get_or_create(
                 obs_lat_deg=column[6],
                 obs_long_deg=column[7],
                 obs_alt_m=column[8],
@@ -62,7 +63,7 @@ def ProcessUpload(self, data):  # noqa: N802
             if column[4] == "" and column[5] == "":
                 column[4] = None
                 column[5] = None
-            observation, obs_created = Observation.objects.update_or_create(
+            observation, obs_created = Observation.objects.get_or_create(
                 obs_time_utc=column[2],
                 obs_time_uncert_sec=column[3],
                 apparent_mag=column[4],
@@ -112,6 +113,8 @@ def ProcessUpload(self, data):  # noqa: N802
             )
             # logger.info(f"Uploaded observation {observation.id}")
             obs_ids.append(observation.id)
+            if not confirmation_email:
+                confirmation_email = column[12]
             progress_recorder.set_progress(
                 obs_num + 1, observation_count, description=""
             )
@@ -140,8 +143,38 @@ def ProcessUpload(self, data):  # noqa: N802
         # logger.exception(e)
 
     print("End")
+
+    msg = EmailMultiAlternatives(
+        "SCORE Observation Upload Confirmation",
+        "text body",
+        "michelle.dadighat@noirlab.edu",
+        [confirmation_email],
+    )
+    email_body = "<html><h1>SCORE Observation Upload Confirmation</h1>\
+                <p>Thank you for submitting your observations.  Your observations \
+                have been successfully uploaded to the SCORE database. \
+                The observation IDs are: </p></br>"
+    for obs_id in obs_ids:
+        observation = Observation.objects.get(id=obs_id)
+        email_body += (
+            str(obs_id)
+            + " - "
+            + observation.satellite_id.sat_name
+            + " - "
+            + str(observation.obs_time_utc)
+            + "<br>"
+        )
+    email_body += "</html>"
+    msg.attach_alternative(email_body, "text/html")
+    msg.send()
+
     current_date = timezone.now().isoformat()
-    return {"status": "success", "obs_ids": obs_ids, "date_added": current_date}
+    return {
+        "status": "success",
+        "obs_ids": obs_ids,
+        "date_added": current_date,
+        "email": confirmation_email,
+    }
 
 
 def validate_position(

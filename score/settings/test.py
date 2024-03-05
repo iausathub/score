@@ -75,6 +75,7 @@ INSTALLED_APPS = [
     "health_check.contrib.migrations",
     "celery",
     "celery_progress",
+    "anymail",
 ]
 
 MIDDLEWARE = [
@@ -207,3 +208,5 @@ LOGGING = {
 BROKER_URL = "redis://localhost"
 CELERY_RESULT_BACKEND = "redis://localhost"
 CELERY_RESULT_SERIALIZER = "json"
+
+EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
