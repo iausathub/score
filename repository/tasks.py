@@ -1,12 +1,10 @@
-import requests
-from astropy.time import Time
 from celery import shared_task
 from celery_progress.backend import ProgressRecorder
-from django.core.mail import EmailMultiAlternatives
 from django.forms import ValidationError
 from django.utils import timezone
 
 from repository.models import Location, Observation, Satellite
+from repository.utils import send_confirmation_email
 
 
 class UploadError(Exception):
@@ -31,7 +29,6 @@ def ProcessUpload(self, data):  # noqa: N802
                     "File contains sample data. Please upload a valid file."
                 )
 
-                # fmt: on
             is_valid = True
             # validate_position(
             #    column[0], column[1], column[2], column[6], column[7], column[8]
@@ -144,29 +141,7 @@ def ProcessUpload(self, data):  # noqa: N802
 
     print("End")
 
-    msg = EmailMultiAlternatives(
-        "SCORE Observation Upload Confirmation",
-        "text body",
-        "michelle.dadighat@noirlab.edu",
-        [confirmation_email],
-    )
-    email_body = "<html><h1>SCORE Observation Upload Confirmation</h1>\
-                <p>Thank you for submitting your observations.  Your observations \
-                have been successfully uploaded to the SCORE database. \
-                The observation IDs are: </p></br>"
-    for obs_id in obs_ids:
-        observation = Observation.objects.get(id=obs_id)
-        email_body += (
-            str(obs_id)
-            + " - "
-            + observation.satellite_id.sat_name
-            + " - "
-            + str(observation.obs_time_utc)
-            + "<br>"
-        )
-    email_body += "</html>"
-    msg.attach_alternative(email_body, "text/html")
-    msg.send()
+    send_confirmation_email(obs_ids, confirmation_email)
 
     current_date = timezone.now().isoformat()
     return {
@@ -175,35 +150,3 @@ def ProcessUpload(self, data):  # noqa: N802
         "date_added": current_date,
         "email": confirmation_email,
     }
-
-
-def validate_position(
-    satellite_name, sat_number, observation_time, latitude, longitude, altitude
-):
-    if (
-        not satellite_name
-        or not sat_number
-        or not observation_time
-        or not latitude
-        or not longitude
-        or not altitude
-    ):
-        return False
-    obs_time = Time(observation_time, format="isot", scale="utc")
-    url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
-    params = {
-        "catalog": sat_number,
-        "latitude": latitude,
-        "longitude": longitude,
-        "elevation": altitude,
-        "julian_date": obs_time.jd,
-        "min_altitude": -5,
-    }
-    r = requests.get(url, params=params, timeout=10)
-    if r.status_code != 200 or not r.json():
-        return "Satellite not visible at this time and location"
-    if r.json()[0]["NAME"] != satellite_name:
-        return "Satellite name and number do not match"
-    if float(r.json()[0]["ALTITUDE-DEG"]) < -5:
-        return "Satellite below horizon"
-    return True
