@@ -1,3 +1,5 @@
+from unittest.mock import patch
+
 from django.forms import ValidationError
 from django.test import Client, TestCase
 
@@ -138,7 +140,10 @@ class SingleObservationFormTest(TestCase):
             },
         )
 
-    def test_invalid_fields(self):
+    @patch("requests.get")
+    def test_invalid_fields(self, mock_get):
+        mock_get.return_value.status_code = 200
+        mock_get.return_value.json.return_value = []
         response = self.client.post(
             "/upload",
             {
@@ -170,7 +175,8 @@ class SingleObservationFormTest(TestCase):
             },
         )
 
-    def test_abs_mag_uncert(self):
+    @patch("repository.utils.validate_position", return_value=True)
+    def test_abs_mag_uncert(self, mock_validate_position):
         with self.assertRaises(ValidationError):
             response = self.client.post(  # noqa: F841
                 "/upload",
