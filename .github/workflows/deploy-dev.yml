@@ -71,10 +71,10 @@ jobs:
 
         export SETTINGS=score.settings.test
         docker-compose build
-        docker tag score-web $ECR_REGISTRY/$ECR_REPOSITORY:web
-        docker tag score-celery $ECR_REGISTRY/$ECR_REPOSITORY:celery
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:web
-        docker push $ECR_REGISTRY/$ECR_REPOSITORY:celery
+        docker tag score_web $ECR_REGISTRY/score:web
+        docker tag score_celery $ECR_REGISTRY/score:celery
+        docker push $ECR_REGISTRY/score:web
+        docker push $ECR_REGISTRY/score:celery
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:web" >> $GITHUB_OUTPUT
         echo "image=$ECR_REGISTRY/$ECR_REPOSITORY:celery" >> $GITHUB_OUTPUT
 
