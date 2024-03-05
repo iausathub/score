@@ -190,6 +190,10 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
         },
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "django.utils.log.AdminEmailHandler",
+        },
     },
     "root": {
         "handlers": ["console"],
@@ -197,7 +201,7 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["console"],
+            "handlers": ["console, mail_admins"],
             "level": "DEBUG",
             "propagate": False,
         },
@@ -210,3 +214,6 @@ CELERY_RESULT_BACKEND = "redis://localhost"
 CELERY_RESULT_SERIALIZER = "json"
 
 EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
+
+SERVER_EMAIL = get_secret("score-settings")["server-email"]
+ADMINS = get_secret("score-settings")["admins"]

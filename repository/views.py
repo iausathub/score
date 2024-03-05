@@ -13,9 +13,10 @@ from rest_framework.renderers import JSONRenderer
 from repository.forms import SearchForm, SingleObservationForm
 from repository.tasks import ProcessUpload
 from repository.utils import (
-    download_csv,
+    create_csv,
     get_stats,
     send_confirmation_email,
+    validate_position,
 )
 
 from .models import Location, Observation, Satellite
@@ -39,17 +40,23 @@ def index(request):
         context["error"] = "Please select a file to upload."
         return HttpResponse(template.render(context, request))
 
+    # Handle file upload
     if request.method == "POST" and request.FILES["uploaded_file"]:
         uploaded_file = request.FILES["uploaded_file"]
-        # parse csv file into models
+
         data_set = uploaded_file.read().decode("UTF-8")
         io_string = io.StringIO(data_set)
-        # check if first row is header or not
 
-        next(io_string)  # Skip the header
+        # Skip the header if it exists
+        first_line = next(io_string)
+        if first_line.startswith("satellite_name"):
+            pass
+        else:
+            io_string.seek(0)
 
         read_data = csv.reader(io_string, delimiter=",")
         obs = list(read_data)
+
         # Create Task
         upload_task = ProcessUpload.delay(obs)
         task_id = upload_task.task_id
@@ -58,8 +65,6 @@ def index(request):
 
         context["date_added"] = datetime.datetime.now()
         return HttpResponse(template.render(context, request))
-    # else:
-    #     form = UploadObservationFileForm()
 
     context = {
         "filename": "",
@@ -78,7 +83,10 @@ def data_format(request):
 
 
 def view_data(request):
+    # Show the 500 most recent observations
     observation_list = Observation.objects.order_by("-date_added")[:500]
+
+    # JSON is also needed for the modal view to show the observation details
     observation_list_json = [
         (JSONRenderer().render(ObservationSerializer(observation).data))
         for observation in observation_list
@@ -92,7 +100,7 @@ def view_data(request):
 
 
 def download_all(request):
-    zipped_file, zipfile_name = download_csv(False)
+    zipped_file, zipfile_name = create_csv(False)
     response = HttpResponse(zipped_file, content_type="application/zip")
 
     response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
@@ -100,6 +108,8 @@ def download_all(request):
 
 
 def download_obs_ids(request):
+    # Provide the observation IDs for the observations that were just uploaded
+    # with the satellite name and date observed for context (CSV)
     if request.method == "POST":
         observation_ids = request.POST.get("obs_ids").split(",")
 
@@ -170,6 +180,7 @@ def search(request):
             if observer_orcid:
                 observations = observations.filter(obs_orc_id__icontains=observer_orcid)
 
+            # JSON is also needed for the modal view to show the observation details
             observation_list_json = [
                 (JSONRenderer().render(ObservationSerializer(observation).data))
                 for observation in observations
@@ -206,7 +217,7 @@ def download_results(request):
 
         observations = Observation.objects.filter(id__in=observation_ids)
 
-        zipped_file, zipfile_name = download_csv(observations)
+        zipped_file, zipfile_name = create_csv(observations)
         response = HttpResponse(zipped_file, content_type="application/zip")
 
         response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
@@ -248,7 +259,17 @@ def upload(request):
             comments = form.cleaned_data["comments"]
             data_archive_link = form.cleaned_data["data_archive_link"]
 
-            satellite, sat_created = Satellite.objects.update_or_create(
+            is_valid = validate_position(
+                sat_name, sat_number, obs_date, obs_lat_deg, obs_long_deg, obs_alt_m
+            )
+            if is_valid is not True:
+                return render(
+                    request,
+                    "repository/upload-obs.html",
+                    {"form": form, "error": is_valid},
+                )
+
+            satellite, sat_created = Satellite.objects.get_or_create(
                 sat_name=sat_name,
                 sat_number=sat_number,
                 defaults={
@@ -258,7 +279,7 @@ def upload(request):
                 },
             )
 
-            location, loc_created = Location.objects.update_or_create(
+            location, loc_created = Location.objects.get_or_create(
                 obs_lat_deg=obs_lat_deg,
                 obs_long_deg=obs_long_deg,
                 obs_alt_m=obs_alt_m,
@@ -270,7 +291,7 @@ def upload(request):
                 },
             )
 
-            observation, obs_created = Observation.objects.update_or_create(
+            observation, obs_created = Observation.objects.get_or_create(
                 obs_time_utc=obs_date,
                 obs_time_uncert_sec=obs_date_uncert,
                 apparent_mag=apparent_mag,
@@ -343,5 +364,11 @@ def upload(request):
 
 def about(request):
     template = loader.get_template("repository/about.html")
+    context = {"": ""}
+    return HttpResponse(template.render(context, request))
+
+
+def download_data(request):
+    template = loader.get_template("repository/download-data.html")
     context = {"": ""}
     return HttpResponse(template.render(context, request))

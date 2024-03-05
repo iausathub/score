@@ -132,7 +132,7 @@ def get_csv_header():
     return header
 
 
-def download_csv(observation_list):
+def create_csv(observation_list):
     all_observations = False
     if not observation_list:
         observation_list = Observation.objects.all()

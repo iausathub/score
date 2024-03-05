@@ -4,7 +4,7 @@ from django.forms import ValidationError
 from django.utils import timezone
 
 from repository.models import Location, Observation, Satellite
-from repository.utils import send_confirmation_email
+from repository.utils import send_confirmation_email, validate_position
 
 
 class UploadError(Exception):
@@ -15,24 +15,24 @@ class UploadError(Exception):
 def ProcessUpload(self, data):  # noqa: N802
     print("Task started")
     progress_recorder = ProgressRecorder(self)
-    print("Start")
+
     obs_ids = []
-    # readCSV = csv.reader(io_string, delimiter=',')
-    # data = list(readCSV)
+
     observation_count = len(data)
     obs_num = 0
     confirmation_email = False
     try:
         for column in data:
+            # Check for data from the sample CSV file
             if "SATHUB-SATELLITE" in column[0]:
                 raise UploadError(
                     "File contains sample data. Please upload a valid file."
                 )
 
-            is_valid = True
-            # validate_position(
-            #    column[0], column[1], column[2], column[6], column[7], column[8]
-            # )
+            # Check if satellite is above the horizon
+            is_valid = validate_position(
+                column[0], column[1], column[2], column[6], column[7], column[8]
+            )
             if is_valid is not True:
                 raise UploadError(is_valid)
 
