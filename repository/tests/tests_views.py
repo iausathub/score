@@ -18,7 +18,6 @@ class TestViews(TestCase):
         self.satellite = Satellite.objects.create(
             sat_name="STARLINK-123",
             sat_number=12345,
-            constellation="STARLINK",
             date_added=timezone.now(),
         )
         self.observation = Observation.objects.create(
@@ -68,3 +67,8 @@ class TestViews(TestCase):
         response = self.client.get("/search")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/search.html")
+
+    def test_upload(self):
+        response = self.client.get("/upload")
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "repository/upload-obs.html")
