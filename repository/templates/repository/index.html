@@ -2,24 +2,12 @@
 
 {% block content %}
 <div class="container-fluid p-3">
-    <div class="bg-danger text-white text-center p-2">
-      <p class="fs-2">Alpha version</p>
-      <p class="fs-6">This is a test version of the database. Please do not upload data for long term storage
-        - this version will be deleted after the alpha.</p>
-    </div>
-    <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr 380px;">
+    <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr .75fr;">
       <div>
-        <div class="container p-3 mb-3">
-        Insert explanatory text here about the purpose of the database, something about the
-        dataset... Blah blah blah blah blah blah blah
-        blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-        blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-        blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah.
-        </div>
-      <div class="bg-light border rounded-3 p-3">
+      <div class="bg-body-tertiary border rounded-3 p-3">
         <div class="container">
-            <h3 class="text-center">Upload Observation File</h3>
-            <p class="p-3 mt-3">Insert explanatory text here about how to upload observations,
+            <h2 class="text-center">Upload Satellite Observations</h2>
+            <p>Insert explanatory text here about how to upload observations,
                  information about the basic data format, and a link to the full data
                  format page and possibly a sample file with the correct headers.
                  Also include what happens if the data upload fails,
@@ -28,109 +16,87 @@
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
                 <div class="row">
-                  {% if task_id %}
-                  <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv" required="required" disabled="true">
-                  {% else %}
-                  <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv" required="required">
-                  {% endif %}
+                  <input type="file" class="form-control " name="uploaded_file" accept=".csv" required="required">
                 </div>
                 <div class="row d-inline-flex flex-row pt-3 align-items-center ">
                   <div class="col">
-                    {% if task_id %}
-                    <input type="submit" class="btn btn-primary" value="Upload"
-                            name="submit_obs" id="upload_btn" disabled="true">
-                    {% else %}
-                    <input type="submit" class="btn btn-primary" value="Upload"
+                    <input type="submit" class="btn btn-primary fs-6" value="Upload File"
                             onclick="this.form.submit(); this.disabled=true;
-                            return true;" name="submit_obs" id="upload_btn">
-                    {% endif %}
-
+                            document.getElementById('loading_spinner').hidden = false;
+                            return true;" name="submit_obs">
                   </div>
-
+                  <div class="spinner-border" id="loading_spinner" role="status" hidden>
+                    <span class="visually-hidden" >Loading...</span>
+                  </div>
+                  <div class="col">
+                    {% if obs_id %}
+                      <span class="text-success text-nowrap">Upload successful</span>
+                    {% endif %}
+                  </div>
                 </div>
-
             </form>
-            <div class="text-center">
-              <div id="progress-bar-message">
-              </div>
-            </div>
-            <div class='progress-wrapper'>
-              <div id='progress-bar' class='progress-bar progress-bar-striped' role='progressbar'>&nbsp;</div>
-            </div>
-            <div id="celery-result"></div>
 
           {% if error %}
             <p class="text-danger">Error: {{ error }}</a></p>
           {% endif %}
 
+          {% if obs_id %}
+          <div class="container-md border rounded-3 mt-3 pt-2 ">
 
-          <div class="container-md bg-success border border-success rounded-3 mt-3 pt-2 "
-            style="--bs-bg-opacity: .2;"
-            id="success_message" hidden>
-            <span class="fw-bold">Upload successful!</span>
-
-            <p id="obs_added_text"></p>
-            <p class="mb-3">Confirmation email with observation ID(s) sent to: <span id="email"></span></p>
-            <p>Observation ID(s) with corresponding satellite name and observation date/time
-              can also be downloaded as a .txt file:</p>
-            <form action="/download-ids" method="post">
-              {% csrf_token %}
-              <input type="hidden" name="obs_ids" id="download_obs_ids">
-              <button class="btn btn-primary btn-sm mb-3" type="submit"
-               aria-controls="downloadObsIds">
-                Download file
-              </button>
-            </form>
+            <p>Observation ID(s):<br />
+              {% for id in obs_id %}
+                {{ id }} <br/>
+              {% endfor %}
+            </p>
+            <p>Email sent to: test@email.com</p>
           </div>
-
+          {% endif %}
 
         </div>
       </div>
       </div>
       <div class="container">
-        <div class="shadow rounded-2 mb-3" style="min-height:50px;">
-          <h5 class="card-title text-center bg-accent1 p-3 rounded-top-2 ">Recent observations</h5>
-          <div class="card-body bg-light rounded-bottom-2 p-3">
-            {% if latest_obs_list %}
-              {% for obs, obs_json in latest_obs_list %}
-
-              <a href="#obsModal" id="showObsModal" class="btn btn-custom" data-content="{{obs_json|escapejs|safe}}" data-bs-toggle="modal"  role="button">
-                {{ obs.date_added|date:"M. d, Y h:i A" }} - {{ obs.satellite_id.sat_name}}</a>
-              {% endfor %}
-
-            {% else %}
-              <p>No observations are available.</p>
-            {% endif %}
+        <div class="bg-body-tertiary border rounded-3 p-3 mb-3" style="min-height: 250px;">
+          <div class="text-center">
+            <p class="fw-bold fs-5">Recent observations:</p>
           </div>
-          {% include "repository/modal.html" %}
+          {% if latest_obs_list %}
+            <ul>
+            {% for obs in latest_obs_list %}
+                <li>{{ obs.date_added }} - {{ obs.satellite_id.sat_name}}</li>
+            {% endfor %}
+            </ul>
+          {% else %}
+            <p>No observations are available.</p>
+          {% endif %}
         </div>
 
-        <div class="shadow bg-body rounded-2 mb-3" style="min-height: 50px;">
-          <h5 class="card-title text-center bg-accent1 rounded-top-3 p-3">Statistics</h5>
-          <div class="card-body bg-light p-3 rounded-bottom-2 text-center">
-
-            {% if not observation_count and not satellite_count %}
-              <p>No stats are available.</p>
-            {% endif %}
-
-            {% if observation_count %}
-            <span class="fs-4">{{ observation_count }}</span> observations
-            <br/>
-            {% endif %}
-
-            {% if satellite_count %}
-            <span class="fs-4">{{ satellite_count }}</span> satellites
-            <br/>
-            {% endif %}
-
-            {% if observer_count %}
-            <span class="fs-4">{{ observer_count }}</span> observers
-            <br/>
-            {% endif %}
+        <div class="bg-body-tertiary border rounded-3 p-3" style="min-height: 250px;">
+          <div class="text-center">
+            <p class="fw-bold fs-5">Stats:</p>
           </div>
+
+          {% if observation_count %}
+          <p>Observations: {{ observation_count }}</p>
+          {% endif %}
+          {% if satellite_count %}
+          <p>Satellites: {{ satellite_count }}</p>
+          {% endif %}
+          {% if observer_count %}
+          <p>Observers: {{ observer_count }}</p>
+          {% endif %}
+          {% if avg_mag %}
+          <p>Average magnitude: {{ avg_mag }}</p>
+          {% endif %}
+
+
+          {% if not observation_count and not satellite_count %}
+            <p>No stats are available.</p>
+          {% endif %}
+
         </div>
       </div>
     </div>
   </div>
-</div>
+
 {% endblock %}
