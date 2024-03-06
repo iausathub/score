@@ -12,6 +12,7 @@ from repository.models import Observation, Satellite
 from repository.serializers import ObservationSerializer
 
 
+# Statistics for main page
 def get_stats():
     stats = namedtuple(
         "stats",
@@ -33,6 +34,7 @@ def get_stats():
     )
     latest_obs_list = Observation.objects.order_by("-date_added")[:7]
 
+    # JSON is also needed for the modal view when an observation in the list is clicked
     observation_list_json = [
         (JSONRenderer().render(ObservationSerializer(observation).data))
         for observation in latest_obs_list
@@ -44,6 +46,7 @@ def get_stats():
     )
 
 
+# Validate satellite position is above horizon using SatChecker
 def validate_position(
     satellite_name, sat_number, observation_time, latitude, longitude, altitude
 ):
@@ -66,9 +69,15 @@ def validate_position(
         "julian_date": obs_time.jd,
         "min_altitude": -5,
     }
-    r = requests.get(url, params=params, timeout=10)
-    if r.status_code != 200 or not r.json():
-        return "Satellite not visible at this time and location"
+    try:
+        r = requests.get(url, params=params, timeout=10)
+    except requests.exceptions.RequestException:
+        return "Satellite position check failed - try again later."
+
+    if r.status_code != 200:
+        return "Satellite position check failed - verify uploaded data is correct."
+    if not r.json():
+        return "Satellite with this ID not visible at this time and location"
     if r.json()[0]["NAME"] != satellite_name:
         return "Satellite name and number do not match"
     if float(r.json()[0]["ALTITUDE-DEG"]) < -5:
@@ -76,10 +85,16 @@ def validate_position(
     return True
 
 
+# Send upload confirmation with observation IDs for reference
 def send_confirmation_email(obs_ids, email_address):
+    text_body = get_observation_list(False, obs_ids)
+
     msg = EmailMultiAlternatives(
         "SCORE Observation Upload Confirmation",
-        "text body",
+        "SCORE Observation Upload Confirmation \n\n Thank you for submitting your \
+            observations. Your observations have been successfully uploaded to the \
+                SCORE database.  The observation ID(s) are: \n\n"
+        + text_body,
         "michelle.dadighat@noirlab.edu",
         [email_address],
     )
@@ -87,22 +102,33 @@ def send_confirmation_email(obs_ids, email_address):
     email_body = "<html><h1>SCORE Observation Upload Confirmation</h1>\
                 <p>Thank you for submitting your observations.  Your observations \
                 have been successfully uploaded to the SCORE database. \
-                The observation ID(s) are: </p></br>"
-    for obs_id in obs_ids:
-        observation = Observation.objects.get(id=obs_id)
-        email_body += (
-            str(obs_id)
-            + " - "
-            + observation.satellite_id.sat_name
-            + " - "
-            + str(observation.obs_time_utc)
-            + "<br>"
-        )
+                The observation ID(s) are: </p>"
+    email_body += get_observation_list(True, obs_ids)
     email_body += "</html>"
     msg.attach_alternative(email_body, "text/html")
     msg.send()
 
 
+# Create list of observations with supplemental details for upload confirmation
+def get_observation_list(is_html, obs_ids):
+    list_text = ""
+
+    for obs_id in obs_ids:
+        observation = Observation.objects.get(id=obs_id)
+        list_text += (
+            str(obs_id)
+            + " - "
+            + observation.satellite_id.sat_name
+            + " - "
+            + str(observation.obs_time_utc)
+            + "<br />"
+            if is_html
+            else "\n"
+        )
+    return list_text
+
+
+# CSV header - same as upload format minus the email address for privacy
 def get_csv_header():
     header = [
         "satellite_name",
