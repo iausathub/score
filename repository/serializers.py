@@ -6,7 +6,7 @@ from repository.models import Location, Observation, Satellite
 class SatelliteSerializer(serializers.ModelSerializer):
     class Meta:
         model = Satellite
-        fields = ("sat_name", "sat_number", "constellation", "date_added")
+        fields = ("sat_name", "sat_number", "date_added")
 
 
 class LocationSerializer(serializers.ModelSerializer):

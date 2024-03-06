@@ -52,7 +52,12 @@
 
 <div class="col p-3">
     <div class="float-end">
-        <i class="fas fa-download"></i>  <a href="{% url 'download-all' %}" class="link-dark">Download all data</a>
+        <form action="{% url 'download-all' %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-primary">
+                <i class="fas fa-download"></i> Download all data
+            </button>
+        </form>
     </div>
 </div>
 

@@ -8,15 +8,9 @@ from django.utils import timezone
 
 
 class Satellite(models.Model):
-    CONSTELLATION_CHOICES = [
-        ("STARLINK", "Starlink"),
-        ("ONEWEB", "OneWeb"),
-        ("OTHER", "Other"),
-    ]
 
     sat_name = models.CharField(max_length=200)
     sat_number = models.IntegerField(default=0)
-    constellation = models.CharField(max_length=100, choices=CONSTELLATION_CHOICES)
     date_added = models.DateTimeField("date added", default=timezone.now)
 
     def __str__(self):
@@ -32,11 +26,6 @@ class Satellite(models.Model):
             raise ValidationError("Satellite number is required.")
         if len(str(self.sat_number)) > 5:
             raise ValidationError("NORAD ID must be 5 digits or less.")
-        if self.constellation not in ["STARLINK", "ONEWEB", "OTHER"]:
-            raise ValidationError(
-                "Constellation must be one of the following: STARLINK,\
-                                  ONEWEB, OTHER"
-            )
 
     def save(self, *args, **kwargs):
         self.full_clean()

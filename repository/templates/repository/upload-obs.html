@@ -13,6 +13,12 @@
                 Confirmation email sent to: {{ obs_email }}
             </div>
             {% endif %}
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Upload failed</h4>
+                {{ error }}
+            </div>
+            {% endif %}
         </div>
         <div class="text-end my-3">
             <span class="text-danger">*</span> denotes required field
@@ -74,10 +80,7 @@
                     </div>
                 </div>
                 <div class="col">
-                    <div class=" pb-4">
-                        {{ form.constellation.label_tag}} <span class="text-danger">*</span>
-                        {{ form.constellation }}
-                    </div>
+
                 </div>
             </div>
             <div class="row">

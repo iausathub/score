@@ -7,13 +7,10 @@ from repository.models import Location, Observation, Satellite
 
 
 class SatelliteTest(TestCase):
-    def create_satellite(
-        self, sat_name="STARLINK-123", sat_number=12345, constellation="STARLINK"
-    ):
+    def create_satellite(self, sat_name="STARLINK-123", sat_number=12345):
         return Satellite.objects.create(
             sat_name=sat_name,
             sat_number=sat_number,
-            constellation=constellation,
             date_added=timezone.now(),
         )
 
@@ -158,7 +155,6 @@ class ObservationTest(TestCase):
         sat = Satellite.objects.create(
             sat_name="STARLINK-123",
             sat_number=12345,
-            constellation="STARLINK",
             date_added=timezone.now(),
         )
         loc = Location.objects.create(
