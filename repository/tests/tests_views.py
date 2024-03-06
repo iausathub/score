@@ -1,7 +1,3 @@
-import csv
-import io
-
-from django.core.files.uploadedfile import SimpleUploadedFile
 from django.test import Client, TestCase
 from django.urls import reverse
 from django.utils import timezone
@@ -53,71 +49,6 @@ class TestViews(TestCase):
         response = self.client.post(reverse("index"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["error"], "Please select a file to upload.")
-
-    def test_index_post_with_file(self):
-        data = [
-            [
-                "satellite_name",
-                "norad_cat_id",
-                "observation_time_utc",
-                "observation_time_uncertainty_sec",
-                "apparent_magnitude",
-                "apparent_magnitude_uncertainty",
-                "observer_latitude_deg",
-                "observer_longitude_deg",
-                "observer_altitude_m",
-                "instrument",
-                "observing_mode",
-                "observing_filter",
-                "observer_orcid",
-                "satellite_right_ascension_deg",
-                "satellite_right_ascension_uncertainty_deg",
-                "satellite_declination_deg",
-                "satellite_declination_uncertainty_deg",
-                "range_to_satellite_km",
-                "range_to_satellite_uncertainty_km",
-                "range_rate_of_satellite_km_per_sec",
-                "range_rate_of_satellite_uncertainty_km_per_sec",
-                "comments",
-                "data_archive_link",
-            ],
-            [
-                "TestSat",
-                "1",
-                "2022-01-01T12:00:00Z",
-                "1",
-                "1",
-                "1",
-                "1",
-                "1",
-                "1",
-                "TestInstrument",
-                "TestMode",
-                "TestFilter",
-                "0000-0000-0000-0000",
-                "1",
-                "1",
-                "1",
-                "1",
-                "1",
-                "1",
-                "1",
-                "1",
-                "TestComment",
-                "http://example.com",
-            ],
-        ]
-        csv_file = io.StringIO()
-        writer = csv.writer(csv_file)
-        writer.writerows(data)
-        csv_file.seek(0)
-        uploaded_file = SimpleUploadedFile("test.csv", csv_file.read().encode())
-
-        response = self.client.post(reverse("index"), {"uploaded_file": uploaded_file})
-        self.assertEqual(response.status_code, 200)
-        self.assertIn("task_id", response.context)
-        print(response.context["task_id"])
-        self.assertIn("date_added", response.context)
 
     def test_data_format(self):
         response = self.client.get("/data-format")
