@@ -1,13 +1,11 @@
-{% extends "admin/base.html" %}
+{% extends "admin/base_site.html" %}
 {% comment %} {% load i18n  eatn_tags static %} {% endcomment %}
 {% load i18n %}
 {% load static %}
 {% load compress %}
 {% block title %}{{ title }} | {% trans "SCORE Admin " %}{% endblock %}
 {% block extrastyle %}
-{% compress css %}
-<link type="text/x-scss" href="{% static 'custom.scss' %}" rel="stylesheet" media="screen">
-{% endcompress %}
+
 {% endblock %}
 {% block branding %}
     <h1 id="site-name">{% trans "SCORE Admin" %}</h1>
