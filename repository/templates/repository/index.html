@@ -9,21 +9,28 @@
     </div>
     <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr 380px;">
       <div>
-        <div class="container p-3 mb-3">
-        Insert explanatory text here about the purpose of the database, something about the
-        dataset... Blah blah blah blah blah blah blah
-        blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-        blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-        blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah.
+        <div class="container p-3">
+        The Satellite Constellation Observation Repository (SCORE) is a project developed and maintained
+        by the International Astronomical Union Center for the Protection of the Dark and Quiet Sky
+        from Satellite Constellation Interference (IAU CPS). SCORE serves as a centralized repository for
+        satellite brightness observations. Its primary function is to provide a comprehensive and organized
+        platform for researchers to contribute, store, and access observational data of artificial space objects.
+        Datasets curated in SCORE are is free and open for download. If you make use of SCORE data in your
+        research, kindly add the following paragraph to your acknowledgments section:
+        <p class="fst-italic p-3">"This research has made use of data and/or services provided by the
+          International Astronomical Union’s Center for the Protection of the Dark and Quiet Sky from
+          Satellite Constellation Interference (IAU CPS)"</p>
         </div>
       <div class="bg-light border rounded-3 p-3">
         <div class="container">
             <h3 class="text-center">Upload Observation File</h3>
-            <p class="p-3 mt-3">Insert explanatory text here about how to upload observations,
-                 information about the basic data format, and a link to the full data
-                 format page and possibly a sample file with the correct headers.
-                 Also include what happens if the data upload fails,
-                 and what kind of error messages to expect.</p>
+            <p class="p-3 mt-3">Satellite observations must be uploaded in CSV file format,
+              using SCORE specific columns. Any uploads with observations not in this format will not
+              be accepted and will return an error message. All correctly formatted observations added during
+              upload prior to a detected error will be added to the database. SCORE will reject
+              duplicate observations - if duplicate entries are detected, the observation IDs provided
+              in the confirmation details will be the IDs of the original observations.
+            </p>
 
             <form method="post" enctype="multipart/form-data">
                 {% csrf_token %}
