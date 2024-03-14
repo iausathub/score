@@ -7,9 +7,9 @@
       <h2 class="text-center p-2">Download data</h2>
       <p>The entire SCORE dataset can be downloaded in CSV format for comprehensive access
         to satellite brightness and position observation data. However, we recommend that
-        users interested in specific subsets of data try the Search (link) page first. The
-        Search page allows you to tailor your query and get refined results based on your
-        criteria. </p>
+        users interested in specific subsets of data visit the <a href="{% url 'search' %}">
+        Search</a> page. The Search page allows for customized queries and returns refined
+        search results based on user selected criteria.</p>
         <div class="text-center pt-3">
             <form action="{% url 'download-all' %}" method="post">
                 {% csrf_token %}

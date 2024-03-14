@@ -1,89 +1,182 @@
 {% extends "repository/base.html" %}
+{% load static %}
 
 {% block content %}
 <div class="container-fluid p-3">
   <div class="container-md">
-    <h2 class="text-center p-2">Data Format</h2>
+    <h2 class="text-center p-2">Satellite Observation Data Format</h2>
 
-    <p>Intro filler paragraph thingy about the data format, the fact that it's supposed to be a .CSV, and what's required and what's not.
-      Sample file can be downloaded with the columns in the right order, but the fields on this page are in the same order too. Blah blah blah
-      blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah
-      blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah blah.
-    </p>
+    <p>To enable the compilation of observations from many observers, locations, instruments, etc.,
+      we specify here the required IAU CPS SatHub data format for observation sharing.
+      The required file type is a CSV with the required columns ordered and named as below.
+       Any or all optional columns may also be included in the order listed.</p>
+    <p>If you attempt to upload a file that does not follow the data format, the
+      upload will fail. A sample file that meets all formatting requirements may be
+      downloaded below.</p>
+    <p>By sharing observations with the IAU CPS SatHub, you agree to follow our
+      Member Collaboration Agreement [NEEDS LINK] and that your data may be published
+      publicly with attribution [SPECIFY CC-THINGY HERE?]. Thank you!</p>
+      <a href="{% static 'observation_format.csv' %}" download>
+        <button class="btn btn-primary btn-sm mb-3">
+          Download sample file
+          </button>
+      </a>
+    <hr /><br />
+    <h3 class="text-center p-2">Required columns</h3>
 
-    <p class="fw-bold fs-5">Required:</p>
-      <p><b>satellite_name</b> <br/>
-      Name of satellite, string, corresponds to https://www.space-track.org/#catalog SATNAME, e.g., “METEOR 1-17 DEB” </p>
+    <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 340px auto;">
+      <div class="text-end">
+        <b>satellite_name</b>
+      </div>
+      <div>
+        Name of satellite, string, corresponds to https://www.space-track.org/#catalog SATNAME, e.g., "METEOR 1-17 DEB"
+      </div>
+      <div class="text-end">
+        <b>norad_cat_id</b>
+      </div>
+      <div>
+        NORAD catalog identifier, integer, corresponds to https://www.space-track.org/#catalog NORAD CAT ID,  e.g., "57957"
+      </div>
+      <div class="text-end">
+        <b>observation_time_utc</b>
+      </div>
+      <div>
+        Mid exposure time of observation in coordinated universal time (UTC), ISO 8601 format (string), e.g., "2023-09-26T23:59:59.123Z"
+      </div>
+      <div class="text-end">
+        <b>observation_time_uncertainty_sec</b>
+      </div>
+      <div>
+        Uncertainty in the observation time in seconds, floating point, e.g., .02
+      </div>
+      <div class="text-end">
+        <b>apparent_magnitude</b>
+      </div>
+      <div>
+        Brightness of the satellite as observed/measured in magnitudes, floating point, e.g., "7.53"
+      </div>
+      <div class="text-end">
+        <b>apparent_magnitude_uncertainty</b>
+      </div>
+      <div>
+        Uncertainty in the brightness of the satellite in magnitudes, floating point, e.g., "0.14"
+      </div>
+      <div class="text-end">
+        <b>observer_latitude_deg</b>
+      </div>
+      <div>
+        Latitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal degrees (DD), signed floating point between -90 and 90, e.g. "-30.2447392" (equivalent to 30°14'40.7"S).
+      </div>
+      <div class="text-end">
+        <b>observer_longitude_deg</b>
+      </div>
+      <div>
+        Longitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal degrees (DD), signed floating point between -180 and 180,  e.g., "-70.7477219" (equivalent to 70°44'57.9"W)
+      </div>
+      <div class="text-end">
+        <b>observer_altitude_m</b>
+      </div>
+      <div>
+        Altitude of the observing location above sea level (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in meters, signed floating point, e.g., "2663" (equivalent to 8,737 ft)
+      </div>
+      <div class="text-end">
+        <b>instrument</b>
+      </div>
+      <div>
+        Name or other identifying information about the telescope, instrument, and/or other hardware that was used for the observation, string, e.g., DECam on the Blanco 4m
+      </div>
+      <div class="text-end">
+        <b>observing_mode</b>
+      </div>
+      <div>
+        Observation hardware / detector: e.g. "VISUAL", "BINOCULARS", "CCD", "CMOS", or "OTHER" if not listed
+      </div>
+      <div class="text-end">
+        <b>observing_filter</b>
+      </div>
+      <div>
+        Filter/Bandpass used in observation: e.g., SDSS g. Use "CLEAR" if observing_mode is visual.
+      </div>
+      <div class="text-end">
+        <b>observer_orcid</b>
+      </div>
+      <div>
+        List of ORCID for all people who should be credited for the observation. At least one is required; getting an ORCID is free and easy at <a href="https://orcid.org/">orcid.org</a>.
+      </div>
+      <div class="text-end">
+        <b>observer_email</b>
+      </div>
+      <div>
+        Valid email address for the observer or point of contact.
+      </div>
 
-      <p><b>norad_cat_id</b><br/>
-      NORAD catalog identifier, integer, corresponds to https://www.space-track.org/#catalog NORAD CAT ID,  e.g., “57957“</p>
+    </div>
 
-      <p><b>observation_time_utc</b><br/>
-      Mid exposure time of observation in coordinated universal time (UTC), ISO 8601 format, e.g., “2023-09-26T23:59:59.123Z”</p>
-
-      <p><b>observation_time_uncertainty_sec</b><br/>
-      Uncertainty in the observation time in seconds, floating point, e.g., .02	</p>
-
-      <p><b>apparent_magnitude</b><br/>
-      brightness of the satellite as observed/measured in magnitudes, floating point, e.g., “7.53”</p>
-
-      <p><b>apparent_magnitude_uncertainty</b><br/>
-      uncertainty in the brightness of the satellite in magnitudes, floating point, e.g., “0.14”</p>
-
-      <p><b>observer_latitude_deg</b><br/>
-      Latitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal degrees (DD), signed floating point between -90 and 90, e.g. “-30.2447392” for 30°14'40.7"S.</p>
-
-      <p><b>observer_longitude_deg</b><br/>
-      Longitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal degrees (DD), signed floating point between -180 and 180,  e.g., “-70.7477219” for 70°44'57.9"W</p>
-
-      <p><b>observer_altitude_m</b><br/>
-      Altitude of the observing location above sea level (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in meters, signed floating point, e.g., “2663” for 8,737 ft</p>
-
-      <p><b>instrument</b></p>
-
-      <p><b>observing_mode</b><br/>
-      Observation hardware / detector: e.g. “VISUAL”, “BINOCULARS”, “CCD”, “CMOS”, “LASER_RANGING” for laser ranging, “DOPPLER” for doppler delay measurements  </p>
-
-      <p><b>observing_filter</b><br/>
-      Filter/Bandpass used in observation:  “CLEAR” if observing_mode is visual</p>
-
-      <p><b>observer_email</b><br/>
-      IAU CPS registered email address (just one email)</p>
-
-      <p><b>observer_orcid</b><br/>
-      List of ORCID for all people who should be credited for the observation, at least one is required</p>
     <br/>
-    <p class="fw-bold fs-5">Optional:</p>
-      <p><b>satellite_right_ascension_deg</b><br/>
-      Right Ascension of satellites in deg, measured with respect to Gaia DR3 astrometric catalog stars, floating point between 0 and 360, e.g., “359.12345678”	</p>
-
-      <p><b>satellite_right_ascension_uncertainty_deg</b></p>
-
-      <p><b>satellite_declination_deg</b><br/>
-      Declination of satellites in deg, measured with respect to Gaia DR3 astrometric catalog stars, floating point between -90 and 90, e.g., “-40.12345678”</p>
-
-      <p><b>satellite_declination_uncertainty_deg</b></p>
-
-      <p><b>range_to_satellite_km</b><br/>
-      Measured distance between observer and satellite at time of observation in kilometers, floating point e.g., “560.12345678”</p>
-
-      <p><b>range_to_satellite_uncertainty_km</b></p>
-
-      <p><b>range_rate_of_satellite_km_per_sec</b><br/>
-      Measured change in distance between observer and satellite at time of observation in kilometers per second, floating point e.g., “3.12345678”</p>
-
-      <p><b>range_rate_of_satellite_uncertainty_km_per_sec</b>	</p>
-
-      <p><b>comments</b><br/>
-      Any comments that would help identify potential issues with the measurement, e.g. “cloudy conditions”, “few background stars to compare”, “strong lights in the background”, etc. </p>
-
-      <p><b>data_archive_link</b><br/>
-      To be defined … placeholder for “which of ~5 legit data archives is your data in? Provide a link here OR none (not preferred)”. Validate the link somehow? Support file upload as an alternative?</p>
-      </p>
-
-      <p><b>constellation</b><br/>
-        Which satellite constellation (if any) the satellite is part of, e.g., “STARLINK”, “ONEWEB”, etc.</p>
-      </p>
+    <h3 class="text-center p-2">Optional columns</h3>
+    <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 340px auto;">
+      <div class="text-end">
+        <b>satellite_right_ascension_deg</b>
+      </div>
+      <div>
+        Right Ascension of satellites in deg, measured with respect to Gaia DR3 astrometric catalog stars, floating point between 0 and 360, e.g., "359.12345678"
+      </div>
+      <div class="text-end">
+        <b>satellite_right_ascension_uncertainty_deg</b>
+      </div>
+      <div>
+        Uncertainty of the above value, floating point, e.g., 0.01
+      </div>
+      <div class="text-end">
+        <b>satellite_declination_deg</b>
+      </div>
+      <div>
+        Declination of satellites in deg, measured with respect to Gaia DR3 astrometric catalog stars, floating point between -90 and 90, e.g., "-40.12345678"
+      </div>
+      <div class="text-end">
+        <b>satellite_declination_uncertainty_deg</b>
+      </div>
+      <div>
+        Uncertainty of the above value, floating point, e.g., 0.01
+      </div>
+      <div class="text-end">
+        <b>range_to_satellite_km</b>
+      </div>
+      <div>
+        Measured distance between observer and satellite at time of observation in kilometers, floating point e.g., "560.12345678"
+      </div>
+      <div class="text-end">
+        <b>range_to_satellite_uncertainty_km</b>
+      </div>
+      <div>
+        Uncertainty of the above value, floating point, e.g., 0.01
+      </div>
+      <div class="text-end">
+        <b>range_rate_of_satellite_km_per_sec</b>
+      </div>
+      <div>
+        Measured change in distance between observer and satellite at time of observation in kilometers per second, floating point e.g., "3.12345678"
+      </div>
+      <div class="text-end">
+        <b>range_rate_of_satellite_uncertainty_km_per_sec</b>
+      </div>
+      <div>
+        Uncertainty of the above value, floating point, e.g., 0.01
+      </div>
+      <div class="text-end">
+        <b>comments</b>
+      </div>
+      <div>
+        Any comments that would help identify potential issues with the measurement, e.g. "cloudy conditions", "few background stars to compare", "strong lights in the background", etc.
+      </div>
+      <div class="text-end">
+        <b>data_archive_link</b>
+      </div>
+      <div>
+        To be defined … placeholder for "which of ~5 legit data archives is your data in? Provide a link here OR none (not preferred)". Validate the link somehow? Support file upload as an alternative?
+      </div>
+    </div>
   </div>
 </div>
+
 {% endblock %}
