@@ -211,6 +211,7 @@ def search(request):
 
 
 def download_results(request):
+    # Download the search results as a CSV file
     if request.method == "POST":
         observation_ids = request.POST.get("obs_ids").split(", ")
         observation_ids = [int(i.strip("[]")) for i in observation_ids]
@@ -259,6 +260,7 @@ def upload(request):
             comments = form.cleaned_data["comments"]
             data_archive_link = form.cleaned_data["data_archive_link"]
 
+            # Check if satellite is above the horizon
             is_valid = validate_position(
                 sat_name, sat_number, obs_date, obs_lat_deg, obs_long_deg, obs_alt_m
             )

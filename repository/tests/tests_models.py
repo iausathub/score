@@ -151,10 +151,11 @@ class ObservationTest(TestCase):
         obs_filter="test",
         instrument="test",
         obs_orc_id=orc_id,
+        sat_number=12345,
     ):
         sat = Satellite.objects.create(
             sat_name="STARLINK-123",
-            sat_number=12345,
+            sat_number=sat_number,
             date_added=timezone.now(),
         )
         loc = Location.objects.create(
@@ -193,106 +194,148 @@ class ObservationTest(TestCase):
             + obs.obs_email,
         )
 
+    def test_observation_creation_bad_satellite(self):
+        # field is required
+        with transaction.atomic():
+            with self.assertRaises(ValidationError) as error:
+                obs = self.create_observation(sat_number=123456)  # noqa: F841
+            self.assertIn("NORAD ID must be 5 digits or less.", str(error.exception))
+
     def test_observation_validation(self):
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as error:
                 obs = self.create_observation(obs_time_utc=None)
+            self.assertIn("Observation time is required.", str(error.exception))
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as error:
                 obs = self.create_observation(obs_time_utc="")
+            self.assertIn("Observation time is required.", str(error.exception))
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as error:
                 obs = self.create_observation(obs_time_uncert_sec=None)
+            self.assertIn(
+                "Observation time uncertainty is required.", str(error.exception)
+            )
 
         # field must be positive
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(obs_time_uncert_sec=-1)
             obs.full_clean()
+        self.assertIn(
+            "Observation time uncertainty must be positive.", str(error.exception)
+        )
 
         # field is required
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(obs_email="")
+            print(error.exception)
             obs.full_clean()
+        self.assertIn("Observer email is required.", str(error.exception))
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as error:
                 obs = self.create_observation(obs_email=None)
+                print(error.exception)
+            self.assertIn("Observer email is required.", str(error.exception))
 
         # field must be valid email
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(obs_email="test")
             obs.full_clean()
+        self.assertIn(
+            "Observer email is not correctly formatted.", str(error.exception)
+        )
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as error:
                 obs = self.create_observation(apparent_mag=3, apparent_mag_uncert=None)
+            self.assertIn(
+                "Apparent magnitude uncertainty is required if apparent magnitude is provided.",  # noqa: E501
+                str(error.exception),
+            )
 
         # field must be positive
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(apparent_mag_uncert=-1)
             obs.full_clean()
+        self.assertIn(
+            "Apparent magnitude uncertainty must be positive.", str(error.exception)
+        )
 
         # field is required
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(obs_mode="")
             obs.full_clean()
+        self.assertIn("Observation mode is required.", str(error.exception))
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as error:
                 obs = self.create_observation(obs_mode=None)
+            self.assertIn("Observation mode is required.", str(error.exception))
 
         # field is required
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(obs_mode="test")
             obs.full_clean()
+        self.assertIn(
+            "Observation mode must be one of the following", str(error.exception)
+        )
 
         # field is required
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(obs_filter="")
             obs.full_clean()
+        self.assertIn("Observation filter is required.", str(error.exception))
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as error:
                 obs = self.create_observation(obs_filter=None)
+            self.assertIn("Observation filter is required.", str(error.exception))
 
         # field is required
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(instrument="")
             obs.full_clean()
+        self.assertIn("Instrument is required.", str(error.exception))
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as error:
                 obs = self.create_observation(instrument=None)
+            self.assertIn("Instrument is required.", str(error.exception))
 
         # field is required
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(obs_orc_id=[""])
             obs.full_clean()
+        self.assertIn("Observer ORCID not correctly formatted.", str(error.exception))
 
         # field is required
         with transaction.atomic():
-            with self.assertRaises(ValidationError):
+            with self.assertRaises(ValidationError) as error:
                 obs = self.create_observation(obs_orc_id=None)
+            self.assertIn("Observer ORCID is required.", str(error.exception))
 
         # field must be valid ORCID
-        with self.assertRaises(TypeError):
+        with self.assertRaises(TypeError) as error:
             obs = self.create_observation(obs_orc_id=1)
             obs.full_clean()
+        self.assertIn("is not iterable", str(error.exception))
 
         # field must be valid ORCID
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValidationError) as error:
             obs = self.create_observation(obs_orc_id=["n/a"])
             obs.full_clean()
+        self.assertIn("Observer ORCID not correctly formatted.", str(error.exception))
 
         # valid values successful
         obs = self.create_observation()

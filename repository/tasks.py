@@ -13,7 +13,6 @@ class UploadError(Exception):
 
 @shared_task(bind=True)
 def ProcessUpload(self, data):  # noqa: N802
-    print("Task started")
     progress_recorder = ProgressRecorder(self)
 
     obs_ids = []
@@ -108,7 +107,6 @@ def ProcessUpload(self, data):  # noqa: N802
                     "date_added": timezone.now(),
                 },
             )
-            # logger.info(f"Uploaded observation {observation.id}")
             obs_ids.append(observation.id)
             if not confirmation_email:
                 confirmation_email = column[12]
@@ -118,11 +116,9 @@ def ProcessUpload(self, data):  # noqa: N802
             obs_num += 1
     except IndexError as e:
         raise UploadError(str(e) + " - check number of fields in csv file.") from e
-        # logger.exception(e)
 
     except ValueError as e:
         raise UploadError(e) from e
-        # logger.exception(e)
 
     except ValidationError as e:
         if len(e.messages) > 1:
@@ -133,13 +129,9 @@ def ProcessUpload(self, data):  # noqa: N802
             for key in e.message_dict.keys():
                 message_text += f"{key}: {e.message_dict[key][0]}\n"
             raise UploadError(message_text) from e
-            # logger.exception(e)
 
     except Exception as e:
         raise UploadError(e) from e
-        # logger.exception(e)
-
-    print("End")
 
     send_confirmation_email(obs_ids, confirmation_email)
 

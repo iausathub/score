@@ -125,8 +125,7 @@ class Observation(models.Model):
             raise ValidationError("Observation time uncertainty must be positive.")
         if self.apparent_mag is not None and self.apparent_mag_uncert is None:
             raise ValidationError(
-                "Apparent magnitude uncertainty is required if \
-                                  apparent magnitude is provided."
+                "Apparent magnitude uncertainty is required if apparent magnitude is provided."  # noqa: E501
             )
         if self.apparent_mag is None and self.apparent_mag_uncert is not None:
             raise ValidationError(
