@@ -304,9 +304,11 @@ def upload(request):
                 obs_orc_id=observer_orcid,
                 sat_ra_deg=sat_ra_deg,
                 sat_dec_deg=sat_dec_deg,
-                sat_ra_dec_uncert_deg=[
-                    float(x) for x in sat_ra_dec_uncert_deg.split(",")
-                ],
+                sat_ra_dec_uncert_deg=(
+                    [float(x) for x in sat_ra_dec_uncert_deg.split(",")]
+                    if sat_ra_dec_uncert_deg
+                    else []
+                ),
                 range_to_sat_km=range_to_sat_km,
                 range_to_sat_uncert_km=range_to_sat_uncert_km,
                 range_rate_sat_km_s=range_rate_sat_km_s,
@@ -327,9 +329,11 @@ def upload(request):
                     "obs_orc_id": observer_orcid,
                     "sat_ra_deg": sat_ra_deg,
                     "sat_dec_deg": sat_dec_deg,
-                    "sat_ra_dec_uncert_deg": [
-                        float(x) for x in sat_ra_dec_uncert_deg.split(",")
-                    ],
+                    "sat_ra_dec_uncert_deg": (
+                        [float(x) for x in sat_ra_dec_uncert_deg.split(",")]
+                        if sat_ra_dec_uncert_deg
+                        else []
+                    ),
                     "range_to_sat_km": range_to_sat_km,
                     "range_to_sat_uncert_km": range_to_sat_uncert_km,
                     "range_rate_sat_km_s": range_rate_sat_km_s,

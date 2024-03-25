@@ -71,7 +71,9 @@ def ProcessUpload(self, data):  # noqa: N802
                 obs_orc_id=orc_id_list,
                 sat_ra_deg=column[14],
                 sat_dec_deg=column[15],
-                sat_ra_dec_uncert_deg=[float(x) for x in column[16].split(",")],
+                sat_ra_dec_uncert_deg=(
+                    [float(x) for x in column[16].split(",")] if column[16] else []
+                ),
                 range_to_sat_km=column[17],
                 range_to_sat_uncert_km=column[18],
                 range_rate_sat_km_s=column[19],
@@ -92,7 +94,9 @@ def ProcessUpload(self, data):  # noqa: N802
                     "obs_orc_id": orc_id_list,
                     "sat_ra_deg": column[14],
                     "sat_dec_deg": column[15],
-                    "sat_ra_dec_uncert_deg": [float(x) for x in column[16].split(",")],
+                    "sat_ra_dec_uncert_deg": (
+                        [float(x) for x in column[16].split(",")] if column[16] else []
+                    ),
                     "range_to_sat_km": column[17],
                     "range_to_sat_uncert_km": column[18],
                     "range_rate_sat_km_s": column[19],
