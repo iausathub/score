@@ -164,20 +164,15 @@ class SingleObservationForm(Form):
         label="Satellite Right Ascension (deg)",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
-    sat_ra_uncert_deg = forms.FloatField(
-        required=False,
-        label="Satellite Right Ascension Uncertainty (deg)",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
-    )
     sat_dec_deg = forms.FloatField(
         required=False,
         label="Satellite Declination (deg)",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
-    sat_dec_uncert_deg = forms.FloatField(
+    sat_ra_dec_uncert_deg = forms.CharField(
         required=False,
-        label="Satellite Declination Uncertainty (deg)",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        label="Satellite RA/Dec. Uncertainty (deg)",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     range_to_sat_km = forms.FloatField(
         required=False,
@@ -214,17 +209,6 @@ class SingleObservationForm(Form):
         cleaned_data = super().clean()
         errors = {}
         # fmt: off
-        if not cleaned_data.get("sat_ra_deg") and \
-               cleaned_data.get("sat_ra_uncert_deg"):
-            errors[
-                "sat_ra_uncert_deg"
-            ] = "Right ascension uncertainty requires right ascension."
-        if not cleaned_data.get("sat_dec_deg") and cleaned_data.get(
-            "sat_dec_uncert_deg"
-        ):
-            errors[
-                "sat_dec_uncert_deg"
-            ] = "Declination uncertainty requires declination."
         if not cleaned_data.get("range_to_sat_km") and cleaned_data.get(
             "range_to_sat_uncert_km"
         ):
