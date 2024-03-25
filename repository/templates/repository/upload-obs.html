@@ -193,11 +193,8 @@
                 </div>
                 <div class="col">
                     <div class=" pb-4">
-                        {{ form.sat_ra_uncert_deg.label_tag}}
-                        {{ form.sat_ra_uncert_deg }}
-                        <div class="text-danger">
-                            {{ form.sat_ra_uncert_deg.errors }}
-                        </div>
+                        {{ form.sat_dec_deg.label_tag}}
+                        {{ form.sat_dec_deg }}
                     </div>
                 </div>
             </div>
@@ -205,18 +202,14 @@
                 <div class="col-sm-4 fw-bold"></div>
                 <div class="col">
                     <div class=" pb-4">
-                        {{ form.sat_dec_deg.label_tag}}
-                        {{ form.sat_dec_deg }}
+                        {{ form.sat_ra_dec_uncert_deg.label_tag}}
+                        {{ form.sat_ra_dec_uncert_deg }}
+                        <div class="text-danger">
+                            {{ form.sat_ra_dec_uncert_deg.errors }}
+                        </div>
                     </div>
                 </div>
                 <div class="col">
-                    <div class=" pb-4">
-                        {{ form.sat_dec_uncert_deg.label_tag}}
-                        {{ form.sat_dec_uncert_deg }}
-                        <div class="text-danger">
-                            {{ form.sat_dec_uncert_deg.errors }}
-                        </div>
-                    </div>
                 </div>
             </div>
             <div class="row">

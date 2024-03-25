@@ -5,6 +5,7 @@ from collections import namedtuple
 
 import requests
 from astropy.time import Time
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from rest_framework.renderers import JSONRenderer
 
@@ -87,6 +88,10 @@ def validate_position(
 
 # Send upload confirmation with observation IDs for reference
 def send_confirmation_email(obs_ids, email_address):
+    # check if email backend is in settings file and return if not
+    #
+    if not hasattr(settings, "ANYMAIL"):
+        return
     text_body = get_observation_list(False, obs_ids)
 
     msg = EmailMultiAlternatives(
@@ -184,9 +189,8 @@ def create_csv(observation_list):
                 observation.obs_filter,
                 observation.obs_orc_id,
                 observation.sat_ra_deg,
-                observation.sat_ra_uncert_deg,
                 observation.sat_dec_deg,
-                observation.sat_dec_uncert_deg,
+                observation.sat_ra_dec_uncert_deg,
                 observation.range_to_sat_km,
                 observation.range_to_sat_uncert_km,
                 observation.range_rate_sat_km_s,

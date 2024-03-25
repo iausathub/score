@@ -213,7 +213,11 @@ BROKER_URL = "redis://localhost"
 CELERY_RESULT_BACKEND = "redis://localhost"
 CELERY_RESULT_SERIALIZER = "json"
 
-EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
+EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
+
+ANYMAIL = {
+    "SENDGRID_API_KEY": get_secret("score-settings")["sendgrid-api-key"],
+}
 
 SERVER_EMAIL = get_secret("score-settings")["server-email"]
 ADMINS = get_secret("score-settings")["admins"]

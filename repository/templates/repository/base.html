@@ -167,9 +167,11 @@
               $('#obs_orc_id').text(observation.obs_orc_id.toString().replace(/,/g, ', '));
               $('#obs_comments').text(observation.obs_comments);
               $('#sat_ra_deg').text(observation.sat_ra_deg);
-              $('#sat_ra_uncert_deg').text(observation.sat_ra_uncert_deg);
               $('#sat_dec_deg').text(observation.sat_dec_deg);
-              $('#sat_dec_uncert_deg').text(observation.sat_dec_uncert_deg);
+              var values = observation.sat_ra_dec_uncert_deg;
+              var firstHalf = values.slice(0, 3).join(', ');
+              var secondHalf = values.slice(3).join(', ');
+              $('#sat_ra_dec_uncert_deg').html('<br>' + firstHalf + '<br>' + secondHalf);
               $('#range_to_sat_km').text(observation.range_to_sat_km);
               $('#range_to_sat_uncert_km').text(observation.range_to_sat_uncert_km);
               $('#range_rate_km_s').text(observation.range_rate_sat_km_s);
