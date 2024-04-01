@@ -46,7 +46,7 @@ class TestViews(TestCase):
         self.assertContains(response, "observers")
 
     def test_index_post_no_file(self):
-        response = self.client.post(reverse("index"))
+        response = self.client.post(reverse("root"))
         self.assertEqual(response.status_code, 200)
         self.assertEqual(response.context["error"], "Please select a file to upload.")
 
