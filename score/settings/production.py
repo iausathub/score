@@ -213,11 +213,19 @@ BROKER_URL = "redis://localhost"
 CELERY_RESULT_BACKEND = "redis://localhost"
 CELERY_RESULT_SERIALIZER = "json"
 
-EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend"
-
+"""
+EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend" # for use with non-gmail email
 ANYMAIL = {
     "SENDGRID_API_KEY": get_secret("score-settings")["sendgrid-api-key"],
 }
+"""
+
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
+EMAIL_HOST_USER = get_secret("score-settings")["server-email"]
+EMAIL_HOST_PASSWORD = get_secret("score-settings")["temp-gmail-pw"]
 
 SERVER_EMAIL = get_secret("score-settings")["server-email"]
 ADMINS = get_secret("score-settings")["admins"]

@@ -11,16 +11,67 @@ class UploadObservationFileForm(forms.Form):
     file = forms.FileField()
 
 
-def validate_orcid(value):
+def validate_orcid(value: str) -> None:
+    """
+    Validates the provided ORCID.
+
+    This function checks if the provided ORCID is valid by splitting the input string
+    into a list of ORCIDs, and then checking each ORCID against a regular expression.
+    If any ORCID does not match the regular expression, a ValidationError is raised.
+
+    Args:
+        value (AnyStr): A string containing one or more ORCIDs, separated by commas.
+
+    Raises:
+        forms.ValidationError: If any ORCID in the input string is not valid.
+    """
     orc_id_list = value.split(",")
     for orc_id in orc_id_list:
         if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", orc_id.strip()):
             raise forms.ValidationError("Invalid ORCID.")
 
 
-def validate_date(value):
+def validate_date(value: str) -> None:
+    """
+    Validates the provided date string.
+
+    This function checks if the provided date string is in the correct format by
+    matching it against a regular expression. The expected format is
+    'YYYY-MM-DDTHH:MM:SS(.SSS)Z'. If the date string does not match this format,
+    a ValidationError is raised.
+
+    Args:
+        value (AnyStr): A string containing the date to be validated.
+
+    Raises:
+        forms.ValidationError: If the date string is not in the expected format.
+    """
     if not re.match(r"^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?Z$", value):
         raise forms.ValidationError("Invalid date format.")
+
+
+def validate_ra_dec_uncert(value: str) -> None:
+    """
+    Validates the provided RA/Dec. uncertainty matrix.
+
+    This function checks if the provided RA/Dec. uncertainty matrix is valid by
+    making sure each value is a float. If any value is not a float, a ValidationError
+    is raised.
+
+    Args:
+        value (AnyStr): A string containing the RA/Dec. uncertainty matrix.
+
+    Raises:
+        forms.ValidationError: If any uncertainty in the input string is not valid.
+    """
+    ra_dec_uncert_list = [x.strip() for x in value.split(",")]
+    if len(ra_dec_uncert_list) != 6:
+        raise forms.ValidationError("Invalid RA/Dec. uncertainty matrix.")
+    for ra_dec_uncert in ra_dec_uncert_list:
+        try:
+            float(ra_dec_uncert)
+        except ValueError as err:
+            raise forms.ValidationError("Invalid RA/Dec. uncertainty matrix.") from err
 
 
 class SearchForm(Form):
@@ -34,7 +85,7 @@ class SearchForm(Form):
         required=False,
         label="Satellite Number",
         widget=forms.NumberInput(
-            attrs={"min": 0, "max": 99999, "class": "form-control"}
+            attrs={"min": 0, "max": 99999, "class": "form-control no-arrows"}
         ),
     )
 
@@ -58,7 +109,9 @@ class SearchForm(Form):
     observation_id = forms.IntegerField(
         required=False,
         label="Observation ID",
-        widget=forms.TextInput(attrs={"type": "number", "class": "form-control"}),
+        widget=forms.TextInput(
+            attrs={"type": "number", "class": "form-control no-arrows"}
+        ),
     )
     observer_orcid = forms.CharField(
         required=False,
@@ -79,7 +132,7 @@ class SingleObservationForm(Form):
         required=True,
         label="Satellite Number",
         widget=forms.NumberInput(
-            attrs={"step": 1, "min": 0, "max": 99999, "class": "form-control"}
+            attrs={"min": 0, "max": 99999, "class": "form-control no-arrows"}
         ),
     )
     obs_mode = forms.ChoiceField(
@@ -172,7 +225,9 @@ class SingleObservationForm(Form):
     sat_ra_dec_uncert_deg = forms.CharField(
         required=False,
         label="Satellite RA/Dec. Uncertainty (deg)",
+        help_text="Uncertainty matrix - e.g. 0.1, 0.2, 0.3, 0.1, 0.2, 0.3",
         widget=forms.TextInput(attrs={"class": "form-control"}),
+        validators=[validate_ra_dec_uncert],
     )
     range_to_sat_km = forms.FloatField(
         required=False,

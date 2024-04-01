@@ -1,10 +1,12 @@
 from django.conf import settings
 from django.urls import include, path
+from django.views.generic.base import RedirectView
 
 from . import views
 
 urlpatterns = [
-    path("", views.index, name="index"),
+    path("", views.index, name="root"),
+    path("index/", RedirectView.as_view(url="/"), name="index"),
     path("data-format", views.data_format, name="data-format"),
     path("view", views.view_data, name="view-data"),
     path("download-all", views.download_all, name="download-all"),

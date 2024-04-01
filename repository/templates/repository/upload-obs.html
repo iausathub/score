@@ -204,6 +204,9 @@
                     <div class=" pb-4">
                         {{ form.sat_ra_dec_uncert_deg.label_tag}}
                         {{ form.sat_ra_dec_uncert_deg }}
+                        <div class="form-text text-muted">
+                            {{ form.sat_ra_dec_uncert_deg.help_text }}
+                        </div>
                         <div class="text-danger">
                             {{ form.sat_ra_dec_uncert_deg.errors }}
                         </div>
