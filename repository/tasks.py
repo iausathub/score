@@ -1,3 +1,5 @@
+from typing import Any, Union
+
 from celery import shared_task
 from celery_progress.backend import ProgressRecorder
 from django.forms import ValidationError
@@ -12,7 +14,26 @@ class UploadError(Exception):
 
 
 @shared_task(bind=True)
-def ProcessUpload(self, data):  # noqa: N802
+def process_upload(
+    self, data: list[list[Any]]
+) -> dict[str, Union[str, list[int], bool]]:
+    """
+    Processes the uploaded CSV data and creates or updates the corresponding Satellite,
+    Location, and Observation objects.
+
+    This function takes a list of lists where each inner list represents a row from
+    the CSV file. It validates the data, creates or updates the corresponding Satellite,
+    Location, and Observation objects, and sends a confirmation email.
+
+    Args:
+        data (list[list[str]]): A list of lists where each inner list represents a row
+                                from the CSV file.
+
+    Returns:
+        dict[str, object]: A dictionary containing the status of the upload, the IDs of
+        the created or updated observations, the date the upload was added, and the
+        email to which the confirmation was sent.
+    """
     progress_recorder = ProgressRecorder(self)
 
     obs_ids = []

@@ -14,9 +14,9 @@
       upload will fail. A sample file that meets all formatting requirements may be
       downloaded below.</p>
     <p>By sharing observations with the IAU CPS SatHub, you agree to follow our
-      Member Collaboration Agreement [NEEDS LINK] and that your data may be published
-      publicly with attribution [SPECIFY CC-THINGY HERE?]. Thank you!</p>
-      <a href="{% static 'observation_format.csv' %}" download>
+      <a href="https://docs.google.com/forms/d/e/1FAIpQLSfr3Td0xuOODMHjGnr9swGsdy4qk_NSYmqUcZ1ezJwCBiA8iQ/viewform">Member Collaboration Agreement</a> and that your data may be published
+      publicly with <a href="https://creativecommons.org/licenses/by/4.0/">attribution</a>. Thank you!</p>
+      <a href="{% static 'observation_format_example.csv' %}" download>
         <button class="btn btn-primary btn-sm mb-3">
           Download sample file
           </button>
@@ -59,7 +59,7 @@
         <b>apparent_magnitude_uncertainty</b>
       </div>
       <div>
-        Uncertainty in the brightness of the satellite in magnitudes, floating point, e.g., "0.14"
+        Uncertainty in the brightness of the satellite in magnitude, floating point, e.g., "0.14"
       </div>
       <div class="text-end">
         <b>observer_latitude_deg</b>
@@ -101,7 +101,7 @@
         <b>observer_orcid</b>
       </div>
       <div>
-        List of ORCID for all people who should be credited for the observation. At least one is required; getting an ORCID is free and easy at <a href="https://orcid.org/">orcid.org</a>.
+        List of ORCIDs for all people who should be credited for the observation. At least one is required; getting an ORCID is free and easy at <a href="https://orcid.org/">orcid.org</a>.
       </div>
       <div class="text-end">
         <b>observer_email</b>
@@ -121,11 +121,6 @@
       <div>
         Right Ascension of satellites in deg, measured with respect to Gaia DR3 astrometric catalog stars, floating point between 0 and 360, e.g., "359.12345678"
       </div>
-      <div class="text-end">
-        <b>satellite_right_ascension_uncertainty_deg</b>
-      </div>
-      <div>
-        Uncertainty of the above value, floating point, e.g., 0.01
       </div>
       <div class="text-end">
         <b>satellite_declination_deg</b>
@@ -134,10 +129,10 @@
         Declination of satellites in deg, measured with respect to Gaia DR3 astrometric catalog stars, floating point between -90 and 90, e.g., "-40.12345678"
       </div>
       <div class="text-end">
-        <b>satellite_declination_uncertainty_deg</b>
+        <b>satellite_ra_dec_uncertainty_deg</b>
       </div>
       <div>
-        Uncertainty of the above value, floating point, e.g., 0.01
+        Uncertainty matrix of the above values, floating point, e.g., "0.01, 0.01, 0.01, 0.01, 0.01, 0.01" to be read as a 2x3 matrix
       </div>
       <div class="text-end">
         <b>range_to_satellite_km</b>
@@ -173,7 +168,7 @@
         <b>data_archive_link</b>
       </div>
       <div>
-        To be defined … placeholder for "which of ~5 legit data archives is your data in? Provide a link here OR none (not preferred)". Validate the link somehow? Support file upload as an alternative?
+        Link to data archive containing the original data
       </div>
     </div>
   </div>

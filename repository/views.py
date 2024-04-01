@@ -11,7 +11,7 @@ from django.utils import timezone
 from rest_framework.renderers import JSONRenderer
 
 from repository.forms import SearchForm, SingleObservationForm
-from repository.tasks import ProcessUpload
+from repository.tasks import process_upload
 from repository.utils import (
     create_csv,
     get_stats,
@@ -58,7 +58,7 @@ def index(request):
         obs = list(read_data)
 
         # Create Task
-        upload_task = ProcessUpload.delay(obs)
+        upload_task = process_upload.delay(obs)
         task_id = upload_task.task_id
 
         context["task_id"] = task_id

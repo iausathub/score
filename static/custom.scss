@@ -48,6 +48,20 @@ $theme-colors: (
   padding: 0;
 }
 
+.clickable {
+  cursor: pointer;
+}
+
+input.no-arrows::-webkit-inner-spin-button,
+input.no-arrows::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+
+input.no-arrows {
+  -moz-appearance: textfield;
+  appearance: textfield;
+}
 
 $dropdown-link-active-bg: map-get($theme-colors, "primary");
 $modal-header-border-color: map-get($theme-colors, "primary");

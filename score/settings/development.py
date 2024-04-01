@@ -157,6 +157,10 @@ LOGGING = {
         "console": {
             "class": "logging.StreamHandler",
         },
+        "mail_admins": {
+            "level": "ERROR",
+            "class": "django.utils.log.AdminEmailHandler",
+        },
     },
     "root": {
         "handlers": ["console"],
@@ -164,8 +168,8 @@ LOGGING = {
     },
     "loggers": {
         "django": {
-            "handlers": ["console"],
-            "level": "INFO",
+            "handlers": ["console", "mail_admins"],
+            "level": "ERROR",
             "propagate": False,
         },
     },
@@ -176,4 +180,7 @@ BROKER_URL = "redis://localhost"
 CELERY_RESULT_BACKEND = "redis://localhost"
 CELERY_RESULT_SERIALIZER = "json"
 
-EMAIL_BACKEND = "anymail.backends.amazon_ses.EmailBackend"
+EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+EMAIL_HOST = "smtp.gmail.com"
+EMAIL_PORT = 587
+EMAIL_USE_TLS = True
