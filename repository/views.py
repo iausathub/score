@@ -426,5 +426,7 @@ def about(request):
 
 def download_data(request):
     template = loader.get_template("repository/download-data.html")
-    context = {"": ""}
+    context = {
+        "recaptcha_public_key": settings.RECAPTCHA_PUBLIC_KEY,
+    }
     return HttpResponse(template.render(context, request))
