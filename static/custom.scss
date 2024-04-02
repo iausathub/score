@@ -63,6 +63,8 @@ input.no-arrows {
   appearance: textfield;
 }
 
+.grecaptcha-badge { visibility: hidden; }
+
 $dropdown-link-active-bg: map-get($theme-colors, "primary");
 $modal-header-border-color: map-get($theme-colors, "primary");
 $modal-header-border-width: 2px;

@@ -4,7 +4,9 @@ import io
 import logging
 import zipfile
 
-from django.http import HttpResponse
+import requests
+from django.conf import settings
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
 from django.utils import timezone
@@ -82,7 +84,17 @@ def data_format(request):
     return HttpResponse(template.render(context, request))
 
 
-def view_data(request):
+def view_data(request) -> HttpResponse:
+    """
+    Show the 500 most recent observations and render the 'repository/view.html'
+    template.
+
+    Args:
+        request (HttpRequest): The request object.
+
+    Returns:
+        HttpResponse: The HttpResponse object with the rendered template.
+    """
     # Show the 500 most recent observations
     observation_list = Observation.objects.order_by("-date_added")[:500]
 
@@ -99,10 +111,47 @@ def view_data(request):
     )
 
 
-def download_all(request):
+def download_all(request) -> HttpResponse:
+    """
+    Create a CSV file, zip it, and return it as a downloadable file.
+
+    Args:
+        request (HttpRequest): The request object.
+
+    Returns:
+        HttpResponse: The HttpResponse object with the zipped CSV file.
+    """
+    if request.method == "POST" and settings.RECAPTCHA_PUBLIC_KEY != "":
+        # Get the reCAPTCHA response from the POST data
+        recaptcha_response = request.POST.get("g-recaptcha-response")
+
+        data = {
+            "secret": settings.RECAPTCHA_PRIVATE_KEY,
+            "response": recaptcha_response,
+        }
+
+        # Send a POST request to the Google reCAPTCHA API
+        r = requests.post(
+            "https://www.google.com/recaptcha/api/siteverify", data=data, timeout=30
+        )
+
+        # Get the result
+        result = r.json()
+
+        # If the reCAPTCHA was valid, proceed with the download
+        if result["score"] > 0.7:
+            return create_and_return_csv()
+        else:
+            # If the reCAPTCHA was not valid, return an error message
+            return JsonResponse({"error": "Invalid reCAPTCHA. Please try again."})
+    # If reCAPTCHA is not enabled (development mode), proceed with the download
+    else:
+        return create_and_return_csv()
+
+
+def create_and_return_csv():
     zipped_file, zipfile_name = create_csv(False)
     response = HttpResponse(zipped_file, content_type="application/zip")
-
     response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
     return response
 

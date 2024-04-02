@@ -11,11 +11,13 @@
         Search</a> page. The Search page allows for customized queries and returns refined
         search results based on user selected criteria.</p>
         <div class="text-center pt-3">
-            <form action="{% url 'download-all' %}" method="post">
+            <form action="{% url 'download-all' %}" method="post" id="download-form">
                 {% csrf_token %}
-                <button type="submit" class="btn btn-primary">
+                <input type="hidden" id="g-recaptcha-response" name="g-recaptcha-response">
+                <button type="button" id="download-button" class="btn btn-primary">
                     <i class="fas fa-download"></i> Download all data
                 </button>
+
             </form>
         </div>
     </div>
