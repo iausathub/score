@@ -243,11 +243,11 @@
       if (downloadButton) {
         downloadButton.addEventListener('click', function() {
           // When in development mode the reCAPTCHA public key is an empty string
-          if ('{{ settings.RECAPTCHA_PUBLIC_KEY }}' === '') {
+          if ('{{ recaptcha_public_key }}' === '') {
             document.getElementById('download-form').submit();
           } else {
               // Execute reCAPTCHA v3
-              grecaptcha.execute('{{ settings.RECAPTCHA_PUBLIC_KEY }}', {action: 'download'}).then(function(token) {
+              grecaptcha.execute('{{ recaptcha_public_key }}', {action: 'download'}).then(function(token) {
                   // Set the value of the 'g-recaptcha-response' input
                   document.getElementById('g-recaptcha-response').value = token;
 
