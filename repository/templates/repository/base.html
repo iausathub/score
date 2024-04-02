@@ -15,6 +15,7 @@
 {% endcompress %}
 
 <head>
+  <script src="https://www.google.com/recaptcha/api.js?render={{ settings.RECAPTCHA_PUBLIC_KEY }}"></script>
   <title>{% block title %}Satellite Constellation Observation Repository{% endblock %}</title>
 </head>
 
@@ -234,10 +235,29 @@
           onResult: customResult,
         })
       });
-
-
     </script>
     {% endif %}
+
+    <script>
+      var downloadButton = document.getElementById('download-button');
+      if (downloadButton) {
+        downloadButton.addEventListener('click', function() {
+          // When in development mode the reCAPTCHA public key is an empty string
+          if ('{{ settings.RECAPTCHA_PUBLIC_KEY }}' === '') {
+            document.getElementById('download-form').submit();
+          } else {
+              // Execute reCAPTCHA v3
+              grecaptcha.execute('{{ settings.RECAPTCHA_PUBLIC_KEY }}', {action: 'download'}).then(function(token) {
+                  // Set the value of the 'g-recaptcha-response' input
+                  document.getElementById('g-recaptcha-response').value = token;
+
+                  // Submit the form
+                  document.getElementById('download-form').submit();
+              });
+          }
+        });
+      }
+  </script>
   </body>
 
   </html>

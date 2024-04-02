@@ -76,6 +76,7 @@ INSTALLED_APPS = [
     "celery",
     "celery_progress",
     "anymail",
+    "django_recaptcha",
 ]
 
 MIDDLEWARE = [
@@ -229,3 +230,6 @@ EMAIL_HOST_PASSWORD = get_secret("score-settings")["temp-gmail-pw"]
 
 SERVER_EMAIL = get_secret("score-settings")["server-email"]
 ADMINS = get_secret("score-settings")["admins"]
+
+RECAPTCHA_PUBLIC_KEY = get_secret("score-settings")["recaptcha-public"]
+RECAPTCHA_PRIVATE_KEY = get_secret("score-settings")["recaptcha-private"]

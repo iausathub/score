@@ -46,6 +46,7 @@ INSTALLED_APPS = [
     "celery",
     "celery_progress",
     "anymail",
+    "django_recaptcha",
 ]
 
 MIDDLEWARE = [
@@ -184,3 +185,6 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+RECAPTCHA_PUBLIC_KEY = ""
+RECAPTCHA_PRIVATE_KEY = ""
