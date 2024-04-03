@@ -1,9 +1,8 @@
 {% load static %}
 {% load compress %}
 
-
 <!doctype html>
-<html lang="en" class="h-100">
+<html lang="en">
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
@@ -15,38 +14,23 @@
 {% endcompress %}
 
 <head>
-  <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_public_key }}"></script>
   <title>{% block title %}Satellite Constellation Observation Repository{% endblock %}</title>
 </head>
 
 <body class="d-flex flex-column h-100" >
-    <nav class="navbar navbar-expand-lg bg-primary border-bottom border-5 border-secondary py-3">
+    <nav class="navbar navbar-expand-lg bg-primary border-bottom border-5 border-secondary">
         <div class="container-fluid p ">
         <a class="navbar-brand fs-3  text-white" href="{% url 'index' %}">Satellite Constellation Observation Repository</a>
-        <button class="navbar-toggler" type="button" data-bs-theme="dark" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
             <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Submit data
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'index' %}">Upload observation file</a></li>
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'upload-obs' %}">Submit single observation</a></li>
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'data-format' %}">Data format</a></li>
-              </ul>
+            <li class="nav-item">
+                <a class="nav-link active text-light" aria-current="page" href="{% url 'index' %}">Upload</a>
             </li>
-
-            <li class="nav-item dropdown">
-              <a class="nav-link dropdown-toggle text-light" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                Data access
-              </a>
-              <ul class="dropdown-menu dropdown-menu-end">
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'view-data' %}">Recent observations</a></li>
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'download-data' %}">Download all observations</a></li>
-              </ul>
+            <li class="nav-item">
+                <a class="nav-link text-light" href="{% url 'view-data' %}">View Data</a>
             </li>
             <li class="nav-item">
                 <a class="nav-link text-light" href="{% url 'search' %}">Search</a>
@@ -59,8 +43,6 @@
     {% block content %}
     {% endblock %}
 
-
-
   <footer class="footer mt-auto bg-dark text-white">
 
     <!-- Section: Links  -->
@@ -69,15 +51,14 @@
         <!-- Grid row -->
         <div class="row mt-3">
           <!-- Grid column -->
-          <div class="col-3 text-center align-items-center d-flex mx-auto mb-4">
+          <div class="col-auto text-center align-items-center d-flex mx-auto mb-4">
             <!-- Content -->
-            <img src="{% static 'images/CPS_Logo_Col.png' %}" alt="IAU CPS logo"
-            class="img-fluid" width="125px">
+            <img src="../../../static/CPS_Logo_Col.png" class="img-fluid" width="125px">
           </div>
           <!-- Grid column -->
 
           <!-- Grid column -->
-          <div class="col-md-3   mx-auto mb-4">
+          <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
             <!-- Links -->
             <h6 class="text-uppercase fw-bold">Data</h6>
             <hr
@@ -85,36 +66,53 @@
                 style="width: 60px; background-color: #4d85ff; height: 2px"
                 />
             <p>
-              <a href="index" class="text-white">Upload observation file</a>
+              <a href="#" class="text-white">Link 1</a>
             </p>
             <p>
-              <a href="upload" class="text-white">Submit single observation</a>
+              <a href="#" class="text-white">Link 2</a>
             </p>
             <p>
-              <a href="search" class="text-white">Search</a>
+              <a href="#" class="text-white">Link 3</a>
             </p>
             <p>
-              <a href="view" class="text-white">View recent observations</a>
+              <a href="#" class="text-white">Link 4</a>
             </p>
           </div>
           <!-- Grid column -->
 
           <!-- Grid column -->
-          <div class="col-md-3 mx-auto mb-md-0 mb-4">
+          <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
             <!-- Links -->
             <h6 class="text-uppercase fw-bold">Resources</h6>
             <hr
                 class="mb-4 mt-0 d-inline-block mx-auto"
                 style="width: 60px; background-color: #4d85ff; height: 2px"
                 />
-                <p>
-                  <a href="data-format" class="text-white">Data format</a>
-                </p>
-                <p>
-                  <a href="about" class="text-white">About</a>
-                </p>
-            <p><i class="fab fa-github"></i> <a href="https://github.com/iausathub/score" class="text-white">Github</a></p>
-            <p><i class="fas fa-envelope mr-3"></i> <a href="mailto:sathub@cps.iau.org" class="text-white">sathub@cps.iau.org</a></p>
+            <p>
+              <a href="data-format.html" class="text-white">Upload format</a>
+            </p>
+            <p>
+              <a href="#" class="text-white">Link 1</a>
+            </p>
+            <p>
+              <a href="#" class="text-white">Link 2</a>
+            </p>
+            <p>
+              <a href="#" class="text-white">Link 3</a>
+            </p>
+          </div>
+          <!-- Grid column -->
+
+          <!-- Grid column -->
+          <div class="col-md-4 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
+            <!-- Links -->
+            <h6 class="text-uppercase fw-bold">Contact</h6>
+            <hr
+                class="mb-4 mt-0 d-inline-block mx-auto"
+                style="width: 60px; background-color: #4d85ff; height: 2px"
+                />
+            <p><i class="fab fa-github"></i> <a href="#" class="text-white">Github</a></p>
+            <p><i class="fas fa-envelope mr-3"></i> info@example.com</p>
           </div>
           <!-- Grid column -->
         </div>
@@ -137,127 +135,10 @@
   </footer>
 
     <script src="https://cdn.jsdelivr.net/npm/jquery/dist/jquery.min.js"></script>
+
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-ka7Sk0Gln4gmtz2MlQnikT1wXgYsOg+OMhuP+IlRH9sENBO0LRn5q+8nbTov4+1p" crossorigin="anonymous"></script>
     <script src="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.js"></script>
-    <!-- Celery Progress -->
-		<script src="{% static 'celery_progress/celery_progress.js' %}"></script>
 
-    <script>
-
-      $(document).ready(function() {
-          $('#obsTable tr, #showObsModal').click(function() {
-              var rowData = $(this).data('content');
-              var escapedJSON = rowData.replace(/\\u0022/g, '\"').replace(/\\u002D/g, '-').replace(/b\\u0027/g, '').replace(/\\u0027/g, '');
-
-              var observation = JSON.parse(escapedJSON);
-
-              $('#observation_id').text(observation.id);
-              $('#satellite_name').text(observation.satellite_id.sat_name);
-              $('#satellite_number').text(observation.satellite_id.sat_number);
-              $('#obs_time_utc').text(observation.obs_time_utc);
-              $('#obs_time_uncert').text(observation.obs_time_uncert_sec);
-              $('#date_added').text(observation.date_added);
-              $('#apparent_mag').text(observation.apparent_mag);
-              $('#apparent_mag_uncert').text(observation.apparent_mag_uncert);
-              $('#obs_lat_deg').text(observation.location_id.obs_lat_deg);
-              $('#obs_long_deg').text(observation.location_id.obs_long_deg);
-              $('#obs_alt_m').text(observation.location_id.obs_alt_m);
-              $('#obs_mode').text(observation.obs_mode);
-              $('#obs_filter').text(observation.obs_filter);
-              $('#obs_instrument').text(observation.instrument);
-              $('#obs_orc_id').text(observation.obs_orc_id.toString().replace(/,/g, ', '));
-              $('#obs_comments').text(observation.obs_comments);
-              $('#sat_ra_deg').text(observation.sat_ra_deg);
-              $('#sat_dec_deg').text(observation.sat_dec_deg);
-              var values = observation.sat_ra_dec_uncert_deg;
-              var firstHalf = values.slice(0, 3).join(', ');
-              var secondHalf = values.slice(3).join(', ');
-              $('#sat_ra_dec_uncert_deg').html('<br>' + firstHalf + '<br>' + secondHalf);
-              $('#range_to_sat_km').text(observation.range_to_sat_km);
-              $('#range_to_sat_uncert_km').text(observation.range_to_sat_uncert_km);
-              $('#range_rate_km_s').text(observation.range_rate_sat_km_s);
-              $('#range_rate_uncert_km_s').text(observation.range_rate_sat_uncert_km_s);
-              $('#data_archive_link').text(observation.data_archive_link);
-
-          });
-      });
-  </script>
-  <script>
-    $(document).ready(function() {
-        $('#id_not_detected').change(function() {
-            if(this.checked) {
-                $('#id_apparent_mag').prop('disabled', true);
-                $('#id_apparent_mag').prop('required', false);
-                $('#id_apparent_mag_uncert').prop('disabled', true);
-                $('#id_apparent_mag_uncert').prop('required', false);
-            } else {
-                $('#id_apparent_mag').prop('disabled', false);
-                $('#id_apparent_mag').prop('required', true);
-                $('#id_apparent_mag_uncert').prop('disabled', false);
-                $('#id_apparent_mag_uncert').prop('required', true);
-            }
-        });
-    });
-    </script>
-
-    {% if task_id %}
-    <script type="text/javascript">
-      // Progress Bar (JQuery)
-      function customResult(resultElement, result) {
-        document.getElementById('upload_btn').disabled = false;
-        document.getElementById('upload_ctrl').disabled = false;
-        if(result.status == "success"){
-          var date = new Date(result.date_added);
-          var formattedDate = date.toUTCString().replace('GMT', 'UTC');
-
-          document.getElementById('obs_added_text').innerText =
-          result.obs_ids.length + " observation(s) added to the database at " + formattedDate + ".";
-          document.getElementById('success_message').hidden = false;
-          //remove progress bar
-          document.getElementById('progress-bar').hidden = true;
-          document.getElementById('progress-bar-message').hidden = true;
-          document.getElementById('download_obs_ids').value = result.obs_ids;
-          document.getElementById('email').innerText = result.email;
-       }
-       else{
-        $( resultElement ).append(
-				  $('<br>')
-			  );
-        $( resultElement ).append(
-				  $('<p>').text(result)
-			  );
-       }
-      }
-
-      $(function () {
-        var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
-        CeleryProgressBar.initProgressBar(progressUrl, {
-          onResult: customResult,
-        })
-      });
-    </script>
-    {% endif %}
-
-    <script>
-      var downloadButton = document.getElementById('download-button');
-      if (downloadButton) {
-        downloadButton.addEventListener('click', function() {
-          // When in development mode the reCAPTCHA public key is an empty string
-          if ('{{ recaptcha_public_key }}' === '') {
-            document.getElementById('download-form').submit();
-          } else {
-              // Execute reCAPTCHA v3
-              grecaptcha.execute('{{ recaptcha_public_key }}', {action: 'download'}).then(function(token) {
-                  // Set the value of the 'g-recaptcha-response' input
-                  document.getElementById('g-recaptcha-response').value = token;
-
-                  // Submit the form
-                  document.getElementById('download-form').submit();
-              });
-          }
-        });
-      }
-  </script>
   </body>
 
   </html>

@@ -3,22 +3,6 @@
 
 // Include any default variable overrides here (though functions won't be available)
 
-.clickable {
-  cursor: pointer;
-}
-
-input.no-arrows::-webkit-inner-spin-button,
-input.no-arrows::-webkit-outer-spin-button {
-  -webkit-appearance: none;
-  margin: 0;
-}
-
-input.no-arrows {
-  -moz-appearance: textfield;
-  appearance: textfield;
-}
-
-.grecaptcha-badge { visibility: hidden; }
 
 // Then add additional custom code here
 $primary: #0d1f4d;

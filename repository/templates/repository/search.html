@@ -17,16 +17,16 @@
                 </div>
                 <div class="col">
                     <div class=" pb-4">
-                        {{ form.sat_number.label_tag }}
-                        {{ form.sat_number }}
+                        {{ form.start_date_range.label_tag}}
+                        {{ form.start_date_range }}
                     </div>
                 </div>
             </div>
             <div class="row">
                 <div class="col">
                     <div class=" pb-4">
-                        {{ form.start_date_range.label_tag}}
-                        {{ form.start_date_range }}
+                        {{ form.sat_number.label_tag }}
+                        {{ form.sat_number }}
                     </div>
                 </div>
                 <div class="col">
@@ -43,19 +43,17 @@
                         {{ form.obs_mode }}
                     </div>
                 </div>
-
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.constellation.label_tag}}
+                        {{ form.constellation }}
+                    </div>
+                </div>
             </div>
 
             <div class="pb-4">
                 {{ form.observation_id.label_tag}}
                 {{ form.observation_id }}
-            </div>
-            <div class="pb-4">
-                {{ form.observer_orcid.label_tag}}
-                {{ form.observer_orcid }}
-                <div class="text-danger">
-                    {{ form.observer_orcid.errors }}
-                </div>
             </div>
             <div class="form-group">
                 <input class="btn btn-primary" type="submit" value="Submit">
@@ -64,6 +62,11 @@
         </div>
             <div class="container-md">
             {% if observations %}
+            <div class="col p-3">
+                <div class="float-start">
+                    <i class="fas fa-download"></i>  <a href="{% url 'download-results' %}">Download search results</a>
+                </div>
+            </div>
                 <table data-toggle="table"
                 data-pagination="true"
                 data-search="true"
@@ -72,53 +75,30 @@
                 data-sort-name="added"
                 data-sort-order="desc"
                 data-classes="table"
-                class="table table-hover fs-6"
-                id="obsTable">
+                class="table table-hover fs-6">
                     <thead >
                         <tr>
                             <th scope="col" data-sortable="true" data-visible="true" >Date added</th>
                             <th data-field="added"  scope="col" data-sortable="true" data-visible="false" >Date_added_timestamp</th>
                             <th scope="col" data-sortable="true">Satellite</th>
                             <th scope="col" data-sortable="true">Date observed</th>
-                            <th scope="col" data-sortable="true">Mag</th>
-                            <th scope="col" data-sortable="true">Latitude</th>
-                            <th scope="col" data-sortable="true">Longitude</th>
-                            <th scope="col" data-sortable="true">Altitude</th>
-                            <th scope="col" data-sortable="true">Obs. mode</th>
-                            <th scope="col" data-sortable="true">Observer ORCID</th>
+                            <th scope="col" data-sortable="true">Apparent Mag.</th>
+                            <th scope="col" data-sortable="true">Obs. Mode</th>
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">
-                    {% for observation, observation_json in observations %}
-                        <tr data-bs-toggle="modal" data-bs-target="#obsModal" data-content="{{observation_json|escapejs|safe}}">
-                            <td scope="row">{{ observation.date_added|date:"M. d, Y h:i A" }}</td>
+                    {% for observation in observations %}
+                        <tr>
+                            <td scope="row">{{ observation.date_added }}</td>
                             <td scope="row">{{ observation.date_added.timestamp }}</td>
                             <td scope="row">{{ observation.satellite_id.sat_name }}</td>
-                            <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
-                            <td scope="row" class="text-end">{{ observation.apparent_mag }}</td>
-                            <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg }}</td>
-                            <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg }}</td>
-                            <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m }}</td>
+                            <td scope="row">{{ observation.obs_time_utc }}</td>
+                            <td scope="row">{{ observation.apparent_mag }}</td>
                             <td scope="row">{{ observation.obs_mode }}</td>
-                            <td scope="row">{{ observation.obs_orc_id|first }}</td>
                         </tr>
                     {% endfor %}
                     </tbody>
                 </table>
-                <div class="col p-3">
-                    {% if obs_ids %}
-                     <div class="float-end">
-                        <form action="{% url 'download-results' %}" method="post">
-                            {% csrf_token %}
-                            <input type="hidden" name="obs_ids" value="{{ obs_ids }}">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-download"></i> Download search results
-                            </button>
-                        </form>
-                    </div>
-                    {% endif %}
-                </div>
-                {% include "repository/modal.html" %}
             {% endif %}
             {% if error %}
             <div class="container-md text-center mt-5">

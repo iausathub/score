@@ -14,6 +14,3 @@ exclude = '''
 
 [tool.ruff]
 select = ["E", "F", "I", "N", "UP", "S", "B"]
-
-[tool.ruff.lint.per-file-ignores]
-"repository/tests/*.py" = ["S101"]
