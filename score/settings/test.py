@@ -1,6 +1,7 @@
 """
 Test Django settings for score project.
 """
+
 from socket import gethostbyname, gethostname
 
 from .base import *  # noqa: F403
