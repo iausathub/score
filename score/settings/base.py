@@ -193,11 +193,3 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-EMAIL_HOST_USER = get_secret("score-settings")["server-email"]
-EMAIL_HOST_PASSWORD = get_secret("score-settings")["temp-gmail-pw"]
-
-SERVER_EMAIL = get_secret("score-settings")["server-email"]
-ADMINS = get_secret("score-settings")["admins"]
-
-RECAPTCHA_PUBLIC_KEY = get_secret("score-settings")["recaptcha-public"]
-RECAPTCHA_PRIVATE_KEY = get_secret("score-settings")["recaptcha-private"]
