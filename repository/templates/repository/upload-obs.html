@@ -1,0 +1,277 @@
+{% extends "repository/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid p-3">
+    <div class="container-sm " >
+        <h2 class="text-center p-2 pb-4">Upload Single Observation</h2>
+        <div class="container-fluid">
+            {% if obs_id %}
+            <div class="alert alert-success" role="alert">
+                <h4 class="alert-heading">Upload successful</h4>
+                Observation ID: {{ obs_id }}<br/>
+                Confirmation email sent to: {{ obs_email }}
+            </div>
+            {% endif %}
+            {% if error %}
+            <div class="alert alert-danger" role="alert">
+                <h4 class="alert-heading">Upload failed</h4>
+                {{ error }}
+            </div>
+            {% endif %}
+        </div>
+        <div class="text-end my-3">
+            <span class="text-danger">*</span> denotes required field
+        </div>
+        <div class="justify-content-center px-5">
+            <form action="{% url 'upload-obs' %}" method="post" enctype="multipart/form-data">
+                {% csrf_token %}
+            <div class="row"><hr/></div>
+            <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold">
+                    Basic data
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.sat_name.label_tag }} <span class="text-danger">*</span>
+                        {{ form.sat_name }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.sat_number.label_tag }} <span class="text-danger">*</span>
+                        {{ form.sat_number }}
+                        <div class="text-danger">
+                            {{ form.sat_number.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.obs_date.label_tag}} <span class="text-danger">*</span>
+                        {{ form.obs_date }}
+                        <div class="form-text text-muted">
+                            {{ form.obs_date.help_text }}
+                        </div>
+                        <div class="text-danger">
+                            {{ form.obs_date.errors }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.obs_date_uncert.label_tag}} <span class="text-danger">*</span>
+                        {{ form.obs_date_uncert }}
+                        <div class="text-danger">
+                            {{ form.obs_date_uncert.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.obs_mode.label_tag}} <span class="text-danger">*</span>
+                        {{ form.obs_mode }}
+                    </div>
+                </div>
+                <div class="col">
+
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold"></div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.apparent_mag.label_tag}} <span class="text-danger">*</span>
+                        {{ form.apparent_mag }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.apparent_mag_uncert.label_tag}} <span class="text-danger">*</span>
+                        {{ form.apparent_mag_uncert }}
+                        <div class="text-danger">
+                            {{ form.apparent_mag_uncert.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold"></div>
+                <div class="col">
+                    <div class="pb-4">
+                        {{ form.not_detected }}
+                        {{ form.not_detected.label}}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.instrument.label_tag}} <span class="text-danger">*</span>
+                        {{ form.instrument }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.filter.label_tag}} <span class="text-danger">*</span>
+                        {{ form.filter }}
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3"><hr/></div>
+            <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold">
+                    Observer information
+                </div>
+                <div class="col">
+                    <div class="pb-4">
+                        {{ form.observer_latitude_deg.label_tag}} <span class="text-danger">*</span>
+                        {{ form.observer_latitude_deg }}
+                        <div class="text-danger">
+                            {{ form.observer_latitude_deg.errors }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.observer_longitude_deg.label_tag}} <span class="text-danger">*</span>
+                        {{ form.observer_longitude_deg }}
+                        <div class="text-danger">
+                            {{ form.observer_longitude_deg.errors }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.observer_altitude_m.label_tag}} <span class="text-danger">*</span>
+                        {{ form.observer_altitude_m }}
+                        <div class="text-danger">
+                            {{ form.observer_altitude_m.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold"></div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.observer_email.label_tag}} <span class="text-danger">*</span>
+                        {{ form.observer_email }}
+                        <div class="text-danger">
+                            {{ form.observer_email.errors }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.observer_orcid.label_tag}} <span class="text-danger">*</span>
+                        {{ form.observer_orcid }}
+                        <div class="text-danger">
+                            {{ form.observer_orcid.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3"><hr/></div>
+            <div class="row">
+                <div class="col-sm-4 fs-5 fw-bold">
+                    Advanced data
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.sat_ra_deg.label_tag}}
+                        {{ form.sat_ra_deg }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.sat_dec_deg.label_tag}}
+                        {{ form.sat_dec_deg }}
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.sat_ra_dec_uncert_deg.label_tag}}
+                        {{ form.sat_ra_dec_uncert_deg }}
+                        <div class="form-text text-muted">
+                            {{ form.sat_ra_dec_uncert_deg.help_text }}
+                        </div>
+                        <div class="text-danger">
+                            {{ form.sat_ra_dec_uncert_deg.errors }}
+                        </div>
+                    </div>
+                </div>
+                <div class="col">
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.range_to_sat_km.label_tag}}
+                        {{ form.range_to_sat_km }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.range_to_sat_uncert_km.label_tag}}
+                        {{ form.range_to_sat_uncert_km }}
+                        <div class="text-danger">
+                            {{ form.range_to_sat_uncert_km.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-sm-4 fw-bold"></div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.range_rate_sat_km_s.label_tag}}
+                        {{ form.range_rate_sat_km_s }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.range_rate_sat_uncert_km_s.label_tag}}
+                        {{ form.range_rate_sat_uncert_km_s }}
+                        <div class="text-danger">
+                            {{ form.range_rate_sat_uncert_km_s.errors }}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-4 fw-bold"></div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.comments.label_tag}}
+                        {{ form.comments }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class=" pb-4">
+                        {{ form.data_archive_link.label_tag}}
+                        {{ form.data_archive_link }}
+                    </div>
+                </div>
+            </div>
+            <div class="form-group">
+                <input class="btn btn-primary" type="submit" value="Submit">
+            </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
