@@ -83,7 +83,7 @@
             <p id="obs_added_text"></p>
             <p class="mb-3">Confirmation email with observation ID(s) sent to: <span id="email"></span></p>
             <p>Observation ID(s) with corresponding satellite name and observation date/time
-              can also be downloaded as a .txt file:</p>
+              can also be downloaded as a .csv file:</p>
             <form action="/download-ids" method="post">
               {% csrf_token %}
               <input type="hidden" name="obs_ids" id="download_obs_ids">

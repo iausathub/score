@@ -3,6 +3,7 @@ import datetime
 import io
 import logging
 import zipfile
+from typing import Union
 
 import requests
 from django.conf import settings
@@ -68,13 +69,6 @@ def index(request):
         context["date_added"] = datetime.datetime.now()
         return HttpResponse(template.render(context, request))
 
-    context = {
-        "filename": "",
-        "satellite_count": stats.satellite_count,
-        "observation_count": stats.observation_count,
-        "observer_count": stats.observer_count,
-        "latest_obs_list": stats.latest_obs_list,
-    }
     return HttpResponse(template.render(context, request))
 
 
@@ -140,17 +134,30 @@ def download_all(request) -> HttpResponse:
 
         # If the reCAPTCHA was valid, proceed with the download
         if result["score"] > 0.7:
-            return create_and_return_csv()
+            return create_and_return_csv(False)
         else:
             # If the reCAPTCHA was not valid, return an error message
             return JsonResponse({"error": "Invalid reCAPTCHA. Please try again."})
     # If reCAPTCHA is not enabled (development mode), proceed with the download
     else:
-        return create_and_return_csv()
+        return create_and_return_csv(False)
 
 
-def create_and_return_csv():
-    zipped_file, zipfile_name = create_csv(False)
+def create_and_return_csv(observations: Union[list[Observation], bool]) -> HttpResponse:
+    """
+    Create a CSV file from the provided observations and return it as a zipped file
+    in an HTTP response.
+
+    Args:
+        observations (Union[List[Observation], bool]): A list of Observation objects
+        or False. If false, all observations will be included in the CSV file.
+
+    Returns:
+        HttpResponse: An HTTP response containing the zipped CSV file. The Content-Type
+        of the response is set to "application/zip", and the Content-Disposition is set
+        to make the file a download with the appropriate filename.
+    """
+    zipped_file, zipfile_name = create_csv(observations)
     response = HttpResponse(zipped_file, content_type="application/zip")
     response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
     return response
@@ -267,11 +274,8 @@ def download_results(request):
 
         observations = Observation.objects.filter(id__in=observation_ids)
 
-        zipped_file, zipfile_name = create_csv(observations)
-        response = HttpResponse(zipped_file, content_type="application/zip")
+        create_and_return_csv(observations)
 
-        response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
-        return response
     return HttpResponse()
 
 
