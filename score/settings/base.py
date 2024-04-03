@@ -4,7 +4,6 @@ Base Django settings for score project.
 
 import json
 from pathlib import Path
-from socket import gethostbyname, gethostname
 
 import boto3
 from botocore.exceptions import ClientError
@@ -40,14 +39,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
-SECRET_KEY = get_secret("score-secret-key")["secret-key"]
-SECRET_HEALTH_CHECK_TOKEN = get_secret("score-secret-key")["health-check-token"]
-SECRET_ADMIN_TOKEN = get_secret("score-secret-key")["admin-token"]
-
 DEBUG = False
 DEBUG_PROPAGATE_EXCEPTIONS = True
-ALLOWED_HOSTS = [get_secret("score-allowed-hosts")["score-prod-alb"]]
-ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 # Application definition
 
@@ -105,23 +98,6 @@ WSGI_APPLICATION = "score.wsgi.application"
 # SESSION_COOKIE_SECURE = True
 # CSRF_COOKIE_SECURE = True
 SECURE_CROSS_ORIGIN_OPENER_POLICY = None
-
-CSRF_TRUSTED_ORIGINS = [get_secret("score-allowed-hosts")["score-prod-alb-csrf"]]
-
-
-# Database
-# https://docs.djangoproject.com/en/5.0/ref/settings/#databases
-
-DATABASES = {
-    "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
-        "NAME": get_secret("score_prod_db")["dbname"],
-        "USER": get_secret("score_prod_db")["username"],
-        "PASSWORD": get_secret("score_prod_db")["password"],
-        "HOST": get_secret("score_prod_db")["host"],
-        "PORT": get_secret("score_prod_db")["port"],
-    },
-}
 
 
 # Password validation

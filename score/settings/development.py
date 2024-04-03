@@ -10,6 +10,8 @@ For the full list of settings and their values, see
 https://docs.djangoproject.com/en/5.0/ref/settings/
 """
 
+from socket import gethostbyname, gethostname
+
 from .base import *  # noqa: F403
 
 # Quick-start development settings - unsuitable for production
@@ -22,7 +24,7 @@ SECRET_ADMIN_TOKEN = "test"  # noqa: S105
 DEBUG = True
 DEBUG_PROPAGATE_EXCEPTIONS = True
 ALLOWED_HOSTS = ["127.0.0.1"]
-
+ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 # SECURE_SSL_REDIRECT = True
 # SESSION_COOKIE_SECURE = True
