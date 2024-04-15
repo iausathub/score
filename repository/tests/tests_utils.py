@@ -1,4 +1,5 @@
 import pytest
+import requests
 from django.utils import timezone
 
 from repository.models import Location, Observation, Satellite
@@ -44,7 +45,10 @@ def test_validate_position(requests_mock, setup_data):
         status_code=200,
         json=[{"NAME": "TestSat", "ALTITUDE-DEG": "10"}],
     )
-    result = validate_position("TestSat", "12345", "2022-01-01T00:00:00", "0", "0", "0")
+    response = requests.get(
+        "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/", timeout=5
+    )
+    result = validate_position(response, "TestSat")
     assert result
 
 
@@ -56,9 +60,11 @@ def test_validate_position_invalid_sat_name(requests_mock, setup_data):
         status_code=200,
         json=[{"NAME": "TestSat", "ALTITUDE-DEG": "10"}],
     )
-    result = validate_position(
-        "InvalidSat", "12345", "2022-01-01T00:00:00", "0", "0", "0"
+    response = requests.get(
+        "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/", timeout=5
     )
+    result = validate_position(response, "InvalidSat")
+
     assert result == "Satellite name and number do not match"
 
 
@@ -70,5 +76,8 @@ def test_validate_position_not_visible(requests_mock, setup_data):
         status_code=200,
         json=[],
     )
-    result = validate_position("TestSat", "12345", "2022-01-01T00:00:00", "0", "0", "0")
+    response = requests.get(
+        "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/", timeout=5
+    )
+    result = validate_position(response, "TestSat")
     assert result == "Satellite with this ID not visible at this time and location"

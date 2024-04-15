@@ -92,6 +92,9 @@
                     <div class=" pb-4">
                         {{ form.apparent_mag.label_tag}} <span class="text-danger">*</span>
                         {{ form.apparent_mag }}
+                        <div class="text-danger">
+                            {{ form.apparent_mag.errors }}
+                        </div>
                     </div>
                 </div>
                 <div class="col">
