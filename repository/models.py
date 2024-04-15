@@ -2,7 +2,7 @@ import re
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
-from django.core.validators import URLValidator
+from django.core.validators import MaxValueValidator, MinValueValidator, URLValidator
 from django.db import models
 from django.utils import timezone
 
@@ -33,8 +33,12 @@ class Satellite(models.Model):
 
 
 class Location(models.Model):
-    obs_lat_deg = models.FloatField(default=0)
-    obs_long_deg = models.FloatField(default=0)
+    obs_lat_deg = models.FloatField(
+        validators=[MinValueValidator(-90), MaxValueValidator(90)]
+    )
+    obs_long_deg = models.FloatField(
+        validators=[MinValueValidator(-180), MaxValueValidator(180)]
+    )
     obs_alt_m = models.FloatField(default=0)
     date_added = models.DateTimeField("date added", default=timezone.now)
 
@@ -57,10 +61,6 @@ class Location(models.Model):
             raise ValidationError("Longitude is required.")
         if not self.obs_alt_m:
             raise ValidationError("Altitude is required.")
-        if self.obs_lat_deg < -90 or self.obs_lat_deg > 90:
-            raise ValidationError("Latitude must be between -90 and 90 degrees.")
-        if self.obs_long_deg < -180 or self.obs_long_deg > 180:
-            raise ValidationError("Longitude must be between -180 and 180 degrees.")
         if self.obs_alt_m < 0:
             raise ValidationError("Altitude must be greater than 0 meters.")
 
@@ -110,8 +110,12 @@ class Observation(models.Model):
     az_deg_satchecker = models.FloatField(null=True, blank=True)
     illuminated = models.BooleanField(null=True, blank=True)
     limiting_magnitude = models.FloatField(null=True, blank=True)
-    satellite_id = models.ForeignKey(Satellite, on_delete=models.CASCADE)
-    location_id = models.ForeignKey(Location, on_delete=models.CASCADE)
+    satellite_id = models.ForeignKey(
+        Satellite, on_delete=models.CASCADE, related_name="observations"
+    )
+    location_id = models.ForeignKey(
+        Location, on_delete=models.CASCADE, related_name="observations"
+    )
     date_added = models.DateTimeField("date added", default=timezone.now)
 
     def __str__(self):
