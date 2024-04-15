@@ -59,8 +59,6 @@ class Location(models.Model):
             raise ValidationError("Longitude is required.")
         if self.obs_alt_m is None:
             raise ValidationError("Altitude is required.")
-        if self.obs_alt_m < 0:
-            raise ValidationError("Altitude must be greater than 0 meters.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
