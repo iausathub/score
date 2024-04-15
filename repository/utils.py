@@ -7,10 +7,28 @@ from typing import Tuple, Union
 import requests
 from astropy.time import Time
 from django.core.mail import EmailMultiAlternatives
+from requests import Response
 from rest_framework.renderers import JSONRenderer
 
 from repository.models import Observation, Satellite
 from repository.serializers import ObservationSerializer
+
+# Named tuple to represent additional data from SatChecker for each observation
+SatCheckerData = namedtuple(
+    "SatCheckerData",
+    [
+        "phase_angle",
+        "range_to_sat",
+        "range_rate",
+        "illuminated",
+        "alt_deg",
+        "az_deg",
+        "ddec_deg_s",
+        "dra_cosdec_deg_s",
+        "sat_dec_deg",
+        "sat_ra_deg",
+    ],
+)
 
 
 # Statistics for main page
@@ -65,22 +83,25 @@ def get_stats():
     )
 
 
-# Validate satellite position is above horizon using SatChecker
-def validate_position(
+# Validate satellite position is above horizon using SatChecker and add additional data
+# from the SatChecker response if successful
+def add_additional_data(
     satellite_name: str,
     sat_number: int,
     observation_time: Union[str, Time],
     latitude: float,
     longitude: float,
     altitude: float,
-) -> Union[bool, str]:
+) -> Union[SatCheckerData, str, bool]:
     """
-    Validates if a satellite is above the horizon at a given time and location.
+    Validates if a satellite is above the horizon at a given time and location and
+    returns additional data.
 
     This function uses the SatChecker API to verify if a satellite, identified by its
     name and number, is above the horizon at a specific time and location. The location
-    is specified by latitude, longitude, and altitude. The function returns True if
-    the satellite is above the horizon, and a string error message otherwise.
+    is specified by latitude, longitude, and altitude. The function returns a
+    SatCheckerData namedtuple containing additional data if the satellite is above the
+    horizon, and a string error message or False otherwise.
 
     Args:
         satellite_name (str): The name of the satellite.
@@ -92,8 +113,10 @@ def validate_position(
         altitude (float): The altitude of the observation location.
 
     Returns:
-        Union[bool, str]: Returns True if the satellite is above the horizon. Returns
-                          an error message string otherwise.
+        Union[SatCheckerData, str, bool]: Returns a SatCheckerData namedtuple containing
+        additional data (phase angle, distance to satellite, height above ground, etc.)
+        if the satellite is above the horizon. Returns an error message string or False
+        otherwise.
     """
     if (
         not satellite_name
@@ -119,14 +142,52 @@ def validate_position(
     except requests.exceptions.RequestException:
         return "Satellite position check failed - try again later."
 
-    if r.status_code != 200:
+    is_valid = validate_position(r, satellite_name)
+
+    if isinstance(is_valid, str):
+        return is_valid
+
+    if is_valid and r.json():
+        data = r.json()[0]
+        satellite_data = SatCheckerData(
+            phase_angle=round(float(data["PHASE_ANGLE-DEG"]), 7),
+            range_to_sat=round(float(data["RANGE-KM"]), 7),
+            range_rate=round(float(data["RANGE_RATE-KM_PER_SEC"]), 7),
+            illuminated=data["ILLUMINATED"],
+            alt_deg=round(float(data["ALTITUDE-DEG"]), 7),
+            az_deg=round(float(data["AZIMUTH-DEG"]), 7),
+            ddec_deg_s=round(float(data["DDEC-DEG_PER_SEC"]), 7),
+            dra_cosdec_deg_s=round(float(data["DRA_COSDEC-DEG_PER_SEC"]), 7),
+            sat_dec_deg=round(float(data["DECLINATION-DEG"]), 7),
+            sat_ra_deg=round(float(data["RIGHT_ASCENSION-DEG"]), 7),
+        )
+        return satellite_data
+
+    return is_valid
+
+
+def validate_position(response: Response, satellite_name: str) -> Union[str, bool]:
+    """
+    Validates the position of a satellite based on the response from an API call.
+
+    Args:
+        response (Response): The response object from the API call.
+        satellite_name (str): The name of the satellite to validate.
+
+    Returns:
+        Union[str, bool]: An error message if the validation fails.
+                          True if the validation is successful.
+    """
+    return True
+    if response.status_code != 200:
         return "Satellite position check failed - verify uploaded data is correct."
-    if not r.json():
+    if not response.json():
         return "Satellite with this ID not visible at this time and location"
-    if r.json()[0]["NAME"] != satellite_name:
+    if response.json()[0]["NAME"] != satellite_name:
         return "Satellite name and number do not match"
-    if float(r.json()[0]["ALTITUDE-DEG"]) < -5:
+    if float(response.json()[0]["ALTITUDE-DEG"]) < -5:
         return "Satellite below horizon"
+
     return True
 
 

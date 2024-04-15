@@ -168,6 +168,11 @@ class SingleObservationForm(Form):
         label="Apparent Magnitude Uncertainty",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
+    limiting_magnitude = forms.FloatField(
+        required=True,
+        label="Limiting Magnitude",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
     instrument = forms.CharField(
         max_length=200,
         required=True,

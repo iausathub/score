@@ -128,7 +128,7 @@
          class="text-center p-3"
          style="background-color: rgba(0, 0, 0, 0.2)"
          >
-      © 2023
+      © 2024
       <a class="text-white" href="https://cps.iau.org/"
          >IAU Centre for the Protection of the Dark and Quiet Sky from Satellite Constellation Interference</a
         >
@@ -165,7 +165,7 @@
               $('#obs_mode').text(observation.obs_mode);
               $('#obs_filter').text(observation.obs_filter);
               $('#obs_instrument').text(observation.instrument);
-              $('#obs_orc_id').text(observation.obs_orc_id.toString().replace(/,/g, ', '));
+              $('#obs_orc_id').html(observation.obs_orc_id.toString().replace(/,/g, ',<br/>'));
               $('#obs_comments').text(observation.obs_comments);
               $('#sat_ra_deg').text(observation.sat_ra_deg);
               $('#sat_dec_deg').text(observation.sat_dec_deg);
@@ -178,7 +178,18 @@
               $('#range_rate_km_s').text(observation.range_rate_sat_km_s);
               $('#range_rate_uncert_km_s').text(observation.range_rate_sat_uncert_km_s);
               $('#data_archive_link').text(observation.data_archive_link);
-
+              $('#limiting_magnitude').text(observation.limiting_magnitude);
+              $('#phase_angle').text(observation.phase_angle);
+              $('#range_to_sat_km_satchecker').text(observation.range_to_sat_km_satchecker);
+              $('#range_rate_sat_km_s_satchecker').text(observation.range_rate_sat_km_s_satchecker);
+              $('#sat_ra_deg_satchecker').text(observation.sat_ra_deg_satchecker);
+              $('#sat_dec_deg_satchecker').text(observation.sat_dec_deg_satchecker);
+              $('#ddec_deg_s_satchecker').text(observation.ddec_deg_s_satchecker);
+              $('#dra_cosdec_deg_s_satchecker').text(observation.dra_cosdec_deg_s_satchecker);
+              $('#alt_deg_satchecker').text(observation.alt_deg_satchecker);
+              $('#az_deg_satchecker').text(observation.az_deg_satchecker);
+              $('#illuminated').text(observation.illuminated);
+              console.log(observation);
           });
       });
   </script>

@@ -1,5 +1,5 @@
 <div id="obsModal" class="modal" role="dialog">
-    <div class="modal-dialog modal-lg modal-dialog-centered"
+    <div class="modal-dialog modal-xl modal-dialog-centered"
     aria-labelledby="obs-modal-title" aria-hidden="true">
         <div class="modal-content">
             <div class="modal-header" data-bs-theme="dark" >
@@ -8,36 +8,189 @@
                 data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body container">
-                <div class="row">
+                <div class="row pb-4 fs-5">
                     <div class="col">
                         <div class="fw-bold">Observation ID: <span class="fw-normal" id="observation_id"></span></div>
-                        <div class="fw-bold">Satellite Name: <span class="fw-normal" id="satellite_name"></span></div>
-                        <div class="fw-bold">NORAD ID: <span class="fw-normal" id="satellite_number"></span></div>
-                        <div class="fw-bold">Observation time (UTC): <span class="fw-normal" id="obs_time_utc"></span></div>
-                        <div class="fw-bold">Observation time uncertainty: <span class="fw-normal" id="obs_time_uncert"></span></div>
-                        <div class="fw-bold">Date added (UTC): <span class="fw-normal" id="date_added"></span></div>
-                        <div class="fw-bold">Apparent magnitude: <span class="fw-normal" id="apparent_mag"></span></div>
-                        <div class="fw-bold">Apparent magnitude uncertainty: <span class="fw-normal" id="apparent_mag_uncert"></span></div>
-                        <div class="fw-bold">Observation latitude (deg.): <span class="fw-normal" id="obs_lat_deg"></span></div>
-                        <div class="fw-bold">Observation longitude (deg.): <span class="fw-normal" id="obs_long_deg"></span></div>
-                        <div class="fw-bold">Observation altitude (m): <span class="fw-normal" id="obs_alt_m"></span></div>
-                        <div class="fw-bold">Observing mode: <span class="fw-normal" id="obs_mode"></span></div>
-                        <div class="fw-bold">Filter: <span class="fw-normal" id="obs_filter"></span></div>
                     </div>
                     <div class="col">
-                        <div class="fw-bold">Instrument: <span class="fw-normal" id="obs_instrument"></span></div>
-                        <div class="fw-bold">Observer ORCID(s): <span class="fw-normal" id="obs_orc_id"></span></div>
-                        <div class="fw-bold">Commments: <span class="fw-normal" id="obs_comments"></span></div>
-                        <div class="fw-bold">Satellite RA (deg.): <span class="fw-normal" id="sat_ra_deg"></span></div>
-                        <div class="fw-bold">Satellite Dec. (deg.): <span class="fw-normal" id="sat_dec_deg"></span></div>
-                        <div class="fw-bold">RA/Dec. uncertainty (deg.): <span class="fw-normal" id="sat_ra_dec_uncert_deg"></span></div>
-                        <div class="fw-bold">Range to satellite (km): <span class="fw-normal" id="range_to_sat_km"></span></div>
-                        <div class="fw-bold">Range uncertainty (km): <span class="fw-normal" id="range_to_sat_uncert_km"></span></div>
-                        <div class="fw-bold">Range rate (km/s): <span class="fw-normal" id="range_rate_km_s"></span></div>
-                        <div class="fw-bold">Range rate uncertainty (km/s): <span class="fw-normal" id="range_rate_uncert_km_s"></span></div>
-                        <div class="fw-bold">Data archive: <span class="fw-normal" id="data_archive_link"></span></div>
+                        <div class="fw-bold text-end">Date added (UTC): <span class="fw-normal" id="date_added"></span></div>
                     </div>
                 </div>
+                <div class="row pb-4">
+                    <div class="col-2 text-center">
+                        <div class="fw-bold">Basic</div>
+                    </div>
+                    <div class="col-5">
+                        <div class="row">
+                            <div class="col text-end px-0">Satellite Name:</div>
+                            <div class="col text-start" id="satellite_name"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end px-0">NORAD ID:</div>
+                            <div class="col text-start" id="satellite_number"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end px-0">Obs. time (UTC):</div>
+                            <div class="col text-start" id="obs_time_utc"></div>
+                        </div>
+                        <div class="row align-items-end">
+                            <div class="col text-end px-0">Obs. time uncertainty (s):</div>
+                            <div class="col " id="obs_time_uncert"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end px-0">Apparent magnitude:</div>
+                            <div class="col text-start" id="apparent_mag"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end px-0">Apparent magnitude uncertainty:</div>
+                            <div class="col text-start" id="apparent_mag_uncert"></div>
+                        </div>
+                    </div>
+                    <div class="col-5">
+                        <div class="row">
+                            <div class="col text-end px-0">Observing mode:</div>
+                            <div class="col text-start" id="obs_mode"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end px-0">Filter:</div>
+                            <div class="col text-start" id="obs_filter"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end px-0">Instrument:</div>
+                            <div class="col text-start" id="obs_instrument"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end px-0">Limiting magnitude:</div>
+                            <div class="col text-start" id="limiting_magnitude"></div>
+                        </div>
+                        <div class="row">
+                            <div class="col text-end px-0">Data archive:</div>
+                            <div class="col text-start" id="data_archive_link"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-light">
+                    <div class="row p-2">
+                        <div class="col-2 text-center">
+                            <div class="fw-bold">Position</div>
+                        </div>
+                        <div class="col-5">
+                            <div class="row">
+                                <div class="col text-end px-0">Satellite RA (deg.):</div>
+                                <div class="col text-start" id="sat_ra_deg"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Satellite Dec. (deg.):</div>
+                                <div class="col text-start" id="sat_dec_deg"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">RA/Dec. uncertainty (deg.):</div>
+                                <div class="col text-start" id="sat_ra_dec_uncert_deg"></div>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="row">
+                                <div class="col text-end px-0">Range to satellite (km):</div>
+                                <div class="col text-start" id="range_to_sat_km"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Range uncertainty (km):</div>
+                                <div class="col text-start" id="range_to_sat_uncert_km"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Range rate (km/s):</div>
+                                <div class="col text-start" id="range_rate_km_s"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Range rate uncertainty (km/s):</div>
+                                <div class="col text-start" id="range_rate_uncert_km_s"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="">
+                    <div class="row p-2">
+                        <div class="col-2 text-center">
+                            <div class="fw-bold">Observer</div>
+                        </div>
+                        <div class="col-5">
+                            <div class="row">
+                                <div class="col text-end px-0">Observation latitude (deg.):</div>
+                                <div class="col text-start" id="obs_lat_deg"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Observation longitude (deg.):</div>
+                                <div class="col text-start" id="obs_long_deg"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Observation altitude (m):</div>
+                                <div class="col text-start" id="obs_alt_m"></div>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="row">
+                                <div class="col text-end px-0">Observer ORCID(s):</div>
+                                <div class="col text-start" id="obs_orc_id"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Commments:</div>
+                                <div class="col text-start" id="obs_comments"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="bg-light">
+                    <div class="row p-2">
+                        <div class="col-2 text-center">
+                            <div class="fw-bold">Reference data<span class="fw-normal">*</span></div>
+                        </div>
+                        <div class="col-5">
+                            <div class="row">
+                                <div class="col text-end px-0">Satellite RA (deg.):</div>
+                                <div class="col text-start" id="sat_ra_deg_satchecker"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Satellite Dec. (deg):</div>
+                                <div class="col text-start" id="sat_dec_deg_satchecker"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Range to satellite (km):</div>
+                                <div class="col text-start" id="range_to_sat_km_satchecker"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Range rate (km/s):</div>
+                                <div class="col text-start" id="range_rate_sat_km_s_satchecker"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Phase angle (deg.):</div>
+                                <div class="col text-start" id="phase_angle"></div>
+                            </div>
+                        </div>
+                        <div class="col-5">
+                            <div class="row">
+                                <div class="col text-end px-0">DRA (cosdec/deg/s):</div>
+                                <div class="col text-start" id="dra_cosdec_deg_s_satchecker"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">DDec (deg/s):</div>
+                                <div class="col text-start" id="ddec_deg_s_satchecker"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Alt (deg):</div>
+                                <div class="col text-start" id="alt_deg_satchecker"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Az (deg):</div>
+                                <div class="col text-start" id="az_deg_satchecker"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Illuminated:</div>
+                                <div class="col text-start" id="illuminated"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="pt-2 text-end text-muted">* Reference data is retrieved from SatChecker upon observation submission.</div>
             </div>
         </div>
     </div>
