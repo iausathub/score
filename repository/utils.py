@@ -178,7 +178,6 @@ def validate_position(response: Response, satellite_name: str) -> Union[str, boo
         Union[str, bool]: An error message if the validation fails.
                           True if the validation is successful.
     """
-    return True
     if response.status_code != 200:
         return "Satellite position check failed - verify uploaded data is correct."
     if not response.json():
