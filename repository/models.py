@@ -9,7 +9,7 @@ from django.utils import timezone
 
 class Satellite(models.Model):
 
-    sat_name = models.CharField(max_length=200)
+    sat_name = models.CharField(max_length=200, null=True, blank=True)
     sat_number = models.IntegerField(default=0)
     date_added = models.DateTimeField("date added", default=timezone.now)
 
@@ -20,8 +20,6 @@ class Satellite(models.Model):
         db_table = "satellite"
 
     def clean(self):
-        if not self.sat_name:
-            raise ValidationError("Satellite name is required.")
         if not self.sat_number:
             raise ValidationError("Satellite number is required.")
         if len(str(self.sat_number)) > 5:
@@ -59,7 +57,7 @@ class Location(models.Model):
             raise ValidationError("Latitude is required.")
         if not self.obs_long_deg:
             raise ValidationError("Longitude is required.")
-        if not self.obs_alt_m:
+        if self.obs_alt_m is None:
             raise ValidationError("Altitude is required.")
         if self.obs_alt_m < 0:
             raise ValidationError("Altitude must be greater than 0 meters.")

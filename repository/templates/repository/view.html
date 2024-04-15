@@ -18,7 +18,8 @@
                 <tr>
                     <th scope="col" data-sortable="true" data-visible="true" >Date added</th>
                     <th data-field="added"  scope="col" data-sortable="true" data-visible="false" >Date_added_timestamp</th>
-                    <th scope="col" data-sortable="true">Satellite</th>
+                    <th scope="col" data-sortable="true">Name</th>
+                    <th scope="col" data-sortable="true">NORAD ID</th>
                     <th scope="col" data-sortable="true">Date observed</th>
                     <th scope="col" data-sortable="true">Mag</th>
                     <th scope="col" data-sortable="true">Latitude</th>
@@ -34,6 +35,7 @@
                     <td scope="row">{{ observation.date_added|date:"M. d, Y h:i A" }}</td>
                     <td scope="row">{{ observation.date_added.timestamp }}</td>
                     <td scope="row">{{ observation.satellite_id.sat_name }}</td>
+                    <td scope="row">{{ observation.satellite_id.sat_number }}</td>
                     <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
                     <td scope="row" class="text-end">{{ observation.apparent_mag }}</td>
                     <td scope="row"class="text-end">{{ observation.location_id.obs_lat_deg }}</td>

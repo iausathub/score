@@ -119,14 +119,13 @@ def add_additional_data(
         otherwise.
     """
     if (
-        not satellite_name
-        or not sat_number
+        not sat_number
         or not observation_time
         or not latitude
         or not longitude
-        or not altitude
+        or altitude is None
     ):
-        return False
+        return "Satellite position check failed - check your data."
     obs_time = Time(observation_time, format="isot", scale="utc")
     url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
     params = {
@@ -182,7 +181,7 @@ def validate_position(response: Response, satellite_name: str) -> Union[str, boo
         return "Satellite position check failed - verify uploaded data is correct."
     if not response.json():
         return "Satellite with this ID not visible at this time and location"
-    if response.json()[0]["NAME"] != satellite_name:
+    if satellite_name and response.json()[0]["NAME"] != satellite_name:
         return "Satellite name and number do not match"
     if float(response.json()[0]["ALTITUDE-DEG"]) < -5:
         return "Satellite below horizon"
@@ -255,8 +254,13 @@ def get_observation_list(is_html: bool, obs_ids: list[int]) -> str:
         observation = Observation.objects.get(id=obs_id)
         list_text += (
             str(obs_id)
+            + (
+                " - " + observation.satellite_id.sat_name
+                if observation.satellite_id.sat_name
+                else ""
+            )
             + " - "
-            + observation.satellite_id.sat_name
+            + str(observation.satellite_id.sat_number)
             + " - "
             + str(observation.obs_time_utc)
             + "<br />"

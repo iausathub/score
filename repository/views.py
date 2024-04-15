@@ -172,6 +172,7 @@ def download_obs_ids(request):
         header = [
             "observation_id",
             "satellite_name",
+            "satellite_number",
             "date_observed",
         ]
 
@@ -182,6 +183,7 @@ def download_obs_ids(request):
                 [
                     observation.id,
                     observation.satellite_id.sat_name,
+                    observation.satellite_id.sat_number,
                     observation.obs_time_utc,
                 ]
             )

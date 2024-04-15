@@ -124,7 +124,7 @@ class SearchForm(Form):
 class SingleObservationForm(Form):
     sat_name = forms.CharField(
         max_length=200,
-        required=True,
+        required=False,
         label="Satellite Name",
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
@@ -204,6 +204,7 @@ class SingleObservationForm(Form):
         max_length=200,
         required=True,
         label="Observation Filter",
+        help_text="Use 'CLEAR' if observing mode is visual",
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
     observer_email = forms.CharField(
@@ -230,7 +231,7 @@ class SingleObservationForm(Form):
     sat_ra_dec_uncert_deg = forms.CharField(
         required=False,
         label="Satellite RA/Dec. Uncertainty (deg)",
-        help_text="Uncertainty matrix - e.g. 0.1, 0.2, 0.3, 0.1, 0.2, 0.3",
+        help_text="Uncertainty covariance matrix - e.g. 0.1, 0.2, 0.3, 0.1, 0.2, 0.3",
         widget=forms.TextInput(attrs={"class": "form-control"}),
         validators=[validate_ra_dec_uncert],
     )
