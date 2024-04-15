@@ -6,7 +6,7 @@ from django.forms import ValidationError
 from django.utils import timezone
 
 from repository.models import Location, Observation, Satellite
-from repository.utils import send_confirmation_email, validate_position
+from repository.utils import add_additional_data, send_confirmation_email
 
 
 class UploadError(Exception):
@@ -48,13 +48,13 @@ def process_upload(
                 raise UploadError(
                     "File contains sample data. Please upload a valid file."
                 )
-
             # Check if satellite is above the horizon
-            is_valid = validate_position(
+            additional_data = add_additional_data(
                 column[0], column[1], column[2], column[6], column[7], column[8]
             )
-            if is_valid is not True:
-                raise UploadError(is_valid)
+
+            if isinstance(additional_data, str):
+                raise UploadError(additional_data)
 
             satellite, sat_created = Satellite.objects.get_or_create(
                 sat_name=column[0],
@@ -76,7 +76,7 @@ def process_upload(
                     "date_added": timezone.now(),
                 },
             )
-            orc_id_list = [item.strip() for item in column[13].split(",")]
+            orc_id_list = [item.strip() for item in column[14].split(",")]
             if column[4] == "" and column[5] == "":
                 column[4] = None
                 column[5] = None
@@ -85,22 +85,33 @@ def process_upload(
                 obs_time_uncert_sec=column[3],
                 apparent_mag=column[4],
                 apparent_mag_uncert=column[5],
-                instrument=column[9],
-                obs_mode=column[10].upper(),
-                obs_filter=column[11],
-                obs_email=column[12],
+                limiting_magnitude=column[9],
+                instrument=column[10],
+                obs_mode=column[11].upper(),
+                obs_filter=column[12],
+                obs_email=column[13],
                 obs_orc_id=orc_id_list,
-                sat_ra_deg=column[14],
-                sat_dec_deg=column[15],
+                sat_ra_deg=column[15],
+                sat_dec_deg=column[16],
                 sat_ra_dec_uncert_deg=(
-                    [float(x) for x in column[16].split(",")] if column[16] else []
+                    [float(x) for x in column[17].split(",")] if column[17] else []
                 ),
-                range_to_sat_km=column[17],
-                range_to_sat_uncert_km=column[18],
-                range_rate_sat_km_s=column[19],
-                range_rate_sat_uncert_km_s=column[20],
-                comments=column[21],
-                data_archive_link=column[22],
+                range_to_sat_km=column[18],
+                range_to_sat_uncert_km=column[19],
+                range_rate_sat_km_s=column[20],
+                range_rate_sat_uncert_km_s=column[21],
+                comments=column[22],
+                data_archive_link=column[23],
+                phase_angle=additional_data.phase_angle,
+                range_to_sat_km_satchecker=additional_data.range_to_sat,
+                range_rate_sat_km_s_satchecker=additional_data.range_rate,
+                sat_ra_deg_satchecker=additional_data.sat_ra_deg,
+                sat_dec_deg_satchecker=additional_data.sat_dec_deg,
+                ddec_deg_s_satchecker=additional_data.ddec_deg_s,
+                dra_cosdec_deg_s_satchecker=additional_data.dra_cosdec_deg_s,
+                alt_deg_satchecker=additional_data.alt_deg,
+                az_deg_satchecker=additional_data.az_deg,
+                illuminated=additional_data.illuminated,
                 satellite_id=satellite,
                 location_id=location,
                 defaults={
@@ -108,22 +119,33 @@ def process_upload(
                     "obs_time_uncert_sec": column[3],
                     "apparent_mag": column[4],
                     "apparent_mag_uncert": column[5],
-                    "instrument": column[9],
-                    "obs_mode": column[10].upper(),
-                    "obs_filter": column[11],
-                    "obs_email": column[12],
+                    "limiting_magnitude": column[9],
+                    "instrument": column[10],
+                    "obs_mode": column[11].upper(),
+                    "obs_filter": column[12],
+                    "obs_email": column[13],
                     "obs_orc_id": orc_id_list,
-                    "sat_ra_deg": column[14],
-                    "sat_dec_deg": column[15],
+                    "sat_ra_deg": column[15],
+                    "sat_dec_deg": column[16],
                     "sat_ra_dec_uncert_deg": (
-                        [float(x) for x in column[16].split(",")] if column[16] else []
+                        [float(x) for x in column[17].split(",")] if column[17] else []
                     ),
-                    "range_to_sat_km": column[17],
-                    "range_to_sat_uncert_km": column[18],
-                    "range_rate_sat_km_s": column[19],
-                    "range_rate_sat_uncert_km_s": column[20],
-                    "comments": column[21],
-                    "data_archive_link": column[22],
+                    "range_to_sat_km": column[18],
+                    "range_to_sat_uncert_km": column[19],
+                    "range_rate_sat_km_s": column[20],
+                    "range_rate_sat_uncert_km_s": column[21],
+                    "comments": column[22],
+                    "data_archive_link": column[23],
+                    "phase_angle": additional_data.phase_angle,
+                    "range_to_sat_km_satchecker": additional_data.range_to_sat,
+                    "range_rate_sat_km_s_satchecker": additional_data.range_rate,
+                    "sat_ra_deg_satchecker": additional_data.sat_ra_deg,
+                    "sat_dec_deg_satchecker": additional_data.sat_dec_deg,
+                    "ddec_deg_s_satchecker": additional_data.ddec_deg_s,
+                    "dra_cosdec_deg_s_satchecker": additional_data.dra_cosdec_deg_s,
+                    "alt_deg_satchecker": additional_data.alt_deg,
+                    "az_deg_satchecker": additional_data.az_deg,
+                    "illuminated": additional_data.illuminated,
                     "flag": None,
                     "satellite_id": satellite,
                     "location_id": location,
@@ -132,7 +154,7 @@ def process_upload(
             )
             obs_ids.append(observation.id)
             if not confirmation_email:
-                confirmation_email = column[12]
+                confirmation_email = column[13]
             progress_recorder.set_progress(
                 obs_num + 1, observation_count, description=""
             )

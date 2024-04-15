@@ -29,13 +29,13 @@
         <b>satellite_name</b>
       </div>
       <div>
-        Name of satellite, string, corresponds to https://www.space-track.org/#catalog SATNAME, e.g., "METEOR 1-17 DEB"
+        Name of satellite, string, corresponds to <a href="https://www.space-track.org/#catalog">https://www.space-track.org/#catalog</a> SATNAME, e.g., "METEOR 1-17 DEB"
       </div>
       <div class="text-end">
         <b>norad_cat_id</b>
       </div>
       <div>
-        NORAD catalog identifier, integer, corresponds to https://www.space-track.org/#catalog NORAD CAT ID,  e.g., "57957"
+        NORAD catalog identifier, integer, corresponds to <a href="https://www.space-track.org/#catalog">https://www.space-track.org/#catalog</a> NORAD CAT ID,  e.g., "57957"
       </div>
       <div class="text-end">
         <b>observation_time_utc</b>
@@ -53,13 +53,13 @@
         <b>apparent_magnitude</b>
       </div>
       <div>
-        Brightness of the satellite as observed/measured in magnitudes, floating point, e.g., "7.53"
+        Brightness of the satellite as observed/measured in magnitudes, floating point, e.g., "7.53". For a non-detection, leave this field blank, but the limiting magnitude must still be provided.
       </div>
       <div class="text-end">
         <b>apparent_magnitude_uncertainty</b>
       </div>
       <div>
-        Uncertainty in the brightness of the satellite in magnitude, floating point, e.g., "0.14"
+        Uncertainty in the brightness of the satellite in magnitude, floating point, e.g., "0.14". For a non-detection, leave this field blank.
       </div>
       <div class="text-end">
         <b>observer_latitude_deg</b>
@@ -78,6 +78,12 @@
       </div>
       <div>
         Altitude of the observing location above sea level (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in meters, signed floating point, e.g., "2663" (equivalent to 8,737 ft)
+      </div>
+      <div class="text-end">
+        <b>limiting_magnitude</b>
+      </div>
+      <div>
+        Faintest magnitude that can be observed by the given instrument (or naked eye in the case of visual observations), floating point, e.g., "6.5"
       </div>
       <div class="text-end">
         <b>instrument</b>

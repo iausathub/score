@@ -99,6 +99,17 @@ class Observation(models.Model):
     comments = models.TextField(null=True, blank=True)
     data_archive_link = models.TextField(null=True, blank=True)
     flag = models.CharField(max_length=100, null=True, blank=True)
+    phase_angle = models.FloatField(null=True, blank=True)
+    range_to_sat_km_satchecker = models.FloatField(null=True, blank=True)
+    range_rate_sat_km_s_satchecker = models.FloatField(null=True, blank=True)
+    sat_ra_deg_satchecker = models.FloatField(null=True, blank=True)
+    sat_dec_deg_satchecker = models.FloatField(null=True, blank=True)
+    ddec_deg_s_satchecker = models.FloatField(null=True, blank=True)
+    dra_cosdec_deg_s_satchecker = models.FloatField(null=True, blank=True)
+    alt_deg_satchecker = models.FloatField(null=True, blank=True)
+    az_deg_satchecker = models.FloatField(null=True, blank=True)
+    illuminated = models.BooleanField(null=True, blank=True)
+    limiting_magnitude = models.FloatField(null=True, blank=True)
     satellite_id = models.ForeignKey(
         Satellite, on_delete=models.CASCADE, related_name="observations"
     )

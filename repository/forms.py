@@ -168,6 +168,11 @@ class SingleObservationForm(Form):
         label="Apparent Magnitude Uncertainty",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
+    limiting_magnitude = forms.FloatField(
+        required=True,
+        label="Limiting Magnitude",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
     instrument = forms.CharField(
         max_length=200,
         required=True,
@@ -281,6 +286,15 @@ class SingleObservationForm(Form):
             cleaned_data.get("observer_email"),
         ):
             errors["observer_email"] = "Observer email is not correctly formatted."
+        if (
+            cleaned_data.get("apparent_mag_uncert")
+            and not cleaned_data.get("apparent_mag")
+            and not cleaned_data.get("not_detected")
+        ):
+            errors["apparent_mag"] = (
+                "Apparent magnitude is required if "
+                "apparent magnitude uncertainty is provided."
+            )
         # fmt: on
         if errors:
             raise forms.ValidationError(errors)

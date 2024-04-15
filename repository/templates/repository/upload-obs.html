@@ -80,7 +80,10 @@
                     </div>
                 </div>
                 <div class="col">
-
+                    <div class=" pb-4">
+                        {{ form.limiting_magnitude.label_tag}} <span class="text-danger">*</span>
+                        {{ form.limiting_magnitude }}
+                    </div>
                 </div>
             </div>
             <div class="row">
@@ -89,6 +92,9 @@
                     <div class=" pb-4">
                         {{ form.apparent_mag.label_tag}} <span class="text-danger">*</span>
                         {{ form.apparent_mag }}
+                        <div class="text-danger">
+                            {{ form.apparent_mag.errors }}
+                        </div>
                     </div>
                 </div>
                 <div class="col">

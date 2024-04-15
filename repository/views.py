@@ -16,10 +16,10 @@ from rest_framework.renderers import JSONRenderer
 from repository.forms import SearchForm, SingleObservationForm
 from repository.tasks import process_upload
 from repository.utils import (
+    add_additional_data,
     create_csv,
     get_stats,
     send_confirmation_email,
-    validate_position,
 )
 
 from .models import Location, Observation, Satellite
@@ -221,7 +221,7 @@ def search(request):
             observations = Observation.objects.all()
             if sat_name:
                 observations = observations.filter(
-                    satellite_id__sat_name__iexact=sat_name
+                    satellite_id__sat_name__icontains=sat_name
                 )
             if sat_number:
                 observations = observations.filter(satellite_id__sat_number=sat_number)
@@ -274,7 +274,7 @@ def download_results(request):
 
         observations = Observation.objects.filter(id__in=observation_ids)
 
-        create_and_return_csv(observations)
+        return create_and_return_csv(observations)
 
     return HttpResponse()
 
@@ -309,18 +309,19 @@ def upload(request):
             range_to_sat_uncert_km = form.cleaned_data["range_to_sat_uncert_km"]
             range_rate_sat_km_s = form.cleaned_data["range_rate_sat_km_s"]
             range_rate_sat_uncert_km_s = form.cleaned_data["range_rate_sat_uncert_km_s"]
+            limiting_magnitude = form.cleaned_data["limiting_magnitude"]
             comments = form.cleaned_data["comments"]
             data_archive_link = form.cleaned_data["data_archive_link"]
 
             # Check if satellite is above the horizon
-            is_valid = validate_position(
+            additional_data = add_additional_data(
                 sat_name, sat_number, obs_date, obs_lat_deg, obs_long_deg, obs_alt_m
             )
-            if is_valid is not True:
+            if isinstance(additional_data, str):
                 return render(
                     request,
                     "repository/upload-obs.html",
-                    {"form": form, "error": is_valid},
+                    {"form": form, "error": additional_data},
                 )
 
             satellite, sat_created = Satellite.objects.get_or_create(
@@ -368,6 +369,17 @@ def upload(request):
                 range_rate_sat_uncert_km_s=range_rate_sat_uncert_km_s,
                 comments=comments,
                 data_archive_link=data_archive_link,
+                limiting_magnitude=limiting_magnitude,
+                phase_angle=additional_data.phase_angle,
+                range_to_sat_km_satchecker=additional_data.range_to_sat,
+                range_rate_sat_km_s_satchecker=additional_data.range_rate,
+                sat_ra_deg_satchecker=additional_data.sat_ra_deg,
+                sat_dec_deg_satchecker=additional_data.sat_dec_deg,
+                ddec_deg_s_satchecker=additional_data.ddec_deg_s,
+                dra_cosdec_deg_s_satchecker=additional_data.dra_cosdec_deg_s,
+                alt_deg_satchecker=additional_data.alt_deg,
+                az_deg_satchecker=additional_data.az_deg,
+                illuminated=additional_data.illuminated,
                 satellite_id=satellite,
                 location_id=location,
                 defaults={
@@ -391,6 +403,17 @@ def upload(request):
                     "range_to_sat_uncert_km": range_to_sat_uncert_km,
                     "range_rate_sat_km_s": range_rate_sat_km_s,
                     "range_rate_sat_uncert_km_s": range_rate_sat_uncert_km_s,
+                    "limiting_magnitude": limiting_magnitude,
+                    "phase_angle": additional_data.phase_angle,
+                    "range_to_sat_km_satchecker": additional_data.range_to_sat,
+                    "range_rate_sat_km_s_satchecker": additional_data.range_rate,
+                    "sat_ra_deg_satchecker": additional_data.sat_ra_deg,
+                    "sat_dec_deg_satchecker": additional_data.sat_dec_deg,
+                    "ddec_deg_s_satchecker": additional_data.ddec_deg_s,
+                    "dra_cosdec_deg_s_satchecker": additional_data.dra_cosdec_deg_s,
+                    "alt_deg_satchecker": additional_data.alt_deg,
+                    "az_deg_satchecker": additional_data.az_deg,
+                    "illuminated": additional_data.illuminated,
                     "comments": comments,
                     "data_archive_link": data_archive_link,
                     "flag": None,
