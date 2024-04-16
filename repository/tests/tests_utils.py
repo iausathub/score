@@ -43,12 +43,18 @@ def test_validate_position(requests_mock, setup_data):
     requests_mock.get(
         "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/",
         status_code=200,
-        json=[{"NAME": "TestSat", "ALTITUDE-DEG": "10"}],
+        json=[
+            {
+                "NAME": "TestSat",
+                "ALTITUDE-DEG": "10",
+                "TLE-DATE": "2024-02-20 00:36:13.000",
+            }
+        ],
     )
     response = requests.get(
         "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/", timeout=5
     )
-    result = validate_position(response, "TestSat")
+    result = validate_position(response, "TestSat", "2024-02-22T04:09:38.150")
     assert result
 
 
@@ -63,7 +69,7 @@ def test_validate_position_invalid_sat_name(requests_mock, setup_data):
     response = requests.get(
         "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/", timeout=5
     )
-    result = validate_position(response, "InvalidSat")
+    result = validate_position(response, "InvalidSat", "2024-02-22T04:09:38.150")
 
     assert result == "Satellite name and number do not match"
 
@@ -79,5 +85,5 @@ def test_validate_position_not_visible(requests_mock, setup_data):
     response = requests.get(
         "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/", timeout=5
     )
-    result = validate_position(response, "TestSat")
+    result = validate_position(response, "TestSat", "2024-02-22T04:09:38.150")
     assert result == "Satellite with this ID not visible at this time and location"

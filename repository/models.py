@@ -2,14 +2,14 @@ import re
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
-from django.core.validators import MaxValueValidator, MinValueValidator, URLValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 from django.utils import timezone
 
 
 class Satellite(models.Model):
 
-    sat_name = models.CharField(max_length=200)
+    sat_name = models.CharField(max_length=200, null=True, blank=True)
     sat_number = models.IntegerField(default=0)
     date_added = models.DateTimeField("date added", default=timezone.now)
 
@@ -20,8 +20,6 @@ class Satellite(models.Model):
         db_table = "satellite"
 
     def clean(self):
-        if not self.sat_name:
-            raise ValidationError("Satellite name is required.")
         if not self.sat_number:
             raise ValidationError("Satellite number is required.")
         if len(str(self.sat_number)) > 5:
@@ -59,10 +57,8 @@ class Location(models.Model):
             raise ValidationError("Latitude is required.")
         if not self.obs_long_deg:
             raise ValidationError("Longitude is required.")
-        if not self.obs_alt_m:
+        if self.obs_alt_m is None:
             raise ValidationError("Altitude is required.")
-        if self.obs_alt_m < 0:
-            raise ValidationError("Altitude must be greater than 0 meters.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -97,7 +93,7 @@ class Observation(models.Model):
     range_rate_sat_km_s = models.FloatField(default=0, null=True, blank=True)
     range_rate_sat_uncert_km_s = models.FloatField(default=0, null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
-    data_archive_link = models.TextField(null=True, blank=True)
+    data_archive_link = models.URLField(null=True, blank=True)
     flag = models.CharField(max_length=100, null=True, blank=True)
     phase_angle = models.FloatField(null=True, blank=True)
     range_to_sat_km_satchecker = models.FloatField(null=True, blank=True)
@@ -191,10 +187,6 @@ class Observation(models.Model):
             raise ValidationError("Range rate must be positive.")
         if self.range_rate_sat_uncert_km_s and (self.range_rate_sat_uncert_km_s < 0):
             raise ValidationError("Range rate uncertainty must be positive.")
-        validate = URLValidator()
-
-        if self.data_archive_link and not validate(self.data_archive_link):
-            raise ValidationError("Data archive link is not correctly formatted.")
 
     def save(self, *args, **kwargs):
         self.full_clean()

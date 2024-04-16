@@ -22,14 +22,6 @@ class SatelliteTest(TestCase):
     def test_satellite_validation(self):
         # field is required
         with self.assertRaises(ValidationError):
-            sat = self.create_satellite(sat_name="")
-
-        # field is required
-        with self.assertRaises(ValidationError):
-            sat = self.create_satellite(sat_name=None)
-
-        # field is required
-        with self.assertRaises(ValidationError):
             sat = self.create_satellite(sat_number="")
 
         # field is required
@@ -122,11 +114,6 @@ class LocationTest(TestCase):
         # field must be in valid range
         with self.assertRaises(ValidationError):
             loc = self.create_location(obs_long_deg=181)
-            loc.full_clean()
-
-        # field must be positive
-        with self.assertRaises(ValidationError):
-            loc = self.create_location(obs_alt_m=-1)
             loc.full_clean()
 
         # valid values successful

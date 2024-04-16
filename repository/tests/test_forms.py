@@ -15,7 +15,6 @@ class SingleObservationFormTest(TestCase):
         self.assertEqual(
             form.errors,
             {
-                "sat_name": ["This field is required."],
                 "sat_number": ["This field is required."],
                 "obs_date": ["This field is required."],
                 "obs_date_uncert": ["This field is required."],

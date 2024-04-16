@@ -28,12 +28,67 @@
                 {% csrf_token %}
             <div class="row"><hr/></div>
             <div class="row">
+                <div class="row">
+                    <div class="col-sm-4 fs-5 fw-bold">
+                        Observer information
+                    </div>
+                    <div class="col">
+                        <div class=" pb-4">
+                            {{ form.observer_orcid.label_tag}} <span class="text-danger">*</span>
+                            {{ form.observer_orcid }}
+                            <div class="text-danger">
+                                {{ form.observer_orcid.errors }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class=" pb-4">
+                            {{ form.observer_email.label_tag}} <span class="text-danger">*</span>
+                            {{ form.observer_email }}
+                            <div class="text-danger">
+                                {{ form.observer_email.errors }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-sm-4 fs-5 fw-bold"></div>
+                    <div class="col">
+                        <div class="pb-4">
+                            {{ form.observer_latitude_deg.label_tag}} <span class="text-danger">*</span>
+                            {{ form.observer_latitude_deg }}
+                            <div class="text-danger">
+                                {{ form.observer_latitude_deg.errors }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class=" pb-4">
+                            {{ form.observer_longitude_deg.label_tag}} <span class="text-danger">*</span>
+                            {{ form.observer_longitude_deg }}
+                            <div class="text-danger">
+                                {{ form.observer_longitude_deg.errors }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col">
+                        <div class=" pb-4">
+                            {{ form.observer_altitude_m.label_tag}} <span class="text-danger">*</span>
+                            {{ form.observer_altitude_m }}
+                            <div class="text-danger">
+                                {{ form.observer_altitude_m.errors }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3"><hr/></div>
                 <div class="col-sm-4 fs-5 fw-bold">
                     Basic data
                 </div>
                 <div class="col">
                     <div class=" pb-4">
-                        {{ form.sat_name.label_tag }} <span class="text-danger">*</span>
+                        {{ form.sat_name.label_tag }}
                         {{ form.sat_name }}
                     </div>
                 </div>
@@ -128,60 +183,8 @@
                     <div class=" pb-4">
                         {{ form.filter.label_tag}} <span class="text-danger">*</span>
                         {{ form.filter }}
-                    </div>
-                </div>
-            </div>
-            <div class="row mt-3"><hr/></div>
-            <div class="row">
-                <div class="col-sm-4 fs-5 fw-bold">
-                    Observer information
-                </div>
-                <div class="col">
-                    <div class="pb-4">
-                        {{ form.observer_latitude_deg.label_tag}} <span class="text-danger">*</span>
-                        {{ form.observer_latitude_deg }}
-                        <div class="text-danger">
-                            {{ form.observer_latitude_deg.errors }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class=" pb-4">
-                        {{ form.observer_longitude_deg.label_tag}} <span class="text-danger">*</span>
-                        {{ form.observer_longitude_deg }}
-                        <div class="text-danger">
-                            {{ form.observer_longitude_deg.errors }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class=" pb-4">
-                        {{ form.observer_altitude_m.label_tag}} <span class="text-danger">*</span>
-                        {{ form.observer_altitude_m }}
-                        <div class="text-danger">
-                            {{ form.observer_altitude_m.errors }}
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-sm-4 fs-5 fw-bold"></div>
-                <div class="col">
-                    <div class=" pb-4">
-                        {{ form.observer_email.label_tag}} <span class="text-danger">*</span>
-                        {{ form.observer_email }}
-                        <div class="text-danger">
-                            {{ form.observer_email.errors }}
-                        </div>
-                    </div>
-                </div>
-                <div class="col">
-                    <div class=" pb-4">
-                        {{ form.observer_orcid.label_tag}} <span class="text-danger">*</span>
-                        {{ form.observer_orcid }}
-                        <div class="text-danger">
-                            {{ form.observer_orcid.errors }}
+                        <div class="form-text text-muted">
+                            {{ form.filter.help_text }}
                         </div>
                     </div>
                 </div>

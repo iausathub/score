@@ -119,14 +119,13 @@ def add_additional_data(
         otherwise.
     """
     if (
-        not satellite_name
-        or not sat_number
+        not sat_number
         or not observation_time
         or not latitude
         or not longitude
-        or not altitude
+        or altitude is None
     ):
-        return False
+        return "Satellite position check failed - check your data."
     obs_time = Time(observation_time, format="isot", scale="utc")
     url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
     params = {
@@ -135,16 +134,20 @@ def add_additional_data(
         "longitude": longitude,
         "elevation": altitude,
         "julian_date": obs_time.jd,
-        "min_altitude": -5,
+        "min_altitude": -90,
     }
     try:
         r = requests.get(url, params=params, timeout=10)
     except requests.exceptions.RequestException:
         return "Satellite position check failed - try again later."
 
-    is_valid = validate_position(r, satellite_name)
+    is_valid = validate_position(r, satellite_name, observation_time)
 
     if isinstance(is_valid, str):
+        if is_valid == "archival data":
+            return SatCheckerData(
+                None, None, None, None, None, None, None, None, None, None
+            )
         return is_valid
 
     if is_valid and r.json():
@@ -166,7 +169,9 @@ def add_additional_data(
     return is_valid
 
 
-def validate_position(response: Response, satellite_name: str) -> Union[str, bool]:
+def validate_position(
+    response: Response, satellite_name: str, obs_time: Union[str, Time]
+) -> Union[str, bool]:
     """
     Validates the position of a satellite based on the response from an API call.
 
@@ -182,10 +187,14 @@ def validate_position(response: Response, satellite_name: str) -> Union[str, boo
         return "Satellite position check failed - verify uploaded data is correct."
     if not response.json():
         return "Satellite with this ID not visible at this time and location"
-    if response.json()[0]["NAME"] != satellite_name:
+    if satellite_name and response.json()[0]["NAME"] != satellite_name:
         return "Satellite name and number do not match"
+    tle_date = Time(response.json()[0]["TLE-DATE"], format="iso")
+    obs_time = Time(obs_time, format="isot")
+    if (tle_date - obs_time).jd > 14:
+        return "archival data"
     if float(response.json()[0]["ALTITUDE-DEG"]) < -5:
-        return "Satellite below horizon"
+        return "Satellite below horizon at this time and location"
 
     return True
 
@@ -255,8 +264,13 @@ def get_observation_list(is_html: bool, obs_ids: list[int]) -> str:
         observation = Observation.objects.get(id=obs_id)
         list_text += (
             str(obs_id)
+            + (
+                " - " + observation.satellite_id.sat_name
+                if observation.satellite_id.sat_name
+                else ""
+            )
             + " - "
-            + observation.satellite_id.sat_name
+            + str(observation.satellite_id.sat_number)
             + " - "
             + str(observation.obs_time_utc)
             + "<br />"
