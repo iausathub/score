@@ -183,21 +183,38 @@ class SingleObservationForm(Form):
         required=True,
         label="Observer Latitude (deg)",
         widget=forms.NumberInput(
-            attrs={"class": "form-control", "step": "any", "min": -90, "max": 90}
+            attrs={
+                "id": "observer_latitude_deg",
+                "class": "form-control",
+                "step": "any",
+                "min": -90,
+                "max": 90,
+            }
         ),
     )
     observer_longitude_deg = forms.FloatField(
         required=True,
         label="Observer Longitude (deg)",
         widget=forms.NumberInput(
-            attrs={"class": "form-control", "step": "any", "min": -180, "max": 180}
+            attrs={
+                "id": "observer_longitude_deg",
+                "class": "form-control",
+                "step": "any",
+                "min": -180,
+                "max": 180,
+            }
         ),
     )
     observer_altitude_m = forms.FloatField(
         required=True,
         label="Observer Altitude (m)",
         widget=forms.NumberInput(
-            attrs={"class": "form-control", "step": "any", "min": 0}
+            attrs={
+                "id": "observer_altitude_m",
+                "class": "form-control",
+                "step": "any",
+                "min": 0,
+            }
         ),
     )
     filter = forms.CharField(
@@ -215,7 +232,7 @@ class SingleObservationForm(Form):
     observer_orcid = forms.CharField(
         required=True,
         label="Observer ORCID",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={"id": "observer_orcid", "class": "form-control"}),
         validators=[validate_orcid],
     )
     sat_ra_deg = forms.FloatField(

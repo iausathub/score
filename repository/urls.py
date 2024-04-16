@@ -17,4 +17,9 @@ urlpatterns = [
     path(r"ht/" + settings.SECRET_HEALTH_CHECK_TOKEN, include("health_check.urls")),
     path("about", views.about, name="about"),
     path("download", views.download_data, name="download-data"),
+    path(
+        "last_observer_location/",
+        views.last_observer_location,
+        name="last_observer_location",
+    ),
 ]
