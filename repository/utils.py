@@ -144,6 +144,10 @@ def add_additional_data(
     is_valid = validate_position(r, satellite_name, observation_time)
 
     if isinstance(is_valid, str):
+        if is_valid == "archival data":
+            return SatCheckerData(
+                None, None, None, None, None, None, None, None, None, None
+            )
         return is_valid
 
     if is_valid and r.json():
@@ -186,11 +190,9 @@ def validate_position(
     if satellite_name and response.json()[0]["NAME"] != satellite_name:
         return "Satellite name and number do not match"
     tle_date = Time(response.json()[0]["TLE-DATE"], format="iso")
-
     obs_time = Time(obs_time, format="isot")
-    print(tle_date, obs_time, (tle_date - obs_time).jd)
     if (tle_date - obs_time).jd > 14:
-        return True
+        return "archival data"
     if float(response.json()[0]["ALTITUDE-DEG"]) < -5:
         return "Satellite below horizon at this time and location"
 

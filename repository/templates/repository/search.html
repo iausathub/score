@@ -97,10 +97,10 @@
                             <td scope="row">{{ observation.satellite_id.sat_name }}</td>
                             <td scope="row">{{ observation.satellite_id.sat_number }}</td>
                             <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
-                            <td scope="row" class="text-end">{{ observation.apparent_mag }}</td>
-                            <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg }}</td>
-                            <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg }}</td>
-                            <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m }}</td>
+                            <td scope="row" class="text-end">{{ observation.apparent_mag|floatformat:"-4" }}</td>
+                            <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg|floatformat:"-4" }}</td>
+                            <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg|floatformat:"-4" }}</td>
+                            <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m|floatformat:"-4" }}</td>
                             <td scope="row">{{ observation.obs_mode }}</td>
                             <td scope="row">{{ observation.obs_orc_id|first }}</td>
                         </tr>

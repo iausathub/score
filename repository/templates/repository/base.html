@@ -177,7 +177,7 @@
               $('#range_to_sat_uncert_km').text(observation.range_to_sat_uncert_km);
               $('#range_rate_km_s').text(observation.range_rate_sat_km_s);
               $('#range_rate_uncert_km_s').text(observation.range_rate_sat_uncert_km_s);
-              $('#data_archive_link').text(observation.data_archive_link);
+              $('#data_archive_link').html('<a href="' + observation.data_archive_link + '">Data link</a>');
               $('#limiting_magnitude').text(observation.limiting_magnitude);
               $('#phase_angle').text(observation.phase_angle);
               $('#range_to_sat_km_satchecker').text(observation.range_to_sat_km_satchecker);
