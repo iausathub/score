@@ -269,6 +269,21 @@
         });
       }
   </script>
+
+<script>
+  $(document).ready(function(){
+      $('#observer_orcid').blur(function(){
+          var observer_orcid = $(this).val();
+          $.post('/last_observer_location/', {'observer_orcid': observer_orcid}, function(data){
+            if(!data.error){
+              $('#observer_altitude_m').val(data.observer_altitude_m);
+              $('#observer_latitude_deg').val(data.observer_latitude_deg);
+              $('#observer_longitude_deg').val(data.observer_longitude_deg);
+            }
+          });
+      });
+  });
+  </script>
   </body>
 
   </html>

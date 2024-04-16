@@ -11,6 +11,7 @@ from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
 from django.utils import timezone
+from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 
 from repository.forms import SearchForm, SingleObservationForm
@@ -459,3 +460,50 @@ def download_data(request):
         "recaptcha_public_key": settings.RECAPTCHA_PUBLIC_KEY,
     }
     return HttpResponse(template.render(context, request))
+
+
+@csrf_exempt
+def last_observer_location(request):
+    """
+    This view returns the last location of an observer based on the provided ORCID.
+
+    The ORCID is received from a POST request. If the ORCID is valid and there are
+    observations associated with it, the function returns a JSON response with the
+    latitude, longitude, and altitude of the observer's last location.
+
+    If the ORCID is not valid/complete or there are no observations associated with it,
+    the function returns a JSON response with an error message.
+
+    Parameters:
+    request (HttpRequest): The Django request object.
+
+    Returns:
+    JsonResponse: A JSON response with the observer's last location or an error message.
+    """
+    observer_orcid = request.POST.get("observer_orcid")
+    if len(observer_orcid) != 19:
+        return JsonResponse(
+            {
+                "error": "pass",
+            }
+        )
+    if observer_orcid:
+        observer = (
+            Observation.objects.filter(obs_orc_id__icontains=observer_orcid)
+            .order_by("-date_added")
+            .first()
+        )
+        if observer:
+            return JsonResponse(
+                {
+                    "observer_latitude_deg": observer.location_id.obs_lat_deg,
+                    "observer_longitude_deg": observer.location_id.obs_long_deg,
+                    "observer_altitude_m": observer.location_id.obs_alt_m,
+                }
+            )
+
+    return JsonResponse(
+        {
+            "error": "No observations found for the provided ORCID.",
+        }
+    )
