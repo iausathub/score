@@ -46,10 +46,21 @@
 
             </div>
 
-            <div class="pb-4">
-                {{ form.observation_id.label_tag}}
-                {{ form.observation_id }}
+            <div class="row">
+                <div class="col">
+                    <div class="pb-4">
+                        {{ form.observation_id.label_tag}}
+                        {{ form.observation_id }}
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="pb-4">
+                        {{ form.mpc_code.label_tag}}
+                        {{ form.mpc_code }}
+                    </div>
+                </div>
             </div>
+
             <div class="pb-4">
                 {{ form.observer_orcid.label_tag}}
                 {{ form.observer_orcid }}

@@ -315,6 +315,7 @@ def get_csv_header() -> list[str]:
         "range_rate_of_satellite_uncertainty_km_per_sec",
         "comments",
         "data_archive_link",
+        "mpc_code",
     ]
     return header
 
@@ -368,6 +369,7 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
                 observation.range_rate_sat_uncert_km_s,
                 observation.comments,
                 observation.data_archive_link,
+                observation.mpc_code,
             ]
         )
 

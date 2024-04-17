@@ -119,6 +119,11 @@ class SearchForm(Form):
         widget=forms.TextInput(attrs={"class": "form-control"}),
         validators=[validate_orcid],
     )
+    mpc_code = forms.CharField(
+        required=False,
+        label="MPC Observatory Code",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
 
 
 class SingleObservationForm(Form):
@@ -281,6 +286,11 @@ class SingleObservationForm(Form):
         required=False,
         label="Data Archive Link",
         widget=forms.URLInput(attrs={"class": "form-control"}),
+    )
+    mpc_code = forms.CharField(
+        required=False,
+        label="MPC Observatory Code",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
     )
 
     def clean(self):

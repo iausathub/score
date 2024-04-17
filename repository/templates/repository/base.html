@@ -167,6 +167,7 @@
               $('#obs_instrument').text(observation.instrument);
               $('#obs_orc_id').html(observation.obs_orc_id.toString().replace(/,/g, ',<br/>'));
               $('#obs_comments').text(observation.obs_comments);
+              $('#mpc_code').text(observation.mpc_code);
               $('#sat_ra_deg').text(observation.sat_ra_deg);
               $('#sat_dec_deg').text(observation.sat_dec_deg);
               var values = observation.sat_ra_dec_uncert_deg;

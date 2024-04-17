@@ -219,6 +219,7 @@ def search(request):
             end_date_range = form.cleaned_data["end_date_range"]
             observation_id = form.cleaned_data["observation_id"]
             observer_orcid = form.cleaned_data["observer_orcid"]
+            mpc_code = form.cleaned_data["mpc_code"]
 
             # filter observations based on search criteria
             observations = Observation.objects.all()
@@ -238,6 +239,8 @@ def search(request):
                 observations = observations.filter(id=observation_id)
             if observer_orcid:
                 observations = observations.filter(obs_orc_id__icontains=observer_orcid)
+            if mpc_code:
+                observations = observations.filter(mpc_code=mpc_code)
 
             # JSON is also needed for the modal view to show the observation details
             observation_list_json = [
@@ -315,6 +318,7 @@ def upload(request):
             limiting_magnitude = form.cleaned_data["limiting_magnitude"]
             comments = form.cleaned_data["comments"]
             data_archive_link = form.cleaned_data["data_archive_link"]
+            mpc_code = form.cleaned_data["mpc_code"]
 
             # Check if satellite is above the horizon
             additional_data = add_additional_data(
@@ -372,6 +376,7 @@ def upload(request):
                 range_rate_sat_uncert_km_s=range_rate_sat_uncert_km_s,
                 comments=comments,
                 data_archive_link=data_archive_link,
+                mpc_code=mpc_code.strip().upper() if mpc_code else None,
                 limiting_magnitude=limiting_magnitude,
                 phase_angle=additional_data.phase_angle,
                 range_to_sat_km_satchecker=additional_data.range_to_sat,
@@ -419,6 +424,7 @@ def upload(request):
                     "illuminated": additional_data.illuminated,
                     "comments": comments,
                     "data_archive_link": data_archive_link,
+                    "mpc_code": mpc_code.strip().upper() if mpc_code else None,
                     "flag": None,
                     "satellite_id": satellite,
                     "location_id": location,
