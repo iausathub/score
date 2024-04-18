@@ -6,6 +6,7 @@ from typing import Tuple, Union
 
 import requests
 from astropy.time import Time
+from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from requests import Response
 from rest_framework.renderers import JSONRenderer
@@ -226,14 +227,19 @@ def send_confirmation_email(obs_ids: list[int], email_address: Union[str, bool])
             observations. Your observations have been successfully uploaded to the \
                 SCORE database.  The observation ID(s) are: \n\n"
         + text_body,
-        "michelle.dadighat@noirlab.edu",
+        settings.EMAIL_HOST_USER,
         [email_address],
     )
 
-    email_body = "<html><h1>SCORE Observation Upload Confirmation</h1>\
-                <p>Thank you for submitting your observations.  Your observations \
-                have been successfully uploaded to the SCORE database. \
-                The observation ID(s) are: </p>"
+    email_body = """
+    <html>
+        <h2>SCORE Observation Upload Confirmation</h2>
+        <p>
+            Thank you for submitting your observations. Your observations have
+            been successfully uploaded to the SCORE database.
+            The observation ID(s) are:
+        </p>
+    """
     email_body += get_observation_list(True, obs_ids)
     email_body += "</html>"
     msg.attach_alternative(email_body, "text/html")
@@ -280,6 +286,44 @@ def get_observation_list(is_html: bool, obs_ids: list[int]) -> str:
     return list_text
 
 
+def send_data_change_email(contact_email: str, obs_ids: str, reason: str):
+    """
+    Sends a data change email with observation IDs, reason for change, and contact email
+
+    Args:
+        contact_email (str): The contact email from the form.
+        obs_ids (str): The observation IDs from the form.
+        reason (str): The reason for data change/deletion from the form.
+        email_address (str): The email address to send the data change email to.
+
+    Returns:
+        None
+    """
+    text_body = f"""
+    Contact Email: {contact_email}
+    Observation IDs: {obs_ids}
+    Reason for Data Change/Deletion: {reason}
+    """
+
+    msg = EmailMultiAlternatives(
+        "SCORE Data Change Request",
+        text_body,
+        settings.EMAIL_HOST_USER,
+        [settings.EMAIL_HOST_USER],
+    )
+
+    email_body = f"""
+    <html>
+    <h2>SCORE Data Change Request</h2>
+    <p>Contact Email: {contact_email}</p>
+    <p>Observation IDs: {obs_ids}</p>
+    <p>Reason for Data Change/Deletion: {reason}</p>
+    </html>
+    """
+    msg.attach_alternative(email_body, "text/html")
+    msg.send()
+
+
 # CSV header - same as upload format minus the email address for privacy
 def get_csv_header() -> list[str]:
     """
@@ -315,6 +359,7 @@ def get_csv_header() -> list[str]:
         "range_rate_of_satellite_uncertainty_km_per_sec",
         "comments",
         "data_archive_link",
+        "mpc_code",
     ]
     return header
 
@@ -368,6 +413,7 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
                 observation.range_rate_sat_uncert_km_s,
                 observation.comments,
                 observation.data_archive_link,
+                observation.mpc_code,
             ]
         )
 

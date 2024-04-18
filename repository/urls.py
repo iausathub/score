@@ -22,4 +22,5 @@ urlpatterns = [
         views.last_observer_location,
         name="last_observer_location",
     ),
+    path("data-change", views.data_change, name="data-change"),
 ]

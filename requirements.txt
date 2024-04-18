@@ -28,6 +28,7 @@ django-bootstrap-v5==1.0.11
 django-composer==0.0.5
 django-compressor==4.4
 django-health-check==3.18.1
+django-jazzmin==2.6.1
 django-libsass==0.9
 django-recaptcha==4.0.0
 djangorestframework==3.14.0

@@ -7,20 +7,24 @@
     <h2 class="text-center p-2">Satellite Observation Data Format</h2>
 
     <p>To enable systematic compilation and curation of observations from various sources,
-       the IAU CPS SatHub requires submissions to adhere to the following format.</p>
+      the IAU CPS SatHub requires submissions to adhere to the following format.</p>
     <p>The required file type for submission is a Comma Separated Value (CSV) text file
       containing a set of required columns ordered and named as below. Any or all optional
       columns may also be included in the order listed. A sample file that meets all formatting
       requirements may be downloaded below. Other observation formats are not currently supported.</p>
 
     <p>Please note that by sharing observations with the IAU CPS SatHub, you agree to follow the IAU CPS
-      <a href="https://drive.google.com/file/d/1tPChesKIz9VSQshb3oPcM1J71xpayS9v/view">Member Collaboration Agreement</a>. This entails that observations you submit can be published, or made otherwise available by third parties as long as you are credited and your data is properly
-       attributed - data will be shared under the <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a> license.</p>
-      <a href="{% static 'observation_format_example.csv' %}" download>
-        <button class="btn btn-primary btn-sm mb-3">
-          Download sample file
-          </button>
-      </a>
+      <a href="https://drive.google.com/file/d/1tPChesKIz9VSQshb3oPcM1J71xpayS9v/view">Member Collaboration
+        Agreement</a>. This entails that observations you submit can be published, or made otherwise available by third
+      parties as long as you are credited and your data is properly
+      attributed - data will be shared under the <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
+      license.
+    </p>
+    <a href="{% static 'observation_format_example.csv' %}" download>
+      <button class="btn btn-primary btn-sm mb-3">
+        Download sample file
+      </button>
+    </a>
     <hr /><br />
     <h3 class="text-center p-2">Required columns</h3>
 
@@ -33,7 +37,8 @@
       </tr>
       <tr>
         <td>norad_cat_id</td>
-        <td>NORAD catalog identifier; corresponds to <a href="https://www.space-track.org/#catalog">https://www.space-track.org/#catalog</a> NORAD CAT ID</td>
+        <td>NORAD catalog identifier; corresponds to <a
+            href="https://www.space-track.org/#catalog">https://www.space-track.org/#catalog</a> NORAD CAT ID</td>
         <td>integer</td>
         <td>57957</td>
       </tr>
@@ -51,50 +56,58 @@
       </tr>
       <tr>
         <td>apparent_magnitude</td>
-        <td>Brightness of the satellite as observed/measured in magnitudes; for a non-detection, leave this field blank, but the limiting magnitude must still be provided</td>
+        <td>Brightness of the satellite as observed/measured in magnitudes; for a non-detection, leave this field blank,
+          but the limiting magnitude must still be provided</td>
         <td>float</td>
         <td>7.53</td>
       </tr>
       <tr>
         <td>apparent_magnitude_uncertainty</td>
-        <td>Uncertainty in the brightness of the satellite in magnitude; for a non-detection, leave this field blank</td>
+        <td>Uncertainty in the brightness of the satellite in magnitude; for a non-detection, leave this field blank
+        </td>
         <td>float</td>
         <td>0.14</td>
       </tr>
       </tr>
       <tr>
         <td>observer_latitude_deg</td>
-        <td>Latitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal degrees (DD) between -90 and 90</td>
+        <td>Latitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal degrees
+          (DD) between -90 and 90</td>
         <td>float</td>
         <td>-30.2447392</td>
       </tr>
       <tr>
         <td>observer_longitude_deg</td>
-        <td>Longitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal degrees (DD) between -180 and 180</td>
+        <td>Longitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal
+          degrees (DD) between -180 and 180</td>
         <td>float</td>
         <td>-70.7477219</td>
       </tr>
       <tr>
         <td>observer_altitude_m</td>
-        <td>Altitude of the observing location above sea level (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in meters</td>
+        <td>Altitude of the observing location above sea level (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in
+          meters</td>
         <td>float</td>
         <td>2663</td>
       </tr>
       <tr>
         <td>limiting_magnitude</td>
-        <td>Faintest magnitude that can be observed by the given instrument (or naked eye in the case of visual observations)</td>
+        <td>Faintest magnitude that can be observed by the given instrument (or naked eye in the case of visual
+          observations)</td>
         <td>float</td>
         <td>6.5</td>
       </tr>
       <tr>
         <td>instrument</td>
-        <td>Name or other identifying information about the telescope, instrument, and/or other hardware that was used for the observation</td>
+        <td>Name or other identifying information about the telescope, instrument, and/or other hardware that was used
+          for the observation</td>
         <td>string</td>
         <td>DECam on the Blanco 4m</td>
       </tr>
       <tr>
         <td>observing_mode</td>
-        <td>Observation hardware / detector: must be one of "VISUAL", "BINOCULARS", "CCD", "CMOS", or "OTHER" if not listed</td>
+        <td>Observation hardware / detector: must be one of "VISUAL", "BINOCULARS", "CCD", "CMOS", or "OTHER" if not
+          listed</td>
         <td>string</td>
         <td>CCD</td>
       </tr>
@@ -106,7 +119,8 @@
       </tr>
       <tr>
         <td>observer_orcid</td>
-        <td>List of ORCIDs for all people who should be credited for the observation; at least one is required. Getting an ORCID is free and easy at <a href="https://orcid.org/">orcid.org</a>.</td>
+        <td>List of ORCIDs for all people who should be credited for the observation; at least one is required. Getting
+          an ORCID is free and easy at <a href="https://orcid.org/">orcid.org</a>.</td>
         <td>string</td>
         <td>0000-0002-1825-0097</td>
       </tr>
@@ -128,19 +142,22 @@
       </tr>
       <tr>
         <td>satellite_name</td>
-        <td>Name of satellite; corresponds to <a href="https://www.space-track.org/#catalog">https://www.space-track.org/#catalog</a> SATNAME</td>
+        <td>Name of satellite; corresponds to <a
+            href="https://www.space-track.org/#catalog">https://www.space-track.org/#catalog</a> SATNAME</td>
         <td>string</td>
         <td>METEOR 1-17 DEB</td>
       </tr>
       <tr>
         <td>satellite_right_ascension_deg</td>
-        <td>Right Ascension of satellites in deg at midpoint of the observation, measured from the observation with respect to Gaia DR3 astrometric catalog stars (ICRF), between 0 and 360</td>
+        <td>Right Ascension of satellites in deg at midpoint of the observation, measured from the observation with
+          respect to Gaia DR3 astrometric catalog stars (ICRF), between 0 and 360</td>
         <td>float</td>
         <td>359.12345678</td>
       </tr>
       <tr>
         <td>satellite_declination_deg</td>
-        <td>Declination of satellites in deg at midpoint of the observation, measured from the observation with respect to Gaia DR3 astrometric catalog stars (ICRF), between -90 and 90</td>
+        <td>Declination of satellites in deg at midpoint of the observation, measured from the observation with respect
+          to Gaia DR3 astrometric catalog stars (ICRF), between -90 and 90</td>
         <td>float</td>
         <td>-40.12345678</td>
       </tr>
@@ -164,7 +181,8 @@
       </tr>
       <tr>
         <td>range_rate_of_satellite_km_per_sec</td>
-        <td>Measured (observed) change in distance between observer and satellite at time of observation in kilometers per second</td>
+        <td>Measured (observed) change in distance between observer and satellite at time of observation in kilometers
+          per second</td>
         <td>float</td>
         <td>3.12345678</td>
       </tr>

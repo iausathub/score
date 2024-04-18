@@ -41,6 +41,7 @@ class ObservationSerializer(serializers.ModelSerializer):
             "range_rate_sat_uncert_km_s",
             "comments",
             "data_archive_link",
+            "mpc_code",
             "flag",
             "satellite_id",
             "location_id",

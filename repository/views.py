@@ -14,13 +14,14 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 
-from repository.forms import SearchForm, SingleObservationForm
+from repository.forms import DataChangeForm, SearchForm, SingleObservationForm
 from repository.tasks import process_upload
 from repository.utils import (
     add_additional_data,
     create_csv,
     get_stats,
     send_confirmation_email,
+    send_data_change_email,
 )
 
 from .models import Location, Observation, Satellite
@@ -219,6 +220,7 @@ def search(request):
             end_date_range = form.cleaned_data["end_date_range"]
             observation_id = form.cleaned_data["observation_id"]
             observer_orcid = form.cleaned_data["observer_orcid"]
+            mpc_code = form.cleaned_data["mpc_code"]
 
             # filter observations based on search criteria
             observations = Observation.objects.all()
@@ -238,6 +240,8 @@ def search(request):
                 observations = observations.filter(id=observation_id)
             if observer_orcid:
                 observations = observations.filter(obs_orc_id__icontains=observer_orcid)
+            if mpc_code:
+                observations = observations.filter(mpc_code=mpc_code)
 
             # JSON is also needed for the modal view to show the observation details
             observation_list_json = [
@@ -315,6 +319,7 @@ def upload(request):
             limiting_magnitude = form.cleaned_data["limiting_magnitude"]
             comments = form.cleaned_data["comments"]
             data_archive_link = form.cleaned_data["data_archive_link"]
+            mpc_code = form.cleaned_data["mpc_code"]
 
             # Check if satellite is above the horizon
             additional_data = add_additional_data(
@@ -372,6 +377,7 @@ def upload(request):
                 range_rate_sat_uncert_km_s=range_rate_sat_uncert_km_s,
                 comments=comments,
                 data_archive_link=data_archive_link,
+                mpc_code=mpc_code.strip().upper() if mpc_code else None,
                 limiting_magnitude=limiting_magnitude,
                 phase_angle=additional_data.phase_angle,
                 range_to_sat_km_satchecker=additional_data.range_to_sat,
@@ -419,6 +425,7 @@ def upload(request):
                     "illuminated": additional_data.illuminated,
                     "comments": comments,
                     "data_archive_link": data_archive_link,
+                    "mpc_code": mpc_code.strip().upper() if mpc_code else None,
                     "flag": None,
                     "satellite_id": satellite,
                     "location_id": location,
@@ -460,6 +467,32 @@ def download_data(request):
         "recaptcha_public_key": settings.RECAPTCHA_PUBLIC_KEY,
     }
     return HttpResponse(template.render(context, request))
+
+
+def data_change(request):
+    if request.method == "POST":
+        form = DataChangeForm(request.POST)
+        if form.is_valid():
+            contact_email = form.cleaned_data["contact_email"]
+            obs_ids = form.cleaned_data["obs_ids"]
+            reason = form.cleaned_data["reason"]
+
+            # Send the confirmation email
+            send_data_change_email(contact_email, obs_ids, reason)
+            return render(
+                request,
+                "repository/data-change.html",
+                {
+                    "msg": "Your request has been submitted. "
+                    "You will receive an email confirmation "
+                    "when your request is reviewed.",
+                    "form": DataChangeForm,
+                },
+            )
+    else:
+        form = DataChangeForm()
+
+    return render(request, "repository/data-change.html", {"form": DataChangeForm})
 
 
 @csrf_exempt

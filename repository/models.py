@@ -106,6 +106,7 @@ class Observation(models.Model):
     az_deg_satchecker = models.FloatField(null=True, blank=True)
     illuminated = models.BooleanField(null=True, blank=True)
     limiting_magnitude = models.FloatField(null=True, blank=True)
+    mpc_code = models.CharField(max_length=10, null=True, blank=True)
     satellite_id = models.ForeignKey(
         Satellite, on_delete=models.CASCADE, related_name="observations"
     )

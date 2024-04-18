@@ -1,7 +1,8 @@
 import re
 
 from django import forms
-from django.forms import Form
+from django.core.validators import validate_email
+from django.forms import Form, ValidationError
 
 from repository.models import Observation
 
@@ -118,6 +119,11 @@ class SearchForm(Form):
         label="Observer ORCID",
         widget=forms.TextInput(attrs={"class": "form-control"}),
         validators=[validate_orcid],
+    )
+    mpc_code = forms.CharField(
+        required=False,
+        label="MPC Observatory Code",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
     )
 
 
@@ -282,6 +288,11 @@ class SingleObservationForm(Form):
         label="Data Archive Link",
         widget=forms.URLInput(attrs={"class": "form-control"}),
     )
+    mpc_code = forms.CharField(
+        required=False,
+        label="MPC Observatory Code",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
 
     def clean(self):
         cleaned_data = super().clean()
@@ -314,5 +325,36 @@ class SingleObservationForm(Form):
                 "apparent magnitude uncertainty is provided."
             )
         # fmt: on
+        if errors:
+            raise forms.ValidationError(errors)
+
+
+class DataChangeForm(Form):
+    contact_email = forms.EmailField(
+        required=True,
+        label="Contact email",
+        widget=forms.EmailInput(attrs={"class": "form-control"}),
+    )
+    obs_ids = forms.CharField(
+        required=True,
+        label="Observation IDs",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    reason = forms.CharField(
+        required=True,
+        label="Reason for data change/deletion",
+        widget=forms.Textarea(attrs={"class": "form-control"}),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        errors = {}
+        email = cleaned_data.get("contact_email")
+
+        try:
+            validate_email(email)
+        except ValidationError:
+            errors["contact_email"] = "Enter a valid email address."
+
         if errors:
             raise forms.ValidationError(errors)
