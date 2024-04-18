@@ -53,8 +53,12 @@ def process_upload(
                 column[0], column[1], column[2], column[6], column[7], column[8]
             )
 
+            obs_error_reference = (
+                "Observation: " + column[0] + " " + column[1] + " " + column[2]
+            )
+
             if isinstance(additional_data, str):
-                raise UploadError(additional_data)
+                raise UploadError(additional_data + " - " + obs_error_reference)
 
             satellite, sat_created = Satellite.objects.get_or_create(
                 sat_name=column[0],
@@ -165,17 +169,17 @@ def process_upload(
         raise UploadError(str(e) + " - check number of fields in csv file.") from e
 
     except ValueError as e:
-        raise UploadError(e) from e
+        raise UploadError(str(e) + " - " + obs_error_reference) from e
 
     except ValidationError as e:
         if len(e.messages) > 1:
-            raise UploadError(e.messages[1]) from e
+            raise UploadError(e.messages[1] + " - " + obs_error_reference) from e
 
         else:
             message_text = ""
             for key in e.message_dict.keys():
                 message_text += f"{key}: {e.message_dict[key][0]}\n"
-            raise UploadError(message_text) from e
+            raise UploadError(message_text + " - " + obs_error_reference) from e
 
     except Exception as e:
         raise UploadError(e) from e
