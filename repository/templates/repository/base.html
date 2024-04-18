@@ -254,10 +254,20 @@
       }
     }
 
+    function customError(progressBarElement, progressBarMessageElement) {
+      progressBarElement.style.backgroundColor = '#c21e1b';
+      progressBarMessageElement.innerHTML = 'Upload failed - check the error and try again.';
+}
+
     $(function () {
       var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
       CeleryProgressBar.initProgressBar(progressUrl, {
         onResult: customResult,
+        defaultMessages: {
+          waiting: "Waiting for upload to start...",
+          started: "Upload started...",
+        },
+        onError: customError,
       })
     });
   </script>
