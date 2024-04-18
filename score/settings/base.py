@@ -46,6 +46,7 @@ DEBUG_PROPAGATE_EXCEPTIONS = True
 
 INSTALLED_APPS = [
     "repository.apps.RepositoryConfig",
+    "jazzmin",
     "django.contrib.admin",
     "django.contrib.auth",
     "django.contrib.contenttypes",
@@ -193,3 +194,9 @@ EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
 EMAIL_HOST = "smtp.gmail.com"
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
+
+JAZZMIN_SETTINGS = {
+    "site_title": "SCORE Admin",
+    "site_header": "SCORE Admin",
+    "site_brand": "SCORE",
+}

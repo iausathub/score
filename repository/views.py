@@ -14,13 +14,14 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 
-from repository.forms import SearchForm, SingleObservationForm
+from repository.forms import DataChangeForm, SearchForm, SingleObservationForm
 from repository.tasks import process_upload
 from repository.utils import (
     add_additional_data,
     create_csv,
     get_stats,
     send_confirmation_email,
+    send_data_change_email,
 )
 
 from .models import Location, Observation, Satellite
@@ -466,6 +467,32 @@ def download_data(request):
         "recaptcha_public_key": settings.RECAPTCHA_PUBLIC_KEY,
     }
     return HttpResponse(template.render(context, request))
+
+
+def data_change(request):
+    if request.method == "POST":
+        form = DataChangeForm(request.POST)
+        if form.is_valid():
+            contact_email = form.cleaned_data["contact_email"]
+            obs_ids = form.cleaned_data["obs_ids"]
+            reason = form.cleaned_data["reason"]
+
+            # Send the confirmation email
+            send_data_change_email(contact_email, obs_ids, reason)
+            return render(
+                request,
+                "repository/data-change.html",
+                {
+                    "msg": "Your request has been submitted. "
+                    "You will receive an email confirmation "
+                    "when your request is reviewed.",
+                    "form": DataChangeForm,
+                },
+            )
+    else:
+        form = DataChangeForm()
+
+    return render(request, "repository/data-change.html", {"form": DataChangeForm})
 
 
 @csrf_exempt
