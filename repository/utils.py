@@ -119,14 +119,25 @@ def add_additional_data(
         if the satellite is above the horizon. Returns an error message string or False
         otherwise.
     """
-    if (
-        not sat_number
-        or not observation_time
-        or not latitude
-        or not longitude
-        or altitude is None
-    ):
-        return "Satellite position check failed - check your data."
+    missing_fields = []
+
+    if not sat_number:
+        missing_fields.append("sat_number")
+    if not observation_time:
+        missing_fields.append("observation_time")
+    if not latitude:
+        missing_fields.append("latitude")
+    if not longitude:
+        missing_fields.append("longitude")
+    if altitude is None:
+        missing_fields.append("altitude")
+
+    if missing_fields:
+        missing_fields_str = ", ".join(missing_fields)
+        return (
+            "Satellite position check failed - check your data. "
+            f"Missing fields: {missing_fields_str}"
+        )
     obs_time = Time(observation_time, format="isot", scale="utc")
     url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
     params = {
@@ -406,7 +417,9 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
                 observation.obs_orc_id,
                 observation.sat_ra_deg,
                 observation.sat_dec_deg,
-                observation.sat_ra_dec_uncert_deg,
+                observation.sigma_2_ra,
+                observation.sigma_ra_sigma_dec,
+                observation.sigma_2_dec,
                 observation.range_to_sat_km,
                 observation.range_to_sat_uncert_km,
                 observation.range_rate_sat_km_s,

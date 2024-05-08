@@ -23,4 +23,6 @@ urlpatterns = [
         name="last_observer_location",
     ),
     path("data-change", views.data_change, name="data-change"),
+    path("tools", views.tools, name="tools"),
+    path("name-id-lookup", views.name_id_lookup, name="name-id-lookup"),
 ]

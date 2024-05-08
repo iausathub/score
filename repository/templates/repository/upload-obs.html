@@ -24,7 +24,7 @@
             <span class="text-danger">*</span> denotes required field
         </div>
         <div class="justify-content-center px-5">
-            <form action="{% url 'upload-obs' %}" method="post" enctype="multipart/form-data">
+            <form action="{% url 'upload-obs' %}" method="post" enctype="multipart/form-data" id="upload-obs">
                 {% csrf_token %}
                 <div class="row">
                     <hr />
@@ -101,6 +101,8 @@
                             <p>Satellite name is optional, but if given, it must match the NORAD ID on the date of the
                                 observation.</p>
                             <p>For non-detections, please check the box.</p>
+                            <p>If you do not know the NORAD ID to use for the satellite number, you can find it using the
+                                <a href="{% url 'tools' %}">Satellite Name/NORAD ID Lookup</a> tool</p>
                         </div>
                     </div>
                     <div class="col-sm-8">
@@ -233,20 +235,53 @@
                             </div>
                         </div>
                         <div class="row">
+                            RA/Dec uncertainty:
+                            <br /><br />
+                        </div>
+                        <div class="row">
                             <div class="col align-self-end">
                                 <div class=" pb-4">
-                                    {{ form.sat_ra_dec_uncert_deg.label_tag}}
-                                    {{ form.sat_ra_dec_uncert_deg }}
+                                    {{ form.sigma_2_ra.label_tag}}
+                                    {{ form.sigma_2_ra }}
                                     <div class="form-text text-muted">
-                                        {{ form.sat_ra_dec_uncert_deg.help_text }}
+                                        {{ form.sigma_2_ra.help_text }}
                                     </div>
                                     <div class="text-danger">
-                                        {{ form.sat_ra_dec_uncert_deg.errors }}
+                                        {{ form.sigma_2_ra.errors }}
                                     </div>
                                 </div>
                             </div>
-                            <div class="col">
+                            <div class="col align-self-end">
+                                <div class=" pb-4">
+                                    {{ form.sigma_2_dec.label_tag}}
+                                    {{ form.sigma_2_dec }}
+                                    <div class="form-text text-muted">
+                                        {{ form.sigma_2_dec.help_text }}
+                                    </div>
+                                    <div class="text-danger">
+                                        {{ form.sigma_2_dec.errors }}
+                                    </div>
+                                </div>
                             </div>
+                        </div>
+                        <div class="row">
+                            <div class="col align-self-end">
+                                <div class=" pb-4">
+                                    {{ form.sigma_ra_sigma_dec.label_tag}}
+                                    {{ form.sigma_ra_sigma_dec }}
+                                    <div class="form-text text-muted">
+                                        {{ form.sigma_ra_sigma_dec.help_text }}
+                                    </div>
+                                    <div class="text-danger">
+                                        {{ form.sigma_ra_sigma_dec.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col ">
+                            </div>
+                        </div>
+                        <div class="row">
+                            <hr />
                         </div>
                         <div class="row">
                             <div class="col align-self-end">

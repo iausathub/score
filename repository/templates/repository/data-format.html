@@ -11,7 +11,8 @@
     <p>The required file type for submission is a Comma Separated Value (CSV) text file
       containing a set of required columns ordered and named as below. Any or all optional
       columns may also be included in the order listed. A sample file that meets all formatting
-      requirements may be downloaded below. Other observation formats are not currently supported.</p>
+      requirements may be downloaded below. It contains various types of valid observations with both
+      required and optional fields. Other observation formats are not currently supported.</p>
 
     <p>Please note that by sharing observations with the IAU CPS SatHub, you agree to follow the IAU CPS
       <a href="https://drive.google.com/file/d/1tPChesKIz9VSQshb3oPcM1J71xpayS9v/view">Member Collaboration
@@ -20,11 +21,19 @@
       attributed - data will be shared under the <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
       license.
     </p>
+    <div class="p-3 mb-3 text-primary-emphasis bg-accent1-subtle border border-accent1 rounded-3">
+      <b>Notes:</b> Optional fields should be left blank if not applicable. Please avoid using "n/a", none, 0, or other similar values.
+      <br />All columns must be used in the file uploaded for submission, just left blank if there is no data.
+      The example file contains sample observations with both required and optional fields.
+    </div>
     <a href="{% static 'observation_format_example.csv' %}" download>
+      <button class="btn btn-primary btn-sm mb-3">Download full sample file</button></a>
+    <a href="{% static 'visual_observation_format_example.csv' %}" download>
       <button class="btn btn-primary btn-sm mb-3">
-        Download sample file
+        Download sample file - visual observations
       </button>
     </a>
+
     <hr /><br />
     <h3 class="text-center p-2">Required columns</h3>
 
@@ -162,10 +171,22 @@
         <td>-40.12345678</td>
       </tr>
       <tr>
-        <td>satellite_ra_dec_uncertainty_deg</td>
-        <td>Uncertainty covariance matrix (2x3) for RA and Dec.</td>
-        <td>string</td>
-        <td>0.01, 0.01, 0.01, 0.01, 0.01, 0.01</td>
+        <td>sigma_2_ra</td>
+        <td>Sigma^2 for Right Ascension (uncertainty)</td>
+        <td>float</td>
+        <td>0.01</td>
+      </tr>
+      <tr>
+        <td>sigma_ra_sigma_dec</td>
+        <td>Sigma_RA * Sigma_Dec (uncertainty)</td>
+        <td>float</td>
+        <td>0.01</td>
+      </tr>
+      <tr>
+        <td>sigma_2_dec</td>
+        <td>Sigma^2 for Declination (uncertainty)</td>
+        <td>float</td>
+        <td>0.01</td>
       </tr>
       <tr>
         <td>range_to_satellite_km</td>

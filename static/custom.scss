@@ -8,12 +8,14 @@ $theme-colors: (
   "tertiary":   #d7cfc5,
   "info":       #6c9fd7,
   "accent1":    #fbb552,
+  "accent1-subtle": lighten(#fbb552, 25%),
   "accent2":    #b7d3df,
   "accent3":    #bcc1ce,
   "success":    #20671d,
   "warning":    #ebd119,
   "danger":     #fe1712,
 );
+
 
 .page-item.active .page-link{
   background-color: map-get($theme-colors, "primary");

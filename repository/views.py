@@ -311,7 +311,9 @@ def upload(request):
             obs_alt_m = form.cleaned_data["observer_altitude_m"]
             sat_ra_deg = form.cleaned_data["sat_ra_deg"]
             sat_dec_deg = form.cleaned_data["sat_dec_deg"]
-            sat_ra_dec_uncert_deg = form.cleaned_data["sat_ra_dec_uncert_deg"]
+            sigma_2_ra = form.cleaned_data["sigma_2_ra"]
+            sigma_ra_sigma_dec = form.cleaned_data["sigma_ra_sigma_dec"]
+            sigma_2_dec = form.cleaned_data["sigma_2_dec"]
             range_to_sat_km = form.cleaned_data["range_to_sat_km"]
             range_to_sat_uncert_km = form.cleaned_data["range_to_sat_uncert_km"]
             range_rate_sat_km_s = form.cleaned_data["range_rate_sat_km_s"]
@@ -366,11 +368,9 @@ def upload(request):
                 obs_orc_id=observer_orcid,
                 sat_ra_deg=sat_ra_deg,
                 sat_dec_deg=sat_dec_deg,
-                sat_ra_dec_uncert_deg=(
-                    [float(x) for x in sat_ra_dec_uncert_deg.split(",")]
-                    if sat_ra_dec_uncert_deg
-                    else []
-                ),
+                sigma_2_ra=sigma_2_ra,
+                sigma_ra_sigma_dec=sigma_ra_sigma_dec,
+                sigma_2_dec=sigma_2_dec,
                 range_to_sat_km=range_to_sat_km,
                 range_to_sat_uncert_km=range_to_sat_uncert_km,
                 range_rate_sat_km_s=range_rate_sat_km_s,
@@ -403,11 +403,9 @@ def upload(request):
                     "obs_orc_id": observer_orcid,
                     "sat_ra_deg": sat_ra_deg,
                     "sat_dec_deg": sat_dec_deg,
-                    "sat_ra_dec_uncert_deg": (
-                        [float(x) for x in sat_ra_dec_uncert_deg.split(",")]
-                        if sat_ra_dec_uncert_deg
-                        else []
-                    ),
+                    "sigma_2_ra": sigma_2_ra,
+                    "sigma_ra_sigma_dec": sigma_ra_sigma_dec,
+                    "sigma_2_dec": sigma_2_dec,
                     "range_to_sat_km": range_to_sat_km,
                     "range_to_sat_uncert_km": range_to_sat_uncert_km,
                     "range_rate_sat_km_s": range_rate_sat_km_s,
@@ -493,6 +491,99 @@ def data_change(request):
         form = DataChangeForm()
 
     return render(request, "repository/data-change.html", {"form": DataChangeForm})
+
+
+def tools(request):
+    template = loader.get_template("repository/tools.html")
+    context = {"": ""}
+    return HttpResponse(template.render(context, request))
+
+
+@csrf_exempt
+def name_id_lookup(request):
+    """
+    This view returns the satellite name or NORAD ID based on the provided information.
+
+    The NORAD ID or satellite name is received from a POST request. If only the NORAD ID
+    is provided, the function queries the SatChecker API to get the associated satellite
+    name. If only the satellite name is provided, the function queries the SatChecker
+    API to get the associated NORAD ID.
+
+    If both the NORAD ID and satellite name are provided, the function returns a JSON
+    response with an error message. If neither is provided, the function does nothing
+    and returns None.
+
+    If the NORAD ID or satellite name is not valid/complete or there is no satellite
+    associated with it, the function returns a JSON response with an error message.
+
+    Parameters:
+    request (HttpRequest): The Django request object.
+
+    Returns:
+    JsonResponse: A JSON response with the satellite name and NORAD ID or an error
+    message.
+    """
+    norad_id = request.POST.get("satellite_id")
+    satellite_name = request.POST.get("satellite_name").upper()
+    error = None
+
+    if norad_id and satellite_name:
+        print("Both norad_id and satellite_name provided")
+        return JsonResponse(
+            {
+                "error": "Please provide either a NORAD ID or a satellite name.",
+            }
+        )
+
+    if norad_id:
+        # query SatChecker for satellite name
+        url = "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/"
+        params = {
+            "id": norad_id,
+        }
+        try:
+            response = requests.get(url, params=params, timeout=10)
+            if response.status_code != 200:
+                error = "Satellite info check failed - check the input and try again."
+            if not response.json() or response.json()[0] == []:
+                error = "No satellite found for the provided NORAD ID."
+            else:
+                satellite_name = response.json()[0]["name"]
+        except requests.exceptions.RequestException:
+            error = "Satellite info check failed - try again later."
+
+    elif satellite_name:
+        # query SatChecker for NORAD ID
+        url = "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/"
+        params = {
+            "name": satellite_name,
+        }
+        try:
+            print(url)
+            response = requests.get(url, params=params, timeout=10)
+            if response.status_code != 200:
+                error = "Satellite info check failed - check the input and try again."
+                error += " Status code: " + str(response.status_code)
+            if not response.json():
+                error = "No satellite found for the provided satellite name."
+            else:
+                norad_id = response.json()[0]["norad_id"]
+        except requests.exceptions.RequestException:
+            error = "Satellite info check failed - try again later."
+
+    if not error:
+        return JsonResponse(
+            {
+                "satellite_name": satellite_name,
+                "norad_id": norad_id,
+            }
+        )
+
+    return JsonResponse(
+        {
+            "error": error,
+        }
+    )
 
 
 @csrf_exempt

@@ -85,9 +85,9 @@ class Observation(models.Model):
     obs_orc_id = ArrayField(models.CharField(max_length=19), default=list)
     sat_ra_deg = models.FloatField(default=0, null=True, blank=True)
     sat_dec_deg = models.FloatField(default=0, null=True, blank=True)
-    sat_ra_dec_uncert_deg = ArrayField(
-        models.FloatField(default=0, null=True, blank=True), null=True, blank=True
-    )
+    sigma_2_ra = models.FloatField(null=True, blank=True)
+    sigma_2_dec = models.FloatField(null=True, blank=True)
+    sigma_ra_sigma_dec = models.FloatField(null=True, blank=True)
     range_to_sat_km = models.FloatField(default=0, null=True, blank=True)
     range_to_sat_uncert_km = models.FloatField(default=0, null=True, blank=True)
     range_rate_sat_km_s = models.FloatField(default=0, null=True, blank=True)
@@ -175,11 +175,6 @@ class Observation(models.Model):
             raise ValidationError("Right ascension must be between 0 and 360 degrees.")
         if self.sat_dec_deg and (self.sat_dec_deg < -90 or self.sat_dec_deg > 90):
             raise ValidationError("Declination must be between -90 and 90 degrees.")
-        if self.sat_ra_dec_uncert_deg and (len(self.sat_ra_dec_uncert_deg) != 6):
-            raise ValidationError(
-                "RA/Dec uncertainty must be an array of \
-                                  6 values (2x3 matrix)."
-            )
         if self.range_to_sat_km and (self.range_to_sat_km < 0):
             raise ValidationError("Range to satellite must be positive.")
         if self.range_to_sat_uncert_km and (self.range_to_sat_uncert_km < 0):

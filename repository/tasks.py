@@ -53,8 +53,12 @@ def process_upload(
                 column[0], column[1], column[2], column[6], column[7], column[8]
             )
 
+            obs_error_reference = (
+                "Observation: " + column[0] + " " + column[1] + " " + column[2]
+            )
+
             if isinstance(additional_data, str):
-                raise UploadError(additional_data)
+                raise UploadError(additional_data + " - " + obs_error_reference)
 
             satellite, sat_created = Satellite.objects.get_or_create(
                 sat_name=column[0],
@@ -93,16 +97,16 @@ def process_upload(
                 obs_orc_id=orc_id_list,
                 sat_ra_deg=column[15] if column[15] else None,
                 sat_dec_deg=column[16] if column[16] else None,
-                sat_ra_dec_uncert_deg=(
-                    [float(x) for x in column[17].split(",")] if column[17] else []
-                ),
-                range_to_sat_km=column[18] if column[18] else None,
-                range_to_sat_uncert_km=column[19] if column[19] else None,
-                range_rate_sat_km_s=column[20] if column[20] else None,
-                range_rate_sat_uncert_km_s=column[21] if column[21] else None,
-                comments=column[22],
-                data_archive_link=column[23],
-                mpc_code=column[24].strip().upper() if column[24] else None,
+                sigma_2_ra=column[17] if column[17] else None,
+                sigma_ra_sigma_dec=column[18] if column[18] else None,
+                sigma_2_dec=column[19] if column[19] else None,
+                range_to_sat_km=column[20] if column[20] else None,
+                range_to_sat_uncert_km=column[21] if column[21] else None,
+                range_rate_sat_km_s=column[22] if column[22] else None,
+                range_rate_sat_uncert_km_s=column[23] if column[23] else None,
+                comments=column[24],
+                data_archive_link=column[25],
+                mpc_code=column[26].strip().upper() if column[26] else None,
                 phase_angle=additional_data.phase_angle,
                 range_to_sat_km_satchecker=additional_data.range_to_sat,
                 range_rate_sat_km_s_satchecker=additional_data.range_rate,
@@ -128,16 +132,16 @@ def process_upload(
                     "obs_orc_id": orc_id_list,
                     "sat_ra_deg": column[15] if column[15] else None,
                     "sat_dec_deg": column[16] if column[16] else None,
-                    "sat_ra_dec_uncert_deg": (
-                        [float(x) for x in column[17].split(",")] if column[17] else []
-                    ),
-                    "range_to_sat_km": column[18] if column[18] else None,
-                    "range_to_sat_uncert_km": column[19] if column[19] else None,
-                    "range_rate_sat_km_s": column[20] if column[20] else None,
-                    "range_rate_sat_uncert_km_s": column[21] if column[21] else None,
-                    "comments": column[22],
-                    "data_archive_link": column[23],
-                    "mpc_code": column[24].strip().upper() if column[24] else None,
+                    "sigma_2_ra": column[17] if column[17] else None,
+                    "sigma_ra_sigma_dec": column[18] if column[18] else None,
+                    "sigma_2_dec": column[19] if column[19] else None,
+                    "range_to_sat_km": column[20] if column[20] else None,
+                    "range_to_sat_uncert_km": column[21] if column[21] else None,
+                    "range_rate_sat_km_s": column[22] if column[22] else None,
+                    "range_rate_sat_uncert_km_s": column[23] if column[23] else None,
+                    "comments": column[24],
+                    "data_archive_link": column[25],
+                    "mpc_code": column[26].strip().upper() if column[26] else None,
                     "phase_angle": additional_data.phase_angle,
                     "range_to_sat_km_satchecker": additional_data.range_to_sat,
                     "range_rate_sat_km_s_satchecker": additional_data.range_rate,
@@ -165,17 +169,17 @@ def process_upload(
         raise UploadError(str(e) + " - check number of fields in csv file.") from e
 
     except ValueError as e:
-        raise UploadError(e) from e
+        raise UploadError(str(e) + " - " + obs_error_reference) from e
 
     except ValidationError as e:
         if len(e.messages) > 1:
-            raise UploadError(e.messages[1]) from e
+            raise UploadError(e.messages[1] + " - " + obs_error_reference) from e
 
         else:
             message_text = ""
             for key in e.message_dict.keys():
                 message_text += f"{key}: {e.message_dict[key][0]}\n"
-            raise UploadError(message_text) from e
+            raise UploadError(message_text + " - " + obs_error_reference) from e
 
     except Exception as e:
         raise UploadError(e) from e
