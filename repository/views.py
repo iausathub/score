@@ -311,7 +311,9 @@ def upload(request):
             obs_alt_m = form.cleaned_data["observer_altitude_m"]
             sat_ra_deg = form.cleaned_data["sat_ra_deg"]
             sat_dec_deg = form.cleaned_data["sat_dec_deg"]
-            sat_ra_dec_uncert_deg = form.cleaned_data["sat_ra_dec_uncert_deg"]
+            sigma_2_ra = form.cleaned_data["sigma_2_ra"]
+            sigma_ra_sigma_dec = form.cleaned_data["sigma_ra_sigma_dec"]
+            sigma_2_dec = form.cleaned_data["sigma_2_dec"]
             range_to_sat_km = form.cleaned_data["range_to_sat_km"]
             range_to_sat_uncert_km = form.cleaned_data["range_to_sat_uncert_km"]
             range_rate_sat_km_s = form.cleaned_data["range_rate_sat_km_s"]
@@ -366,11 +368,9 @@ def upload(request):
                 obs_orc_id=observer_orcid,
                 sat_ra_deg=sat_ra_deg,
                 sat_dec_deg=sat_dec_deg,
-                sat_ra_dec_uncert_deg=(
-                    [float(x) for x in sat_ra_dec_uncert_deg.split(",")]
-                    if sat_ra_dec_uncert_deg
-                    else []
-                ),
+                sigma_2_ra=sigma_2_ra,
+                sigma_ra_sigma_dec=sigma_ra_sigma_dec,
+                sigma_2_dec=sigma_2_dec,
                 range_to_sat_km=range_to_sat_km,
                 range_to_sat_uncert_km=range_to_sat_uncert_km,
                 range_rate_sat_km_s=range_rate_sat_km_s,
@@ -403,11 +403,9 @@ def upload(request):
                     "obs_orc_id": observer_orcid,
                     "sat_ra_deg": sat_ra_deg,
                     "sat_dec_deg": sat_dec_deg,
-                    "sat_ra_dec_uncert_deg": (
-                        [float(x) for x in sat_ra_dec_uncert_deg.split(",")]
-                        if sat_ra_dec_uncert_deg
-                        else []
-                    ),
+                    "sigma_2_ra": sigma_2_ra,
+                    "sigma_ra_sigma_dec": sigma_ra_sigma_dec,
+                    "sigma_2_dec": sigma_2_dec,
                     "range_to_sat_km": range_to_sat_km,
                     "range_to_sat_uncert_km": range_to_sat_uncert_km,
                     "range_rate_sat_km_s": range_rate_sat_km_s,

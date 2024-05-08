@@ -51,30 +51,6 @@ def validate_date(value: str) -> None:
         raise forms.ValidationError("Invalid date format.")
 
 
-def validate_ra_dec_uncert(value: str) -> None:
-    """
-    Validates the provided RA/Dec. uncertainty matrix.
-
-    This function checks if the provided RA/Dec. uncertainty matrix is valid by
-    making sure each value is a float. If any value is not a float, a ValidationError
-    is raised.
-
-    Args:
-        value (AnyStr): A string containing the RA/Dec. uncertainty matrix.
-
-    Raises:
-        forms.ValidationError: If any uncertainty in the input string is not valid.
-    """
-    ra_dec_uncert_list = [x.strip() for x in value.split(",")]
-    if len(ra_dec_uncert_list) != 6:
-        raise forms.ValidationError("Invalid RA/Dec. uncertainty matrix.")
-    for ra_dec_uncert in ra_dec_uncert_list:
-        try:
-            float(ra_dec_uncert)
-        except ValueError as err:
-            raise forms.ValidationError("Invalid RA/Dec. uncertainty matrix.") from err
-
-
 class SearchForm(Form):
     sat_name = forms.CharField(
         max_length=200,
@@ -251,12 +227,23 @@ class SingleObservationForm(Form):
         label="Satellite Declination (deg)",
         widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
-    sat_ra_dec_uncert_deg = forms.CharField(
+    sigma_2_ra = forms.FloatField(
         required=False,
-        label="Satellite RA/Dec. Uncertainty (deg)",
-        help_text="Uncertainty covariance matrix - e.g. 0.1, 0.2, 0.3, 0.1, 0.2, 0.3",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
-        validators=[validate_ra_dec_uncert],
+        label="Sigma^2 - RA (deg)",
+        help_text="Uncertainty in RA^2",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    sigma_ra_sigma_dec = forms.FloatField(
+        required=False,
+        label="Sigma RA * Sigma Dec (deg)",
+        help_text="Uncertainty in RA * Uncertainty in Dec",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    sigma_2_dec = forms.FloatField(
+        required=False,
+        label="Sigma^2 - Dec (deg)",
+        help_text="Uncertainty in Dec^2",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
     )
     range_to_sat_km = forms.FloatField(
         required=False,

@@ -17,7 +17,7 @@
                 </div>
                 <div class="row pb-4">
                     <div class="col-2 text-center">
-                        <div class="fw-bold">Basic</div>
+                        <div class="fw-bold fs-5">Basic</div>
                     </div>
                     <div class="col-5">
                         <div class="row">
@@ -71,7 +71,7 @@
                 <div class="bg-light">
                     <div class="row p-2">
                         <div class="col-2 text-center">
-                            <div class="fw-bold">Position</div>
+                            <div class="fw-bold fs-5">Position</div>
                         </div>
                         <div class="col-5">
                             <div class="row">
@@ -82,12 +82,6 @@
                                 <div class="col text-end px-0">Satellite Dec. (deg.):</div>
                                 <div class="col text-start" id="sat_dec_deg"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">RA/Dec. uncertainty (deg.):</div>
-                                <div class="col text-start" id="sat_ra_dec_uncert_deg"></div>
-                            </div>
-                        </div>
-                        <div class="col-5">
                             <div class="row">
                                 <div class="col text-end px-0">Range to satellite (km):</div>
                                 <div class="col text-start" id="range_to_sat_km"></div>
@@ -105,12 +99,30 @@
                                 <div class="col text-start" id="range_rate_uncert_km_s"></div>
                             </div>
                         </div>
+                        <div class="col-5">
+                            <div class="row">
+                                <div class="col text-end px-0 fw-bold">RA/Dec. uncertainty</div>
+                                <div class="col text-start" ></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Sigma^2 RA:</div>
+                                <div class="col text-start" id="sigma_2_ra"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Sigma RA * Sigma Dec:</div>
+                                <div class="col text-start" id="sigma_ra_sigma_dec"></div>
+                            </div>
+                            <div class="row">
+                                <div class="col text-end px-0">Sigma^2 Dec:</div>
+                                <div class="col text-start" id="sigma_2_dec"></div>
+                            </div>
+                        </div>
                     </div>
                 </div>
                 <div class="">
                     <div class="row p-2">
                         <div class="col-2 text-center">
-                            <div class="fw-bold">Observer</div>
+                            <div class="fw-bold fs-5">Observer</div>
                         </div>
                         <div class="col-5">
                             <div class="row">
@@ -145,7 +157,7 @@
                 <div class="bg-light">
                     <div class="row p-2">
                         <div class="col-2 text-center">
-                            <div class="fw-bold">Reference data<span class="fw-normal">*</span></div>
+                            <div class="fw-bold fs-5">Reference data<span class="fw-normal">*</span></div>
                         </div>
                         <div class="col-5">
                             <div class="row">
