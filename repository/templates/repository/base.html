@@ -65,6 +65,9 @@
               </ul>
             </li>
             <li class="nav-item">
+              <a class="nav-link" href="{% url 'tools' %}">Tools</a>
+            </li>
+            <li class="nav-item">
               <a class="nav-link" href="{% url 'search' %}">Search</a>
             </li>
           </ul>
@@ -125,6 +128,9 @@
             </p>
             <p>
               <a href="about" class="text-white">About</a>
+            </p>
+            <p>
+              <a href="tools" class="text-white">Tools</a>
             </p>
             <p><i class="fab fa-github"></i> <a href="https://github.com/iausathub/score" class="text-white">Github</a>
             </p>
@@ -309,10 +315,35 @@
   </script>
 
   <script>
-    document.getElementById('upload-obs').addEventListener('submit', function() {
-      window.scrollTo(0, 0);
+    var uploadForm = document.getElementById('upload-obs');
+    if (uploadForm) {
+      uploadForm.addEventListener('submit', function () {
+        window.scrollTo(0, 0);
+      });
+    }
+  </script>
+
+  <script>
+    $(document).ready(function () {
+      $('#name-id-lookup').on('submit', function (event) {
+        event.preventDefault(); // Prevent the form from being submitted normally
+
+        var satellite_name = $('#satellite_name').val();
+        var satellite_id = $('#satellite_id').val();
+
+        $.post('/name-id-lookup', { 'satellite_name': satellite_name, 'satellite_id': satellite_id }, function (data) {
+          if (!data.error) {
+            $('#satellite_id').val(data.norad_id);
+            $('#satellite_name').val(data.satellite_name);
+            $('#lookup_error').text('');
+          } else {
+            $('#lookup_error').text(data.error);
+          }
+        });
+      });
     });
   </script>
+
 </body>
 
 </html>

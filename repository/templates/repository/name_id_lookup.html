@@ -1,0 +1,27 @@
+<div id="name_id_lookup" class="border border-2 border-tertiary" role="form">
+    <div class="container-fluid p-2">
+        <h4 class="text-center">Satellite Name/NORAD ID Lookup</h4>
+        <form action="{% url 'name-id-lookup' %}" method="post" enctype="multipart/form-data" id="name-id-lookup">
+            {% csrf_token %}
+            <p>
+                Enter the name or NORAD ID of a satellite to search for the opposite field in the database. For example,
+                if you enter a satellite name, the corresponding NORAD ID will be returned, and vice versa. For satellites
+                with history of more than one name or NORAD ID, the most recent information will be returned.
+            </p>
+            <div class="row">
+                <div class="col">
+                    <label for="satellite_name">Satellite name</label>
+                    <input type="text" class="form-control" name="satellite_name" id="satellite_name" >
+                </div>
+                <div class="col">
+                    <label for="satellite_id">NORAD ID</label>
+                    <input type="text" class="form-control" name="satellite_id" id="satellite_id">
+                </div>
+            </div>
+            <div class="row">
+                <p class="p-2 text-danger" id="lookup_error"></p>
+            </div>
+            <button type="submit" class="btn btn-primary mt-3" name="submit" id="lookup_btn">Search</button>
+        </form>
+    </div>
+</div>
