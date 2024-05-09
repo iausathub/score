@@ -48,6 +48,7 @@ def process_upload(
                 raise UploadError(
                     "File contains sample data. Please upload a valid file."
                 )
+
             # Check if satellite is above the horizon
             additional_data = add_additional_data(
                 column[0], column[1], column[2], column[6], column[7], column[8]
@@ -80,10 +81,12 @@ def process_upload(
                     "date_added": timezone.now(),
                 },
             )
+
             orc_id_list = [item.strip() for item in column[14].split(",")]
             if column[4] == "" and column[5] == "":
                 column[4] = None
                 column[5] = None
+
             observation, obs_created = Observation.objects.get_or_create(
                 obs_time_utc=column[2],
                 obs_time_uncert_sec=column[3],
@@ -158,6 +161,7 @@ def process_upload(
                     "date_added": timezone.now(),
                 },
             )
+
             obs_ids.append(observation.id)
             if not confirmation_email:
                 confirmation_email = column[13]
