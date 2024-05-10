@@ -14,7 +14,12 @@ from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 
-from repository.forms import DataChangeForm, SearchForm, SingleObservationForm
+from repository.forms import (
+    DataChangeForm,
+    GenerateCSVForm,
+    SearchForm,
+    SingleObservationForm,
+)
 from repository.tasks import process_upload
 from repository.utils import (
     add_additional_data,
@@ -497,6 +502,24 @@ def tools(request):
     template = loader.get_template("repository/tools.html")
     context = {"": ""}
     return HttpResponse(template.render(context, request))
+
+
+def generate_csv(request):
+    if request.method == "POST":
+        form = GenerateCSVForm(request.POST)
+        if form.is_valid():
+            return render(
+                request,
+                "repository/generate-csv.html",
+                {
+                    "status": "Upload successful",
+                    "form": GenerateCSVForm,
+                },
+            )
+
+        else:
+            return render(request, "repository/generate-csv.html", {"form": form})
+    return render(request, "repository/generate-csv.html", {"form": GenerateCSVForm})
 
 
 @csrf_exempt

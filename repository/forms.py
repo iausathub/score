@@ -316,6 +316,263 @@ class SingleObservationForm(Form):
             raise forms.ValidationError(errors)
 
 
+class GenerateCSVForm(Form):
+    sat_name = forms.CharField(
+        max_length=200,
+        required=False,
+        label="Satellite Name",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    sat_number = forms.IntegerField(
+        required=True,
+        label="Satellite Number",
+        widget=forms.NumberInput(
+            attrs={"min": 0, "max": 99999, "class": "form-control no-arrows"}
+        ),
+    )
+    obs_mode = forms.ChoiceField(
+        choices=Observation.OBS_MODE_CHOICES,
+        required=True,
+        label="Observation Mode",
+        widget=forms.Select(attrs={"class": "form-select"}),
+    )
+    obs_date_year = forms.IntegerField(
+        required=True,
+        label="YYYY",
+        widget=forms.NumberInput(
+            attrs={"min": 0, "max": 99999, "class": "form-control no-arrows"}
+        ),
+    )
+    obs_date_month = forms.IntegerField(
+        required=True,
+        label="MM",
+        widget=forms.NumberInput(
+            attrs={"min": 1, "max": 12, "class": "form-control no-arrows"}
+        ),
+    )
+    obs_date_day = forms.IntegerField(
+        required=True,
+        label="DD",
+        widget=forms.NumberInput(
+            attrs={"min": 1, "max": 31, "class": "form-control no-arrows"}
+        ),
+    )
+    obs_date_hour = forms.IntegerField(
+        required=True,
+        label="HH",
+        widget=forms.NumberInput(
+            attrs={"min": 0, "max": 24, "class": "form-control no-arrows"}
+        ),
+    )
+    obs_date_min = forms.IntegerField(
+        required=True,
+        label="MM",
+        widget=forms.NumberInput(
+            attrs={"min": 0, "max": 60, "class": "form-control no-arrows"}
+        ),
+    )
+    obs_date_sec = forms.DecimalField(
+        required=True,
+        label="SS.ssssss",
+        widget=forms.NumberInput(
+            attrs={"min": 0, "max": 60, "class": "form-control no-arrows"}
+        ),
+    )
+
+    obs_date_uncert = forms.FloatField(
+        required=True,
+        label="Uncertainty (sec)",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    not_detected = forms.BooleanField(
+        required=False,
+        label="Not Detected",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
+    apparent_mag = forms.FloatField(
+        required=False,
+        label="Apparent Magnitude",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    apparent_mag_uncert = forms.FloatField(
+        required=False,
+        label="Apparent Magnitude Uncertainty",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    limiting_magnitude = forms.FloatField(
+        required=True,
+        label="Limiting Magnitude",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    instrument = forms.CharField(
+        max_length=200,
+        required=True,
+        label="Instrument",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    observer_latitude_deg = forms.FloatField(
+        required=True,
+        label="Observer Latitude (deg)",
+        widget=forms.NumberInput(
+            attrs={
+                "id": "observer_latitude_deg",
+                "class": "form-control",
+                "step": "any",
+                "min": -90,
+                "max": 90,
+            }
+        ),
+    )
+    observer_longitude_deg = forms.FloatField(
+        required=True,
+        label="Observer Longitude (deg)",
+        widget=forms.NumberInput(
+            attrs={
+                "id": "observer_longitude_deg",
+                "class": "form-control",
+                "step": "any",
+                "min": -180,
+                "max": 180,
+            }
+        ),
+    )
+    observer_altitude_m = forms.FloatField(
+        required=True,
+        label="Observer Altitude (m)",
+        widget=forms.NumberInput(
+            attrs={
+                "id": "observer_altitude_m",
+                "class": "form-control",
+                "step": "any",
+                "min": 0,
+            }
+        ),
+    )
+    filter = forms.CharField(
+        max_length=200,
+        required=True,
+        label="Observation Filter",
+        help_text="Use 'CLEAR' if observing mode is visual",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    observer_email = forms.CharField(
+        required=True,
+        label="Observer Email",
+        widget=forms.EmailInput(attrs={"class": "form-control"}),
+    )
+    observer_orcid = forms.CharField(
+        required=True,
+        label="Observer ORCID",
+        widget=forms.TextInput(attrs={"id": "observer_orcid", "class": "form-control"}),
+        validators=[validate_orcid],
+    )
+    sat_ra_deg = forms.FloatField(
+        required=False,
+        label="Satellite Right Ascension (deg)",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    sat_dec_deg = forms.FloatField(
+        required=False,
+        label="Satellite Declination (deg)",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    sigma_2_ra = forms.FloatField(
+        required=False,
+        label="Sigma^2 - RA (deg)",
+        help_text="Uncertainty in RA^2",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    sigma_ra_sigma_dec = forms.FloatField(
+        required=False,
+        label="Sigma RA * Sigma Dec (deg)",
+        help_text="Uncertainty in RA * Uncertainty in Dec",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    sigma_2_dec = forms.FloatField(
+        required=False,
+        label="Sigma^2 - Dec (deg)",
+        help_text="Uncertainty in Dec^2",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    range_to_sat_km = forms.FloatField(
+        required=False,
+        label="Range to Satellite (km)",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    range_to_sat_uncert_km = forms.FloatField(
+        required=False,
+        label="Uncertainty (km)",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    range_rate_sat_km_s = forms.FloatField(
+        required=False,
+        label="Range Rate of Satellite (km/s)",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    range_rate_sat_uncert_km_s = forms.FloatField(
+        required=False,
+        label="Uncertainty (km/s)",
+        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+    )
+    comments = forms.CharField(
+        required=False,
+        label="Comments",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+    data_archive_link = forms.CharField(
+        required=False,
+        label="Data Archive Link",
+        widget=forms.URLInput(attrs={"class": "form-control"}),
+    )
+    mpc_code = forms.CharField(
+        required=False,
+        label="MPC Observatory Code",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
+
+    output = forms.CharField(
+        required=False,
+        label="Output",
+        widget=forms.Textarea(
+            attrs={"class": "form-control", "rows": 10, "readonly": "readonly"}
+        ),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        errors = {}
+        # fmt: off
+        if not cleaned_data.get("range_to_sat_km") and cleaned_data.get(
+            "range_to_sat_uncert_km"
+        ):
+            errors[
+                "range_to_sat_uncert_km"
+            ] = "Range to satellite uncertainty requires range to satellite."
+        if not cleaned_data.get("range_rate_sat_km_s") and cleaned_data.get(
+            "range_rate_sat_uncert_km_s"
+        ):
+            errors[
+                "range_rate_sat_uncert_km_s"
+            ] = "Range rate uncertainty requires range rate."
+        if cleaned_data.get("observer_email") and not re.match(
+            r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$",
+            cleaned_data.get("observer_email"),
+        ):
+            errors["observer_email"] = "Observer email is not correctly formatted."
+        if (
+            cleaned_data.get("apparent_mag_uncert")
+            and not cleaned_data.get("apparent_mag")
+            and not cleaned_data.get("not_detected")
+        ):
+            errors["apparent_mag"] = (
+                "Apparent magnitude is required if "
+                "apparent magnitude uncertainty is provided."
+            )
+        # fmt: on
+        if errors:
+            raise forms.ValidationError(errors)
+
+
 class DataChangeForm(Form):
     contact_email = forms.EmailField(
         required=True,
