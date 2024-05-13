@@ -6,6 +6,7 @@ import zipfile
 from typing import Union
 
 import requests
+from celery.result import AsyncResult
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
@@ -73,8 +74,17 @@ def index(request):
         return redirect(request.path)
 
     if "task_id" in request.session and "date_added" in request.session:
-        context["task_id"] = request.session["task_id"]
-        context["date_added"] = request.session["date_added"]
+        task_id = request.session["task_id"]
+        task = AsyncResult(task_id)
+
+        if task.ready():
+            # If the task is complete, delete the task ID from the session
+            del request.session["task_id"]
+            del request.session["date_added"]
+        else:
+            # If the task is not complete, pass the task ID to the context
+            context["task_id"] = task_id
+            context["date_added"] = request.session["date_added"]
 
     return HttpResponse(template.render(context, request))
 

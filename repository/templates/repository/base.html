@@ -342,7 +342,6 @@
 
             if (!(apparentMag && apparentMagUncert) && !notDetected) {
                 isFormValid = false;
-                console.log("is false")
             }
 
             if (isFormValid) {
@@ -400,7 +399,6 @@
     var addDataRowButton = document.getElementById('addDataRow');
     if (addDataRowButton) {
       addDataRowButton.addEventListener('click', function () {
-        console.log('addDataRow clicked');
 
         // get the current contents of the form
         var formValues = {
