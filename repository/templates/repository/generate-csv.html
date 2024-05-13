@@ -24,7 +24,7 @@
             <span class="text-danger">*</span> denotes required field
         </div>
         <div class="justify-content-center px-5">
-            <form action="{% url 'upload-obs' %}" method="post" enctype="multipart/form-data" id="upload-obs">
+            <form action="{% url 'generate-csv' %}" method="post" enctype="multipart/form-data" id="generate-csv">
                 {% csrf_token %}
                 <div class="row">
                     <hr />
@@ -292,7 +292,7 @@
                         </div>
                     </div>
                     <div class="col-sm-8">
-                        <button class="btn btn-primary" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdvanced" aria-expanded="false" aria-controls="collapseAdvanced">
+                        <button class="btn btn-secondary text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdvanced" aria-expanded="false" aria-controls="collapseAdvanced">
                             Show/hide advanced data fields
                         </button>
                         <div class="collapse p-4" id="collapseAdvanced">
@@ -407,7 +407,7 @@
                 </div>
                 <div class="row justify-content-end pb-2">
                     <div class="col-auto">
-                        <button class="btn btn-secondary text-light" type="button">
+                        <button class="btn btn-primary text-light" id="addDataRow" type="button" disabled>
                         Add data row
                         </button>
                     </div>
@@ -420,7 +420,7 @@
                     {{ form.output }}
                 </div>
                 <div class="form-group">
-                    <input class="btn btn-primary" type="submit" value="Download CSV">
+                    <input class="btn btn-primary" type="submit" value="Download CSV" id="download-csv" disabled>
                 </div>
             </form>
         </div>

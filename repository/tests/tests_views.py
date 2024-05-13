@@ -77,11 +77,6 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/search.html")
 
-    def test_upload(self):
-        response = self.client.get("/upload")
-        self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "repository/upload-obs.html")
-
 
 class SearchViewTest(TestCase):
     def setUp(self):

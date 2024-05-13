@@ -10,7 +10,6 @@ from django.conf import settings
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import render
 from django.template import loader
-from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
 
@@ -18,18 +17,15 @@ from repository.forms import (
     DataChangeForm,
     GenerateCSVForm,
     SearchForm,
-    SingleObservationForm,
 )
 from repository.tasks import process_upload
 from repository.utils import (
-    add_additional_data,
     create_csv,
     get_stats,
-    send_confirmation_email,
     send_data_change_email,
 )
 
-from .models import Location, Observation, Satellite
+from .models import Observation
 from .serializers import ObservationSerializer
 
 logger = logging.getLogger(__name__)
@@ -291,173 +287,6 @@ def download_results(request):
     return HttpResponse()
 
 
-def upload(request):
-    if request.method == "POST":
-        form = SingleObservationForm(request.POST)
-        if form.is_valid():
-            orc_id_list = [
-                orc_id.strip()
-                for orc_id in form.cleaned_data["observer_orcid"].split(",")
-            ]
-
-            sat_name = form.cleaned_data["sat_name"]
-            sat_number = form.cleaned_data["sat_number"]
-            obs_mode = form.cleaned_data["obs_mode"]
-            obs_date = form.cleaned_data["obs_date"]
-            obs_date_uncert = form.cleaned_data["obs_date_uncert"]
-            apparent_mag = form.cleaned_data["apparent_mag"]
-            apparent_mag_uncert = form.cleaned_data["apparent_mag_uncert"]
-            instrument = form.cleaned_data["instrument"]
-            filter = form.cleaned_data["filter"]
-            observer_email = form.cleaned_data["observer_email"]
-            observer_orcid = orc_id_list
-            obs_lat_deg = form.cleaned_data["observer_latitude_deg"]
-            obs_long_deg = form.cleaned_data["observer_longitude_deg"]
-            obs_alt_m = form.cleaned_data["observer_altitude_m"]
-            sat_ra_deg = form.cleaned_data["sat_ra_deg"]
-            sat_dec_deg = form.cleaned_data["sat_dec_deg"]
-            sigma_2_ra = form.cleaned_data["sigma_2_ra"]
-            sigma_ra_sigma_dec = form.cleaned_data["sigma_ra_sigma_dec"]
-            sigma_2_dec = form.cleaned_data["sigma_2_dec"]
-            range_to_sat_km = form.cleaned_data["range_to_sat_km"]
-            range_to_sat_uncert_km = form.cleaned_data["range_to_sat_uncert_km"]
-            range_rate_sat_km_s = form.cleaned_data["range_rate_sat_km_s"]
-            range_rate_sat_uncert_km_s = form.cleaned_data["range_rate_sat_uncert_km_s"]
-            limiting_magnitude = form.cleaned_data["limiting_magnitude"]
-            comments = form.cleaned_data["comments"]
-            data_archive_link = form.cleaned_data["data_archive_link"]
-            mpc_code = form.cleaned_data["mpc_code"]
-
-            # Check if satellite is above the horizon
-            additional_data = add_additional_data(
-                sat_name, sat_number, obs_date, obs_lat_deg, obs_long_deg, obs_alt_m
-            )
-            if isinstance(additional_data, str):
-                return render(
-                    request,
-                    "repository/upload-obs.html",
-                    {"form": form, "error": additional_data},
-                )
-
-            satellite, sat_created = Satellite.objects.get_or_create(
-                sat_name=sat_name,
-                sat_number=sat_number,
-                defaults={
-                    "sat_name": sat_name,
-                    "sat_number": sat_number,
-                    "date_added": timezone.now(),
-                },
-            )
-
-            location, loc_created = Location.objects.get_or_create(
-                obs_lat_deg=obs_lat_deg,
-                obs_long_deg=obs_long_deg,
-                obs_alt_m=obs_alt_m,
-                defaults={
-                    "obs_lat_deg": obs_lat_deg,
-                    "obs_long_deg": obs_long_deg,
-                    "obs_alt_m": obs_alt_m,
-                    "date_added": timezone.now(),
-                },
-            )
-
-            observation, obs_created = Observation.objects.get_or_create(
-                obs_time_utc=obs_date,
-                obs_time_uncert_sec=obs_date_uncert,
-                apparent_mag=apparent_mag,
-                apparent_mag_uncert=apparent_mag_uncert,
-                instrument=instrument,
-                obs_mode=obs_mode,
-                obs_filter=filter,
-                obs_email=observer_email,
-                obs_orc_id=observer_orcid,
-                sat_ra_deg=sat_ra_deg,
-                sat_dec_deg=sat_dec_deg,
-                sigma_2_ra=sigma_2_ra,
-                sigma_ra_sigma_dec=sigma_ra_sigma_dec,
-                sigma_2_dec=sigma_2_dec,
-                range_to_sat_km=range_to_sat_km,
-                range_to_sat_uncert_km=range_to_sat_uncert_km,
-                range_rate_sat_km_s=range_rate_sat_km_s,
-                range_rate_sat_uncert_km_s=range_rate_sat_uncert_km_s,
-                comments=comments,
-                data_archive_link=data_archive_link,
-                mpc_code=mpc_code.strip().upper() if mpc_code else None,
-                limiting_magnitude=limiting_magnitude,
-                phase_angle=additional_data.phase_angle,
-                range_to_sat_km_satchecker=additional_data.range_to_sat,
-                range_rate_sat_km_s_satchecker=additional_data.range_rate,
-                sat_ra_deg_satchecker=additional_data.sat_ra_deg,
-                sat_dec_deg_satchecker=additional_data.sat_dec_deg,
-                ddec_deg_s_satchecker=additional_data.ddec_deg_s,
-                dra_cosdec_deg_s_satchecker=additional_data.dra_cosdec_deg_s,
-                alt_deg_satchecker=additional_data.alt_deg,
-                az_deg_satchecker=additional_data.az_deg,
-                illuminated=additional_data.illuminated,
-                satellite_id=satellite,
-                location_id=location,
-                defaults={
-                    "obs_time_utc": obs_date,
-                    "obs_time_uncert_sec": obs_date_uncert,
-                    "apparent_mag": apparent_mag,
-                    "apparent_mag_uncert": apparent_mag_uncert,
-                    "instrument": instrument,
-                    "obs_mode": obs_mode,
-                    "obs_filter": filter,
-                    "obs_email": observer_email,
-                    "obs_orc_id": observer_orcid,
-                    "sat_ra_deg": sat_ra_deg,
-                    "sat_dec_deg": sat_dec_deg,
-                    "sigma_2_ra": sigma_2_ra,
-                    "sigma_ra_sigma_dec": sigma_ra_sigma_dec,
-                    "sigma_2_dec": sigma_2_dec,
-                    "range_to_sat_km": range_to_sat_km,
-                    "range_to_sat_uncert_km": range_to_sat_uncert_km,
-                    "range_rate_sat_km_s": range_rate_sat_km_s,
-                    "range_rate_sat_uncert_km_s": range_rate_sat_uncert_km_s,
-                    "limiting_magnitude": limiting_magnitude,
-                    "phase_angle": additional_data.phase_angle,
-                    "range_to_sat_km_satchecker": additional_data.range_to_sat,
-                    "range_rate_sat_km_s_satchecker": additional_data.range_rate,
-                    "sat_ra_deg_satchecker": additional_data.sat_ra_deg,
-                    "sat_dec_deg_satchecker": additional_data.sat_dec_deg,
-                    "ddec_deg_s_satchecker": additional_data.ddec_deg_s,
-                    "dra_cosdec_deg_s_satchecker": additional_data.dra_cosdec_deg_s,
-                    "alt_deg_satchecker": additional_data.alt_deg,
-                    "az_deg_satchecker": additional_data.az_deg,
-                    "illuminated": additional_data.illuminated,
-                    "comments": comments,
-                    "data_archive_link": data_archive_link,
-                    "mpc_code": mpc_code.strip().upper() if mpc_code else None,
-                    "flag": None,
-                    "satellite_id": satellite,
-                    "location_id": location,
-                    "date_added": timezone.now(),
-                },
-            )
-
-            obs_id = observation.id
-            send_confirmation_email([obs_id], observer_email)
-
-            # confirm observation uploaded
-            return render(
-                request,
-                "repository/upload-obs.html",
-                {
-                    "status": "Upload successful",
-                    "obs_id": obs_id,
-                    "obs_email": observer_email,
-                    "form": SingleObservationForm,
-                },
-            )
-        else:
-            return render(request, "repository/upload-obs.html", {"form": form})
-
-    return render(
-        request, "repository/upload-obs.html", {"form": SingleObservationForm}
-    )
-
-
 def about(request):
     template = loader.get_template("repository/about.html")
     context = {"": ""}
@@ -508,14 +337,66 @@ def generate_csv(request):
     if request.method == "POST":
         form = GenerateCSVForm(request.POST)
         if form.is_valid():
-            return render(
-                request,
-                "repository/generate-csv.html",
-                {
-                    "status": "Upload successful",
-                    "form": GenerateCSVForm,
-                },
-            )
+            header = [
+                "satellite_name",
+                "norad_cat_id",
+                "observation_time_utc",
+                "observation_time_uncertainty_sec",
+                "apparent_magnitude",
+                "apparent_magnitude_uncertainty",
+                "observer_latitude_deg",
+                "observer_longitude_deg",
+                "observer_altitude_m",
+                "limiting_magnitude",
+                "instrument",
+                "observing_mode",
+                "observing_filter",
+                "observer_email",
+                "observer_orcid",
+                "satellite_right_ascension_deg",
+                "satellite_declination_deg",
+                "sigma_2_ra",
+                "sigma_ra_sigma_dec",
+                "sigma_2_dec",
+                "range_to_satellite_km",
+                "range_to_satellite_uncertainty_km",
+                "range_rate_of_satellite_km_per_sec",
+                "range_rate_of_satellite_uncertainty_km_per_sec",
+                "comments",
+                "data_archive_link",
+                "mpc_code",
+            ]
+
+            # for each line in the output field in the form,
+            # add the line to a new csv file
+            csv_lines = []
+            for line in form.cleaned_data["output"].split("\n"):
+                reader = csv.reader(io.StringIO(line))
+                csv_lines.append(next(reader))
+
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(header)
+            writer.writerows(csv_lines)
+
+            zipfile_name = "score_upload.zip"
+            zipped_file = io.BytesIO()
+
+            with zipfile.ZipFile(zipped_file, "w") as zip:
+                zip.writestr("score_upload.csv", output.getvalue())
+            zipped_file.seek(0)
+
+            response = HttpResponse(zipped_file, content_type="application/zip")
+            response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
+            return response
+            # return render(
+            #    request,
+            #    "repository/generate-csv.html",
+            #    {
+            #        "status": "Upload successful",
+            #        "form": form,
+            #    },
+            # )
 
         else:
             return render(request, "repository/generate-csv.html", {"form": form})
