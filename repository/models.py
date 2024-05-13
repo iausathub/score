@@ -24,6 +24,8 @@ class Satellite(models.Model):
             raise ValidationError("Satellite number is required.")
         if len(str(self.sat_number)) > 6:
             raise ValidationError("NORAD ID must be 6 digits or less.")
+        if int(self.sat_number) < 0:
+            raise ValidationError("Satellite number must be positive.")
 
     def save(self, *args, **kwargs):
         self.full_clean()

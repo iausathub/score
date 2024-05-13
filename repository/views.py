@@ -8,7 +8,7 @@ from typing import Union
 import requests
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import render
+from django.shortcuts import redirect, render
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.renderers import JSONRenderer
@@ -67,10 +67,14 @@ def index(request):
         upload_task = process_upload.delay(obs)
         task_id = upload_task.task_id
 
-        context["task_id"] = task_id
+        # This prevents the file from being re-uploaded if the page is refreshed
+        request.session["task_id"] = task_id
+        request.session["date_added"] = str(datetime.datetime.now())
+        return redirect(request.path)
 
-        context["date_added"] = datetime.datetime.now()
-        return HttpResponse(template.render(context, request))
+    if "task_id" in request.session and "date_added" in request.session:
+        context["task_id"] = request.session["task_id"]
+        context["date_added"] = request.session["date_added"]
 
     return HttpResponse(template.render(context, request))
 
@@ -337,6 +341,9 @@ def generate_csv(request):
     if request.method == "POST":
         form = GenerateCSVForm(request.POST)
         if form.is_valid():
+
+            # not the exact same header as the observation download header since this
+            # one needs observer_email
             header = [
                 "satellite_name",
                 "norad_cat_id",
@@ -389,14 +396,6 @@ def generate_csv(request):
             response = HttpResponse(zipped_file, content_type="application/zip")
             response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
             return response
-            # return render(
-            #    request,
-            #    "repository/generate-csv.html",
-            #    {
-            #        "status": "Upload successful",
-            #        "form": form,
-            #    },
-            # )
 
         else:
             return render(request, "repository/generate-csv.html", {"form": form})

@@ -165,8 +165,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
 
   <script>
-
-  $(document).ready(function () {
+    // Populate observation modal dialog
+    $(document).ready(function () {
       $(document).on('click', '#obsTable tr, #showObsModal', function () {
         var rowData = $(this).data('content');
         var escapedJSON = rowData.replace(/\\u0022/g, '\"').replace(/\\u002D/g, '-').replace(/b\\u0027/g, '').replace(/\\u0027/g, '');
@@ -217,6 +217,7 @@
   </script>
 
   <script>
+    // Enable or disable apparent magnitude and uncertainty inputs based on the 'not detected' checkbox
     $(document).ready(function () {
       $('#not_detected').change(function () {
         if (this.checked) {
@@ -237,6 +238,7 @@
   </script>
 
   <script>
+    // Enable or disable the download button based on the Output content
     $(document).ready(function () {
         $('#output').on('input', function() {
             if ($(this).val()) {
@@ -254,6 +256,7 @@
     function customResult(resultElement, result) {
       document.getElementById('upload_btn').disabled = false;
       document.getElementById('upload_ctrl').disabled = false;
+      $('#upload_ctrl').val('');
       if (result.status == "success") {
         var date = new Date(result.date_added);
         var formattedDate = date.toUTCString().replace('GMT', 'UTC');
@@ -283,6 +286,7 @@
 }
 
     $(function () {
+      // Initialize the progress bar
       var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
       CeleryProgressBar.initProgressBar(progressUrl, {
         onResult: customResult,
@@ -297,6 +301,7 @@
   {% endif %}
 
   <script>
+    // Execute reCAPTCHA v3 when the download button is clicked
     var downloadButton = document.getElementById('download-button');
     if (downloadButton) {
       downloadButton.addEventListener('click', function () {
@@ -318,10 +323,12 @@
   </script>
 
   <script>
+    // Enable or disable the addDataRow button based on the form inputs
     $(document).ready(function () {
         function validateForm() {
             var isFormValid = true;
 
+            // Check if all required inputs have a value
             $('form :input[required]').each(function() {
                 if (!$(this).val()) {
                     isFormValid = false;
@@ -351,6 +358,7 @@
   </script>
 
   <script>
+    // Populate the last used observer location fields based on the observer ORCID
     $(document).ready(function () {
       $('#observer_orcid').blur(function () {
         var observer_orcid = $(this).val();
@@ -366,6 +374,7 @@
   </script>
 
   <script>
+    // Lookup the NORAD ID based on the satellite name (and vice versa)
     $(document).ready(function () {
       $('#name-id-lookup').on('submit', function (event) {
         event.preventDefault(); // Prevent the form from being submitted normally
@@ -387,6 +396,7 @@
   </script>
 
   <script>
+    // Add a new row to the output field when the addDataRow button is clicked
     var addDataRowButton = document.getElementById('addDataRow');
     if (addDataRowButton) {
       addDataRowButton.addEventListener('click', function () {
@@ -471,7 +481,6 @@
               var value = formValues[item];
               if (item === 'comments' || item === 'observer_orcid') {
                 // if item is not empty
-
                 if (value && value.includes(',')) {
                   // Enclose the value in quotes if the item is 'comments', 'data_archive_link', or 'observer_orcid'
                   value = '"' + value + '"';
