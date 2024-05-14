@@ -39,9 +39,9 @@
                 <i class="fas fa-info-circle me-2"></i>
               </div>
               <div class="col">
-                <p>
+
                   Optional fields should be left blank if not applicable. Please avoid using "n/a", none, 0, or other similar values.<br />
-                  All columns must be used in the file uploaded for submission - leave a column blank if there is no data.</p>
+                  All columns must be used in the file uploaded for submission - leave a column blank if there is no data.
               </div>
             </div>
           </div>
@@ -53,6 +53,9 @@
           </p>
           <p>
             <a class="link-info" href="{% static 'visual_observation_format_example.csv' %}">Sample observation CSV file for visual observers (download)</a>
+          </p>
+          <p>
+            <a class="link-info" href="{% url 'generate-csv' %}">Form to generate CSV file from individual observations</a>
           </p>
 
           <form method="post" enctype="multipart/form-data">
