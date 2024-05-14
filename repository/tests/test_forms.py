@@ -2,21 +2,26 @@ from unittest.mock import patch
 
 from django.test import Client, TestCase
 
-from repository.forms import SingleObservationForm
+from repository.forms import GenerateCSVForm
 
 
-class SingleObservationFormTest(TestCase):
+class GenerateCSVFormTest(TestCase):
     def setUp(self):
         self.client = Client()
 
     def test_form_required_fields(self):
-        form = SingleObservationForm({})
+        form = GenerateCSVForm({})
         self.assertFalse(form.is_valid())
         self.assertEqual(
             form.errors,
             {
                 "sat_number": ["This field is required."],
-                "obs_date": ["This field is required."],
+                "obs_date_year": ["This field is required."],
+                "obs_date_month": ["This field is required."],
+                "obs_date_day": ["This field is required."],
+                "obs_date_hour": ["This field is required."],
+                "obs_date_min": ["This field is required."],
+                "obs_date_sec": ["This field is required."],
                 "obs_date_uncert": ["This field is required."],
                 "instrument": ["This field is required."],
                 "observer_latitude_deg": ["This field is required."],
@@ -31,11 +36,15 @@ class SingleObservationFormTest(TestCase):
         )
 
     def test_form_valid_required(self):
-        form = SingleObservationForm(
+        form = GenerateCSVForm(
             {
-                "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "obs_date": "2024-01-02T23:59:59.123Z",
+                "obs_date_year": 2024,
+                "obs_date_month": 1,
+                "obs_date_day": 2,
+                "obs_date_hour": 23,
+                "obs_date_min": 59,
+                "obs_date_sec": 59,
                 "obs_date_uncert": 0.01,
                 "apparent_mag": 8.1,
                 "apparent_mag_uncert": 0.01,
@@ -53,11 +62,16 @@ class SingleObservationFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_form_valid_optional(self):
-        form = SingleObservationForm(
+        form = GenerateCSVForm(
             {
                 "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "obs_date": "2024-01-02T23:59:59.123Z",
+                "obs_date_year": 2024,
+                "obs_date_month": 1,
+                "obs_date_day": 2,
+                "obs_date_hour": 23,
+                "obs_date_min": 59,
+                "obs_date_sec": 59,
                 "obs_date_uncert": 0.01,
                 "apparent_mag": 8.1,
                 "apparent_mag_uncert": 0.01,
@@ -87,39 +101,17 @@ class SingleObservationFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
     def test_form_validators(self):
-        form = SingleObservationForm(
+
+        form = GenerateCSVForm(
             {
                 "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "obs_date": "2024-01-02",
-                "obs_date_uncert": 0.01,
-                "apparent_mag": 8.1,
-                "limiting_magnitude": 10,
-                "apparent_mag_uncert": 0.01,
-                "observer_latitude_deg": 33,
-                "observer_longitude_deg": 100,
-                "observer_altitude_m": 100,
-                "obs_mode": "VISUAL",
-                "filter": "CLEAR",
-                "instrument": "n/a",
-                "observer_email": "abc@123.com",
-                "observer_orcid": "0123-4567-8910-1112",
-            }
-        )
-
-        self.assertFalse(form.is_valid())
-        self.assertEqual(
-            form.errors,
-            {
-                "obs_date": ["Invalid date format."],
-            },
-        )
-
-        form = SingleObservationForm(
-            {
-                "sat_name": "STARLINK-123",
-                "sat_number": 12345,
-                "obs_date": "2024-01-02T23:59:59.123Z",
+                "obs_date_year": 2024,
+                "obs_date_month": 1,
+                "obs_date_day": 2,
+                "obs_date_hour": 23,
+                "obs_date_min": 59,
+                "obs_date_sec": 59,
                 "obs_date_uncert": 0.01,
                 "apparent_mag": 8.1,
                 "apparent_mag_uncert": 0.01,
@@ -149,11 +141,16 @@ class SingleObservationFormTest(TestCase):
         mock_get.return_value.status_code = 200
         mock_get.return_value.json.return_value = []
         response = self.client.post(
-            "/upload",
+            "/generate-csv",
             {
                 "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "obs_date": "2024-01-02T23:59:59.123Z",
+                "obs_date_year": 2024,
+                "obs_date_month": 1,
+                "obs_date_day": 2,
+                "obs_date_hour": 23,
+                "obs_date_min": 59,
+                "obs_date_sec": 59,
                 "obs_date_uncert": 0.01,
                 "apparent_mag": 8.1,
                 "apparent_mag_uncert": "",
@@ -183,11 +180,16 @@ class SingleObservationFormTest(TestCase):
     def test_abs_mag_uncert(self):
 
         response = self.client.post(  # noqa: F841
-            "/upload",
+            "/generate-csv",
             {
                 "sat_name": "STARLINK-123",
                 "sat_number": 12345,
-                "obs_date": "2024-01-02T23:59:59.123Z",
+                "obs_date_year": 2024,
+                "obs_date_month": 1,
+                "obs_date_day": 2,
+                "obs_date_hour": 23,
+                "obs_date_min": 59,
+                "obs_date_sec": 59,
                 "obs_date_uncert": 0.01,
                 "apparent_mag_uncert": 0.01,
                 "non_detection": "false",

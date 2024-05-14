@@ -9,8 +9,8 @@
     <p>To enable systematic compilation and curation of observations from various sources,
       the IAU CPS SatHub requires submissions to adhere to the following format.</p>
     <p>The required file type for submission is a Comma Separated Value (CSV) text file
-      containing a set of required columns ordered and named as below. Any or all optional
-      columns may also be included in the order listed. A sample file that meets all formatting
+      containing a set of required columns named and described below. Any or all optional fields may be
+      populated, but all columns must be included. A sample file that meets all formatting
       requirements may be downloaded below. It contains various types of valid observations with both
       required and optional fields. Other observation formats are not currently supported.</p>
 
@@ -21,10 +21,16 @@
       attributed - data will be shared under the <a href="https://creativecommons.org/licenses/by/4.0/">CC BY 4.0</a>
       license.
     </p>
-    <div class="p-3 mb-3 text-primary-emphasis bg-accent1-subtle border border-accent1 rounded-3">
-      <b>Notes:</b> Optional fields should be left blank if not applicable. Please avoid using "n/a", none, 0, or other similar values.
-      <br />All columns must be used in the file uploaded for submission, just left blank if there is no data.
-      The example file contains sample observations with both required and optional fields.
+    <div class="px-3 pt-3 mb-3 text-primary-emphasis bg-accent1-subtle border border-accent1 rounded-3">
+      <b>Notes:</b> <br />
+      <ul>
+        <li>
+          Please refer to the sample file for the correct column ordering - the information here is for reference only.
+        </li>
+        <li>Optional fields should be left blank if not applicable. Please avoid using "n/a", none, 0, or other similar values.</li>
+        <li>All columns must be used in the file uploaded for submission, just left blank if there is no data.
+      The example file contains sample observations with both required and optional fields.</li>
+      </ul>
     </div>
     <a href="{% static 'observation_format_example.csv' %}" download>
       <button class="btn btn-primary btn-sm mb-3">Download full sample file</button></a>
@@ -35,113 +41,9 @@
     </a>
 
     <hr /><br />
-    <h3 class="text-center p-2">Required columns</h3>
+    <h3 class="text-center p-2">Data columns</h3>
+    <p><span class="text-danger">*</span> denotes required field</p>
 
-    <table class="w-100 table table-striped">
-      <tr>
-        <th scope="col" class="col-3">Name</th>
-        <th scope="col" class="col-5">Description</th>
-        <th scope="col" class="col-1">Type</th>
-        <th scope="col" class="col-3">Example</th>
-      </tr>
-      <tr>
-        <td>norad_cat_id</td>
-        <td>NORAD catalog identifier; corresponds to <a
-            href="https://www.space-track.org/#catalog">https://www.space-track.org/#catalog</a> NORAD CAT ID</td>
-        <td>integer</td>
-        <td>57957</td>
-      </tr>
-      <tr>
-        <td>observation_time_utc</td>
-        <td>Mid exposure time of observation in coordinated universal time (UTC), ISO 8601 format</td>
-        <td>string</td>
-        <td>2023-09-26T23:59:59.123Z</td>
-      </tr>
-      <tr>
-        <td>observation_time_uncertainty_sec</td>
-        <td>Uncertainty in the observation time in seconds</td>
-        <td>float</td>
-        <td>.02</td>
-      </tr>
-      <tr>
-        <td>apparent_magnitude</td>
-        <td>Brightness of the satellite as observed/measured in magnitudes; for a non-detection, leave this field blank,
-          but the limiting magnitude must still be provided</td>
-        <td>float</td>
-        <td>7.53</td>
-      </tr>
-      <tr>
-        <td>apparent_magnitude_uncertainty</td>
-        <td>Uncertainty in the brightness of the satellite in magnitude; for a non-detection, leave this field blank
-        </td>
-        <td>float</td>
-        <td>0.14</td>
-      </tr>
-      </tr>
-      <tr>
-        <td>observer_latitude_deg</td>
-        <td>Latitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal degrees
-          (DD) between -90 and 90</td>
-        <td>float</td>
-        <td>-30.2447392</td>
-      </tr>
-      <tr>
-        <td>observer_longitude_deg</td>
-        <td>Longitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal
-          degrees (DD) between -180 and 180</td>
-        <td>float</td>
-        <td>-70.7477219</td>
-      </tr>
-      <tr>
-        <td>observer_altitude_m</td>
-        <td>Altitude of the observing location above sea level (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in
-          meters</td>
-        <td>float</td>
-        <td>2663</td>
-      </tr>
-      <tr>
-        <td>limiting_magnitude</td>
-        <td>Faintest magnitude that can be observed by the given instrument (or naked eye in the case of visual
-          observations)</td>
-        <td>float</td>
-        <td>6.5</td>
-      </tr>
-      <tr>
-        <td>instrument</td>
-        <td>Name or other identifying information about the telescope, instrument, and/or other hardware that was used
-          for the observation</td>
-        <td>string</td>
-        <td>DECam on the Blanco 4m</td>
-      </tr>
-      <tr>
-        <td>observing_mode</td>
-        <td>Observation hardware / detector: must be one of "VISUAL", "BINOCULARS", "CCD", "CMOS", or "OTHER" if not
-          listed</td>
-        <td>string</td>
-        <td>CCD</td>
-      </tr>
-      <tr>
-        <td>observing_filter</td>
-        <td>Filter/Bandpass used in observation; use "CLEAR" if observing_mode is visual.</td>
-        <td>string</td>
-        <td>SDSS g</td>
-      </tr>
-      <tr>
-        <td>observer_orcid</td>
-        <td>List of ORCIDs for all people who should be credited for the observation; at least one is required. Getting
-          an ORCID is free and easy at <a href="https://orcid.org/">orcid.org</a>.</td>
-        <td>string</td>
-        <td>0000-0002-1825-0097</td>
-      </tr>
-      <tr>
-        <td>observer_email</td>
-        <td>Valid email address for the observer or point of contact</td>
-        <td>string</td>
-        <td>example@observer.com</td>
-      </tr>
-    </table>
-    <br /><br />
-    <h3 class="text-center p-2">Optional columns</h3>
     <table class="w-100 table table-striped">
       <tr>
         <th scope="col" class="col-3">Name</th>
@@ -155,6 +57,101 @@
             href="https://www.space-track.org/#catalog">https://www.space-track.org/#catalog</a> SATNAME</td>
         <td>string</td>
         <td>METEOR 1-17 DEB</td>
+      </tr>
+      <tr>
+        <td>norad_cat_id<span class="text-danger">*</span></td>
+        <td>NORAD catalog identifier; corresponds to <a
+            href="https://www.space-track.org/#catalog">https://www.space-track.org/#catalog</a> NORAD CAT ID</td>
+        <td>integer</td>
+        <td>57957</td>
+      </tr>
+      <tr>
+        <td>observation_time_utc<span class="text-danger">*</span></td>
+        <td>Mid exposure time of observation in coordinated universal time (UTC), ISO 8601 format</td>
+        <td>string</td>
+        <td>2023-09-26T23:59:59.123Z</td>
+      </tr>
+      <tr>
+        <td>observation_time_uncertainty_sec<span class="text-danger">*</span></td>
+        <td>Uncertainty in the observation time in seconds</td>
+        <td>float</td>
+        <td>.02</td>
+      </tr>
+      <tr>
+        <td>apparent_magnitude<span class="text-danger">*</span></td>
+        <td>Brightness of the satellite as observed/measured in magnitudes; for a non-detection, leave this field blank,
+          but the limiting magnitude must still be provided</td>
+        <td>float</td>
+        <td>7.53</td>
+      </tr>
+      <tr>
+        <td>apparent_magnitude_uncertainty<span class="text-danger">*</span></td>
+        <td>Uncertainty in the brightness of the satellite in magnitude; for a non-detection, leave this field blank
+        </td>
+        <td>float</td>
+        <td>0.14</td>
+      </tr>
+      </tr>
+      <tr>
+        <td>observer_latitude_deg<span class="text-danger">*</span></td>
+        <td>Latitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal degrees
+          (DD) between -90 and 90</td>
+        <td>float</td>
+        <td>-30.2447392</td>
+      </tr>
+      <tr>
+        <td>observer_longitude_deg<span class="text-danger">*</span></td>
+        <td>Longitude of the observing location (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in decimal
+          degrees (DD) between -180 and 180</td>
+        <td>float</td>
+        <td>-70.7477219</td>
+      </tr>
+      <tr>
+        <td>observer_altitude_m<span class="text-danger">*</span></td>
+        <td>Altitude of the observing location above sea level (GPS/WGS84/EPSG Coordinate Reference System Code 4326) in
+          meters</td>
+        <td>float</td>
+        <td>2663</td>
+      </tr>
+      <tr>
+        <td>limiting_magnitude<span class="text-danger">*</span></td>
+        <td>Faintest magnitude that can be observed by the given instrument (or naked eye in the case of visual
+          observations)</td>
+        <td>float</td>
+        <td>6.5</td>
+      </tr>
+      <tr>
+        <td>instrument<span class="text-danger">*</span></td>
+        <td>Name or other identifying information about the telescope, instrument, and/or other hardware that was used
+          for the observation</td>
+        <td>string</td>
+        <td>DECam on the Blanco 4m</td>
+      </tr>
+      <tr>
+        <td>observing_mode<span class="text-danger">*</span></td>
+        <td>Observation hardware / detector: must be one of "VISUAL", "BINOCULARS", "CCD", "CMOS", or "OTHER" if not
+          listed</td>
+        <td>string</td>
+        <td>CCD</td>
+      </tr>
+      <tr>
+        <td>observing_filter<span class="text-danger">*</span></td>
+        <td>Filter/Bandpass used in observation; use "CLEAR" if observing_mode is visual.</td>
+        <td>string</td>
+        <td>SDSS g</td>
+      </tr>
+      <tr>
+        <td>observer_email<span class="text-danger">*</span></td>
+        <td>Valid email address for the observer or point of contact</td>
+        <td>string</td>
+        <td>example@observer.com</td>
+      </tr>
+      <tr>
+        <td>observer_orcid<span class="text-danger">*</span></td>
+        <td>List of ORCIDs for all people who should be credited for the observation; at least one is required. Getting
+          an ORCID is free and easy at <a href="https://orcid.org/">orcid.org</a>.</td>
+        <td>string</td>
+        <td>0000-0002-1825-0097</td>
       </tr>
       <tr>
         <td>satellite_right_ascension_deg</td>

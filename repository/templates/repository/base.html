@@ -45,8 +45,7 @@
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'index' %}">Upload observation file</a>
                 </li>
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'upload-obs' %}">Submit single
-                    observation</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'generate-csv' %}">Generate CSV file</a></li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'data-format' %}">Data format</a></li>
               </ul>
             </li>
@@ -105,7 +104,7 @@
               <a href="index" class="text-white">Upload observation file</a>
             </p>
             <p>
-              <a href="upload" class="text-white">Submit single observation</a>
+              <a href="generate-csv" class="text-white">Generate CSV file</a>
             </p>
             <p>
               <a href="search" class="text-white">Search</a>
@@ -166,8 +165,8 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
 
   <script>
-
-  $(document).ready(function () {
+    // Populate observation modal dialog
+    $(document).ready(function () {
       $(document).on('click', '#obsTable tr, #showObsModal', function () {
         var rowData = $(this).data('content');
         var escapedJSON = rowData.replace(/\\u0022/g, '\"').replace(/\\u002D/g, '-').replace(/b\\u0027/g, '').replace(/\\u0027/g, '');
@@ -216,21 +215,38 @@
       });
     });
   </script>
+
   <script>
+    // Enable or disable apparent magnitude and uncertainty inputs based on the 'not detected' checkbox
     $(document).ready(function () {
-      $('#id_not_detected').change(function () {
+      $('#not_detected').change(function () {
         if (this.checked) {
-          $('#id_apparent_mag').prop('disabled', true);
-          $('#id_apparent_mag').prop('required', false);
-          $('#id_apparent_mag_uncert').prop('disabled', true);
-          $('#id_apparent_mag_uncert').prop('required', false);
+          $('#apparent_mag').prop('disabled', true);
+          $('#apparent_mag').prop('required', false);
+          $('#apparent_mag').val(''); // Clear the input
+          $('#apparent_mag_uncert').prop('disabled', true);
+          $('#apparent_mag_uncert').prop('required', false);
+          $('#apparent_mag_uncert').val(''); // Clear the input
         } else {
-          $('#id_apparent_mag').prop('disabled', false);
-          $('#id_apparent_mag').prop('required', true);
-          $('#id_apparent_mag_uncert').prop('disabled', false);
-          $('#id_apparent_mag_uncert').prop('required', true);
+          $('#apparent_mag').prop('disabled', false);
+          $('#apparent_mag').prop('required', true);
+          $('#apparent_mag_uncert').prop('disabled', false);
+          $('#apparent_mag_uncert').prop('required', true);
         }
       });
+    });
+  </script>
+
+  <script>
+    // Enable or disable the download button based on the Output content
+    $(document).ready(function () {
+        $('#output').on('input', function() {
+            if ($(this).val()) {
+                $('#download-csv').prop('disabled', false);
+            } else {
+                $('#download-csv').prop('disabled', true);
+            }
+        });
     });
   </script>
 
@@ -240,6 +256,7 @@
     function customResult(resultElement, result) {
       document.getElementById('upload_btn').disabled = false;
       document.getElementById('upload_ctrl').disabled = false;
+      $('#upload_ctrl').val('');
       if (result.status == "success") {
         var date = new Date(result.date_added);
         var formattedDate = date.toUTCString().replace('GMT', 'UTC');
@@ -269,6 +286,7 @@
 }
 
     $(function () {
+      // Initialize the progress bar
       var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
       CeleryProgressBar.initProgressBar(progressUrl, {
         onResult: customResult,
@@ -283,6 +301,7 @@
   {% endif %}
 
   <script>
+    // Execute reCAPTCHA v3 when the download button is clicked
     var downloadButton = document.getElementById('download-button');
     if (downloadButton) {
       downloadButton.addEventListener('click', function () {
@@ -304,6 +323,41 @@
   </script>
 
   <script>
+    // Enable or disable the addDataRow button based on the form inputs
+    $(document).ready(function () {
+        function validateForm() {
+            var isFormValid = true;
+
+            // Check if all required inputs have a value
+            $('form :input[required]').each(function() {
+                if (!$(this).val()) {
+                    isFormValid = false;
+                }
+            });
+
+            // Custom validation for apparent magnitude and not detected
+            var apparentMag = $('#apparent_mag').val();
+            var apparentMagUncert = $('#apparent_mag_uncert').val();
+            var notDetected = $('#not_detected').is(':checked');
+
+            if (!(apparentMag && apparentMagUncert) && !notDetected) {
+                isFormValid = false;
+            }
+
+            if (isFormValid) {
+                $('#addDataRow').prop('disabled', false);
+            } else {
+                $('#addDataRow').prop('disabled', true);
+            }
+        }
+
+        $('form :input').on('input', validateForm);
+        $('#not_detected').on('change', validateForm);
+    });
+  </script>
+
+  <script>
+    // Populate the last used observer location fields based on the observer ORCID
     $(document).ready(function () {
       $('#observer_orcid').blur(function () {
         var observer_orcid = $(this).val();
@@ -319,15 +373,7 @@
   </script>
 
   <script>
-    var uploadForm = document.getElementById('upload-obs');
-    if (uploadForm) {
-      uploadForm.addEventListener('submit', function () {
-        window.scrollTo(0, 0);
-      });
-    }
-  </script>
-
-  <script>
+    // Lookup the NORAD ID based on the satellite name (and vice versa)
     $(document).ready(function () {
       $('#name-id-lookup').on('submit', function (event) {
         event.preventDefault(); // Prevent the form from being submitted normally
@@ -346,6 +392,151 @@
         });
       });
     });
+  </script>
+
+  <script>
+    // Add a new row to the output field when the addDataRow button is clicked
+    var addDataRowButton = document.getElementById('addDataRow');
+    if (addDataRowButton) {
+      addDataRowButton.addEventListener('click', function () {
+
+        // get the current contents of the form
+        var formValues = {
+        satellite_name: $('#sat_name').val(),
+        norad_cat_id: $('#sat_number').val(),
+        observing_mode: $('#obs_mode').val(),
+        obs_date_year: $('#obs_date_year').val(),
+        obs_date_month: $('#obs_date_month').val(),
+        obs_date_day: $('#obs_date_day').val(),
+        obs_date_hour: $('#obs_date_hour').val(),
+        obs_date_min: $('#obs_date_min').val(),
+        obs_date_sec: $('#obs_date_sec').val(),
+        observation_time_uncertainty_sec: $('#obs_date_uncert').val(),
+        apparent_magnitude: $('#apparent_mag').val(),
+        apparent_magnitude_uncertainty: $('#apparent_mag_uncert').val(),
+        not_detected: $('#not_detected').is(':checked'),
+        limiting_magnitude: $('#limiting_magnitude').val(),
+        instrument: $('#instrument').val(),
+        observer_latitude_deg: $('#observer_latitude_deg').val(),
+        observer_longitude_deg: $('#observer_longitude_deg').val(),
+        observer_altitude_m: $('#observer_altitude_m').val(),
+        observing_filter: $('#filter').val(),
+        observer_orcid: $('#observer_orcid').val(),
+        observer_email: $('#observer_email').val(),
+        satellite_right_ascension_deg: $('#sat_ra_deg').val(),
+        satellite_declination_deg: $('#sat_dec_deg').val(),
+        sigma_2_ra: $('#sigma_2_ra').val(),
+        sigma_ra_sigma_dec: $('#sigma_ra_sigma_dec').val(),
+        sigma_2_dec: $('#sigma_2_dec').val(),
+        range_to_satellite_km: $('#range_to_sat_km').val(),
+        range_to_satellite_uncertainty_km: $('#range_to_sat_uncert_km').val(),
+        range_rate_of_satellite_km_per_sec: $('#range_rate_sat_km_s').val(),
+        range_rate_of_satellite_uncertainty_km_per_sec: $('#range_rate_sat_uncert_km_s').val(),
+        data_archive_link: $('#data_archive_link').val(),
+        comments: $('#comments').val(),
+        mpc_code: $('#mpc_code').val(),
+        };
+
+        // Clear form values that change between adding observations
+        $('#sat_name').val('');
+        $('#sat_number').val('');
+        $('#obs_date_year').val('');
+        $('#obs_date_month').val('');
+        $('#obs_date_day').val('');
+        $('#obs_date_hour').val('');
+        $('#obs_date_min').val('');
+        $('#obs_date_sec').val('');
+        $('#obs_date_uncert').val('');
+        $('#apparent_mag').val('');
+        $('#apparent_mag_uncert').val('');
+        $('#not_detected').prop('checked', false);
+        $('#sat_ra_deg').val('');
+        $('#sat_dec_deg').val('');
+        $('#sigma_2_ra').val('');
+        $('#sigma_ra_sigma_dec').val('');
+        $('#sigma_2_dec').val('');
+        $('#range_to_sat_km').val('');
+        $('#range_to_sat_uncert_km').val('');
+        $('#range_rate_sat_km_s').val('');
+        $('#range_rate_sat_uncert_km_s').val('');
+        $('#comments').val('');
+
+        //create a csv row from that data
+        header = [
+          "satellite_name",
+          "norad_cat_id",
+          "observation_time_utc",
+          "observation_time_uncertainty_sec",
+          "apparent_magnitude",
+          "apparent_magnitude_uncertainty",
+          "observer_latitude_deg",
+          "observer_longitude_deg",
+          "observer_altitude_m",
+          "limiting_magnitude",
+          "instrument",
+          "observing_mode",
+          "observing_filter",
+          "observer_email",
+          "observer_orcid",
+          "satellite_right_ascension_deg",
+          "satellite_declination_deg",
+          "sigma_2_ra",
+          "sigma_ra_sigma_dec",
+          "sigma_2_dec",
+          "range_to_satellite_km",
+          "range_to_satellite_uncertainty_km",
+          "range_rate_of_satellite_km_per_sec",
+          "range_rate_of_satellite_uncertainty_km_per_sec",
+          "comments",
+          "data_archive_link",
+          "mpc_code",
+        ];
+
+        var csvString = '';
+        header.forEach(function(item, index) {
+            if (item === 'observation_time_utc') {
+                // Combine the date and time values into a single string
+                var date = new Date(Date.UTC(formValues['obs_date_year'], formValues['obs_date_month'] - 1, formValues['obs_date_day'], formValues['obs_date_hour'], formValues['obs_date_min'], formValues['obs_date_sec']));
+                csvString += date.toISOString();
+            } else {
+              // Append the form value to the string
+              var value = formValues[item];
+              if (item === 'comments' || item === 'observer_orcid') {
+                // if item is not empty
+                if (value && value.includes(',')) {
+                  // Enclose the value in quotes if the item is 'comments', 'data_archive_link', or 'observer_orcid'
+                  value = '"' + value + '"';
+                }
+              }
+              csvString += value;
+            }
+
+            // Add a comma after each value except the last one
+            if (index < header.length - 1) {
+                csvString += ',';
+            }
+        });
+
+        //append that row to the output field
+        var outputField = document.getElementById('output');
+        outputField.value += csvString + '\n';
+        $(outputField).trigger('input');
+        $('#clear-output').prop('disabled', false);
+      }
+    )};
+  </script>
+
+  <script>
+    // Clear output text area
+    var clearOutputButton = document.getElementById('clear-output');
+    if (clearOutputButton) {
+      clearOutputButton.addEventListener('click', function () {
+        $('#output').val("");
+        $('#output').trigger('input');
+        //$('#download-csv').prop('disabled', true);
+        $('#clear-output').prop('disabled', true);
+      }
+    )};
   </script>
 
 </body>

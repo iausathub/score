@@ -30,14 +30,14 @@ class SatelliteTest(TestCase):
 
         # field must be in valid range
         with self.assertRaises(ValidationError):
-            sat = self.create_satellite(sat_number=123456)
+            sat = self.create_satellite(sat_number=1234567)
 
         # field must be in valid range
         with self.assertRaises(ValidationError):
             sat = self.create_satellite(sat_number=-12345)
 
         # field must be valid format
-        with self.assertRaises(ValidationError):
+        with self.assertRaises(ValueError):
             sat = self.create_satellite(sat_number="test")
 
         # valid values successful
@@ -185,8 +185,8 @@ class ObservationTest(TestCase):
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(sat_number=123456)  # noqa: F841
-            self.assertIn("NORAD ID must be 5 digits or less.", str(error.exception))
+                obs = self.create_observation(sat_number=1234567)  # noqa: F841
+            self.assertIn("NORAD ID must be 6 digits or less.", str(error.exception))
 
     def test_observation_validation(self):
         # field is required

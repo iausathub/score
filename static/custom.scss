@@ -6,7 +6,7 @@ $theme-colors: (
   "primary":    #142943,
   "secondary":  #5c7da7,
   "tertiary":   #d7cfc5,
-  "info":       #6c9fd7,
+  "info":       #1a69bd,
   "accent1":    #fbb552,
   "accent1-subtle": lighten(#fbb552, 25%),
   "accent2":    #b7d3df,
@@ -70,7 +70,6 @@ input.no-arrows {
 $dropdown-link-active-bg: map-get($theme-colors, "primary");
 $modal-header-border-color: map-get($theme-colors, "primary");
 $modal-header-border-width: 2px;
-
 
 $font-family-sans-serif: 'Helvetica', sans-serif;
 $font-size-base: .9rem;

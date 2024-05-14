@@ -77,10 +77,10 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/search.html")
 
-    def test_upload(self):
-        response = self.client.get("/upload")
+    def test_generate_csv(self):
+        response = self.client.get("/generate-csv")
         self.assertEqual(response.status_code, 200)
-        self.assertTemplateUsed(response, "repository/upload-obs.html")
+        self.assertTemplateUsed(response, "repository/generate-csv.html")
 
 
 class SearchViewTest(TestCase):

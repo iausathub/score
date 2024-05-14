@@ -49,6 +49,9 @@ def process_upload(
                     "File contains sample data. Please upload a valid file."
                 )
 
+            if len(column) != 27:
+                raise UploadError("Incorrect number of fields in csv file.")
+
             # Check if satellite is above the horizon
             additional_data = add_additional_data(
                 column[0], column[1], column[2], column[6], column[7], column[8]
@@ -173,17 +176,17 @@ def process_upload(
         raise UploadError(str(e) + " - check number of fields in csv file.") from e
 
     except ValueError as e:
-        raise UploadError(str(e) + " - " + obs_error_reference) from e
+        raise UploadError(str(e)) from e
 
     except ValidationError as e:
         if len(e.messages) > 1:
-            raise UploadError(e.messages[1] + " - " + obs_error_reference) from e
+            raise UploadError(e.messages[1]) from e
 
         else:
             message_text = ""
             for key in e.message_dict.keys():
                 message_text += f"{key}: {e.message_dict[key][0]}\n"
-            raise UploadError(message_text + " - " + obs_error_reference) from e
+            raise UploadError(message_text) from e
 
     except Exception as e:
         raise UploadError(e) from e

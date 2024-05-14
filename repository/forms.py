@@ -103,63 +103,144 @@ class SearchForm(Form):
     )
 
 
-class SingleObservationForm(Form):
+class GenerateCSVForm(Form):
     sat_name = forms.CharField(
         max_length=200,
         required=False,
         label="Satellite Name",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={"class": "form-control", "id": "sat_name"}),
     )
     sat_number = forms.IntegerField(
         required=True,
         label="Satellite Number",
         widget=forms.NumberInput(
-            attrs={"min": 0, "max": 99999, "class": "form-control no-arrows"}
+            attrs={
+                "min": 0,
+                "max": 99999,
+                "class": "form-control no-arrows",
+                "id": "sat_number",
+            }
         ),
     )
     obs_mode = forms.ChoiceField(
         choices=Observation.OBS_MODE_CHOICES,
         required=True,
         label="Observation Mode",
-        widget=forms.Select(attrs={"class": "form-select"}),
+        widget=forms.Select(attrs={"class": "form-select", "id": "obs_mode"}),
     )
-    obs_date = forms.CharField(
+    obs_date_year = forms.IntegerField(
         required=True,
-        label="Observation Date/Time (UTC)",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
-        help_text="Required format: YYYY-MM-DDTHH:MM:SSZ",
-        validators=[validate_date],
+        label="YYYY",
+        widget=forms.NumberInput(
+            attrs={
+                "min": 0,
+                "max": 99999,
+                "class": "form-control no-arrows",
+                "id": "obs_date_year",
+            }
+        ),
     )
+    obs_date_month = forms.IntegerField(
+        required=True,
+        label="MM",
+        widget=forms.NumberInput(
+            attrs={
+                "min": 1,
+                "max": 12,
+                "class": "form-control no-arrows",
+                "id": "obs_date_month",
+            }
+        ),
+    )
+    obs_date_day = forms.IntegerField(
+        required=True,
+        label="DD",
+        widget=forms.NumberInput(
+            attrs={
+                "min": 1,
+                "max": 31,
+                "class": "form-control no-arrows",
+                "id": "obs_date_day",
+            }
+        ),
+    )
+    obs_date_hour = forms.IntegerField(
+        required=True,
+        label="HH",
+        widget=forms.NumberInput(
+            attrs={
+                "min": 0,
+                "max": 24,
+                "class": "form-control no-arrows",
+                "id": "obs_date_hour",
+            }
+        ),
+    )
+    obs_date_min = forms.IntegerField(
+        required=True,
+        label="MM",
+        widget=forms.NumberInput(
+            attrs={
+                "min": 0,
+                "max": 60,
+                "class": "form-control no-arrows",
+                "id": "obs_date_min",
+            }
+        ),
+    )
+    obs_date_sec = forms.DecimalField(
+        required=True,
+        label="SS.ssssss",
+        widget=forms.NumberInput(
+            attrs={
+                "min": 0,
+                "max": 60,
+                "class": "form-control no-arrows",
+                "id": "obs_date_sec",
+            }
+        ),
+    )
+
     obs_date_uncert = forms.FloatField(
         required=True,
-        label="Observation Date/Time Uncertainty (sec)",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        label="Uncertainty (sec)",
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "obs_date_uncert"}
+        ),
     )
     not_detected = forms.BooleanField(
         required=False,
         label="Not Detected",
-        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+        widget=forms.CheckboxInput(
+            attrs={"class": "form-check-input", "id": "not_detected"}
+        ),
     )
     apparent_mag = forms.FloatField(
         required=False,
         label="Apparent Magnitude",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "apparent_mag"}
+        ),
     )
     apparent_mag_uncert = forms.FloatField(
         required=False,
         label="Apparent Magnitude Uncertainty",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "apparent_mag_uncert"}
+        ),
     )
     limiting_magnitude = forms.FloatField(
         required=True,
         label="Limiting Magnitude",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "limiting_magnitude"}
+        ),
     )
     instrument = forms.CharField(
         max_length=200,
         required=True,
         label="Instrument",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={"class": "form-control", "id": "instrument"}),
     )
     observer_latitude_deg = forms.FloatField(
         required=True,
@@ -204,12 +285,14 @@ class SingleObservationForm(Form):
         required=True,
         label="Observation Filter",
         help_text="Use 'CLEAR' if observing mode is visual",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={"class": "form-control", "id": "filter"}),
     )
     observer_email = forms.CharField(
         required=True,
         label="Observer Email",
-        widget=forms.EmailInput(attrs={"class": "form-control"}),
+        widget=forms.EmailInput(
+            attrs={"class": "form-control", "id": "observer_email"}
+        ),
     )
     observer_orcid = forms.CharField(
         required=True,
@@ -220,65 +303,108 @@ class SingleObservationForm(Form):
     sat_ra_deg = forms.FloatField(
         required=False,
         label="Satellite Right Ascension (deg)",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "sat_ra_deg"}
+        ),
     )
     sat_dec_deg = forms.FloatField(
         required=False,
         label="Satellite Declination (deg)",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "sat_dec_deg"}
+        ),
     )
     sigma_2_ra = forms.FloatField(
         required=False,
         label="Sigma^2 - RA (deg)",
         help_text="Uncertainty in RA^2",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "sigma_2_ra"}
+        ),
     )
     sigma_ra_sigma_dec = forms.FloatField(
         required=False,
         label="Sigma RA * Sigma Dec (deg)",
         help_text="Uncertainty in RA * Uncertainty in Dec",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "sigma_ra_sigma_dec"}
+        ),
     )
     sigma_2_dec = forms.FloatField(
         required=False,
         label="Sigma^2 - Dec (deg)",
         help_text="Uncertainty in Dec^2",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "sigma_2_dec"}
+        ),
     )
     range_to_sat_km = forms.FloatField(
         required=False,
         label="Range to Satellite (km)",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "range_to_sat_km"}
+        ),
     )
     range_to_sat_uncert_km = forms.FloatField(
         required=False,
-        label="Range to Satellite Uncertainty (km)",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        label="Uncertainty (km)",
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "step": "any",
+                "id": "range_to_sat_uncert_km",
+            }
+        ),
     )
     range_rate_sat_km_s = forms.FloatField(
         required=False,
         label="Range Rate of Satellite (km/s)",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
+        widget=forms.NumberInput(
+            attrs={"class": "form-control", "step": "any", "id": "range_rate_sat_km_s"}
+        ),
     )
     range_rate_sat_uncert_km_s = forms.FloatField(
         required=False,
-        label="Range Rate of Satellite Uncertainty (km/s)",
-        widget=forms.NumberInput(attrs={"class": "form-control", "step": "any"}),
-    )
-    comments = forms.CharField(
-        required=False,
-        label="Comments",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        label="Uncertainty (km/s)",
+        widget=forms.NumberInput(
+            attrs={
+                "class": "form-control",
+                "step": "any",
+                "id": "range_rate_sat_uncert_km_s",
+            }
+        ),
     )
     data_archive_link = forms.CharField(
         required=False,
         label="Data Archive Link",
-        widget=forms.URLInput(attrs={"class": "form-control"}),
+        widget=forms.URLInput(
+            attrs={"class": "form-control", "id": "data_archive_link"}
+        ),
+    )
+    comments = forms.CharField(
+        required=False,
+        label="Comments",
+        widget=forms.TextInput(
+            attrs={"class": "form-control", "rows": 1, "id": "comments"}
+        ),
     )
     mpc_code = forms.CharField(
         required=False,
         label="MPC Observatory Code",
-        widget=forms.TextInput(attrs={"class": "form-control"}),
+        widget=forms.TextInput(attrs={"class": "form-control", "id": "mpc_code"}),
+    )
+
+    output = forms.CharField(
+        required=False,
+        label="Output",
+        widget=forms.Textarea(
+            attrs={
+                "class": "form-control",
+                "rows": 10,
+                "readonly": "readonly",
+                "id": "output",
+            }
+        ),
     )
 
     def clean(self):
