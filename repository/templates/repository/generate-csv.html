@@ -5,20 +5,20 @@
 <div class="container-fluid p-3">
     <div class="container-sm ">
         <h2 class="text-center p-2 pb-2">Generate CSV File</h2>
-        <div class="container-fluid">
-            {% if obs_id %}
-            <div class="alert alert-success" role="alert">
-                <h4 class="alert-heading">Upload successful</h4>
-                Observation ID: {{ obs_id }}<br />
-                Confirmation email sent to: {{ obs_email }}
-            </div>
-            {% endif %}
-            {% if error %}
-            <div class="alert alert-danger" role="alert">
-                <h4 class="alert-heading">Upload failed</h4>
-                {{ error }}
-            </div>
-            {% endif %}
+        <div class="">
+            <p>To generate a CSV file following SCORE's data format, please fill out the required fields marked with an asterisk (*).
+            </p>
+            <p>
+                Click <span class="fw-bold">Add data row</span> to add a new comma separated row with the data provided below.
+                The basic data common to multiple observations (such as observer information) will remain in the form after adding a new row, but fields such as
+                observation date and brightness will be cleared between rows.
+            </p>
+            <p>
+                Click <span class="fw-bold">Download CSV</span> to download the generated CSV file.
+            </p>
+            <p class="alert alert-primary">The advanced data section is optional but encouraged if data is available. Reference positional data from SatChecker will automatically
+            be added to the uploaded observation for comparison.
+            </p>
         </div>
         <div class="text-end my-3">
             <span class="text-danger">*</span> denotes required field
@@ -296,6 +296,7 @@
                             Show/hide advanced data fields
                         </button>
                         <div class="collapse p-4" id="collapseAdvanced">
+                            <div class="px-5">
                             <div class="card card-body">
                                 <div class="row fw-bold">
                                     Position - RA/Dec
@@ -403,6 +404,7 @@
                                 </div>
                             </div>
                         </div>
+                        </div>
                     </div>
                 </div>
                 <div class="row justify-content-end pb-2">
@@ -421,6 +423,7 @@
                 </div>
                 <div class="form-group">
                     <input class="btn btn-primary" type="submit" value="Download CSV" id="download-csv" disabled>
+                    <input class="btn btn-primary" type="reset" value="Clear Output" id="clear-output" disabled>
                 </div>
             </form>
         </div>

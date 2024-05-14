@@ -521,10 +521,22 @@
         var outputField = document.getElementById('output');
         outputField.value += csvString + '\n';
         $(outputField).trigger('input');
+        $('#clear-output').prop('disabled', false);
       }
     )};
+  </script>
 
-
+  <script>
+    // Clear output text area
+    var clearOutputButton = document.getElementById('clear-output');
+    if (clearOutputButton) {
+      clearOutputButton.addEventListener('click', function () {
+        $('#output').val("");
+        $('#output').trigger('input');
+        //$('#download-csv').prop('disabled', true);
+        $('#clear-output').prop('disabled', true);
+      }
+    )};
   </script>
 
 </body>
