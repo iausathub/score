@@ -437,6 +437,30 @@
         mpc_code: $('#mpc_code').val(),
         };
 
+        // Clear form values that change between adding observations
+        $('#sat_name').val('');
+        $('#sat_number').val('');
+        $('#obs_date_year').val('');
+        $('#obs_date_month').val('');
+        $('#obs_date_day').val('');
+        $('#obs_date_hour').val('');
+        $('#obs_date_min').val('');
+        $('#obs_date_sec').val('');
+        $('#obs_date_uncert').val('');
+        $('#apparent_mag').val('');
+        $('#apparent_mag_uncert').val('');
+        $('#not_detected').prop('checked', false);
+        $('#sat_ra_deg').val('');
+        $('#sat_dec_deg').val('');
+        $('#sigma_2_ra').val('');
+        $('#sigma_ra_sigma_dec').val('');
+        $('#sigma_2_dec').val('');
+        $('#range_to_sat_km').val('');
+        $('#range_to_sat_uncert_km').val('');
+        $('#range_rate_sat_km_s').val('');
+        $('#range_rate_sat_uncert_km_s').val('');
+        $('#comments').val('');
+
         //create a csv row from that data
         header = [
           "satellite_name",
