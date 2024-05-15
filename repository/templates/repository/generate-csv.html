@@ -296,9 +296,9 @@
                             Show/hide advanced data fields
                         </button>
                         <div class="collapse p-4" id="collapseAdvanced">
-                            <div class="px-5">
+                            <div class="">
                             <div class="card card-body">
-                                <div class="row fw-bold">
+                                <div class="row fw-bold px-2">
                                     Position - RA/Dec
                                     <br /><br />
                                 </div>
@@ -316,12 +316,13 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row fw-bold">
+                                <br/>
+                                <div class="row fw-bold px-2">
                                     Position Uncertainty
-                                    <br />
+                                    <br /><br />
                                 </div>
                                 <div class="row">
-                                    <div class="col align-self-end">
+                                    <div class="col ">
                                         <div class=" pb-2">
                                             {{ form.sigma_2_ra.label_tag}}
                                             {{ form.sigma_2_ra }}
@@ -345,7 +346,7 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div class="col align-self-end">
+                                    <div class="col ">
                                         <div class=" pb-2">
                                             {{ form.sigma_2_dec.label_tag}}
                                             {{ form.sigma_2_dec }}
@@ -358,7 +359,8 @@
                                         </div>
                                     </div>
                                 </div>
-                                <div class="row fw-bold">
+                                <br/>
+                                <div class="row fw-bold px-2">
                                     Range and Range Rate
                                 </div>
                                 <div class="row">

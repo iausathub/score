@@ -52,6 +52,8 @@ def process_upload(
             if len(column) != 27:
                 raise UploadError("Incorrect number of fields in csv file.")
 
+            # Satellite names are always upper case for some reason
+            column[0] = column[0].upper()
             # Check if satellite is above the horizon
             additional_data = add_additional_data(
                 column[0], column[1], column[2], column[6], column[7], column[8]
