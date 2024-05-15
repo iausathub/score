@@ -161,6 +161,7 @@ def add_additional_data(
         params = {
             "id": sat_number,
         }
+
         error = None
         try:
             response = requests.get(url, params=params, timeout=10)
@@ -184,7 +185,6 @@ def add_additional_data(
             is_valid = True
     else:
         is_valid = validate_position(r, satellite_name, observation_time)
-
     if isinstance(is_valid, str):
         if is_valid == "archival data":
             return SatCheckerData(
