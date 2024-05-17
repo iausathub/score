@@ -1,0 +1,22 @@
+satellite_name,norad_cat_id,observation_time_utc,observation_time_uncertainty_sec,apparent_magnitude,apparent_magnitude_uncertainty,observer_latitude_deg,observer_longitude_deg,observer_altitude_m,limiting_magnitude,instrument,observing_mode,observing_filter,observer_email,observer_orcid,satellite_right_ascension_deg,satellite_declination_deg,sigma_2_ra,sigma_ra_sigma_dec,sigma_2_dec,range_to_satellite_km,range_to_satellite_uncertainty_km,range_rate_of_satellite_km_per_sec,range_rate_of_satellite_uncertainty_km_per_sec,comments,data_archive_link,mpc_code
+Kuiper-P1,58014,2024-04-22T09:29:55Z,1,6.7,0.2,36.062,-91.688,185,0.0,none,VISUAL,CLEAR,test@email.com,1234-1234-1234-1234,,,,,,,,,,,,
+Kuiper-P1,58014,2024-04-22T09:30:10Z,1,6.9,0.2,36.062,-91.688,185,0.0,none,VISUAL,CLEAR,test@email.com,1234-1234-1234-1234,,,,,,,,,,'Test comment',,
+KUIPER-P2,58013,2024-04-22T09:25:00Z,1,6.7,0.2,36.062,-91.688,185,0.0,none,VISUAL,CLEAR,test@email.com,1234-1234-1234-1234,,,,,,,,,,'Harrington_Observation',,
+PELICAN 3001,58296,2024-05-08T21:42:54.572Z,0.001,6.0418,0.0952,52.15399,4.49085,8,10,WATEC 902H2 Supreme + 1.2/85 mm,CCD,CLEAR,test@email.com,1234-1234-1234-1234,185.4465171,25.69768917,0,0,0,571.894,0,0,0,"5-frame average; lim mag of instrument",,
+PELICAN 3001,58296,2024-05-08T21:42:54.612Z,0.001,6.0482,0.0971,52.15399,4.49085,8,10,WATEC 902H2 Supreme + 1.2/85 mm,CCD,CLEAR,test@email.com,1234-1234-1234-1234,185.4315266,25.72785525,0,0,0,571.786,0,0,0,"5-frame average; lim mag of instrument",,
+STARLINK-31531,59477,2024-04-18T1:43:54Z,0.3,3.3,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-31592,59467,2024-04-18T1:48:56Z,0.3,2.3,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-31621,59465,2024-04-18T1:50:00Z,0.3,2.3,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-31617,59455,2024-04-18T1:54:54Z,0.3,1.7,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-4068,52681,2024-04-18T1:57:50Z,0.3,5.1,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-3309,50158,2024-04-18T2:06:37Z,0.3,4.8,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-3288,50160,2024-04-18T2:10:38Z,0.3,4.8,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-4005,52686,2024-04-18T2:12:47Z,0.3,5.6,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-3304,50161,2024-04-18T2:15:57Z,0.3,5.3,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-3313,50157,2024-04-18T2:21:44Z,0.3,4.8,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-31051,58719,2024-04-18T2:32:00Z,0.3,6.5,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-31466,59240,2024-04-18T2:35:50Z,0.3,5.7,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-31534,59398,2024-04-18T2:47:05Z,0.3,5.6,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+STARLINK-5286,55294,2024-04-18T2:47:51Z,0.3,8,0.2,36.1,-95.9,201,6,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,359,-40,0.1,600,5,0.01,None
+BLUEWALKER 3,53807,2022-11-19T23:01:11Z,1,4.0,.2,38.982,-76.763,43,6.0,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,,,,,,,,,,"mandatory fields only",,
+,53807,2022-11-19T23:01:22Z,1,3.5,.2,38.982,-76.763,43,6.0,none,VISUAL,CLEAR,test@email.com, 1234-1234-1234-1234,,,,,,,,,,"mandatory fields only",,
