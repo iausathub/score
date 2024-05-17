@@ -1,5 +1,6 @@
 import csv
 import io
+import json
 import zipfile
 from collections import namedtuple
 from typing import Tuple, Union
@@ -8,6 +9,7 @@ import requests
 from astropy.time import Time
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
+from django.db.models import Count
 from requests import Response
 from rest_framework.renderers import JSONRenderer
 
@@ -59,6 +61,7 @@ def get_stats():
             "observation_count",
             "observer_count",
             "latest_obs_list",
+            "observer_locations",
         ],
     )
 
@@ -72,6 +75,18 @@ def get_stats():
     )
     latest_obs_list = Observation.objects.order_by("-date_added")[:7]
 
+    # Get all observer locations (the latitude and longitude) and a count of how many
+    # observations were made at each location
+    observer_locations = (
+        Observation.objects.values(
+            "location_id", "location_id__obs_lat_deg", "location_id__obs_long_deg"
+        )
+        .annotate(count=Count("location_id"))
+        .order_by("-count")
+    )
+    observer_locations_list = list(observer_locations)
+    observer_locations_json = json.dumps(observer_locations_list)
+
     # JSON is also needed for the modal view when an observation in the list is clicked
     observation_list_json = [
         (JSONRenderer().render(ObservationSerializer(observation).data))
@@ -80,7 +95,11 @@ def get_stats():
     observations_and_json = zip(latest_obs_list, observation_list_json)
 
     return stats(
-        satellite_count, observation_count, observer_count, observations_and_json
+        satellite_count,
+        observation_count,
+        observer_count,
+        observations_and_json,
+        observer_locations_json,
     )
 
 

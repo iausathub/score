@@ -10,6 +10,9 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
 <link rel="stylesheet" href="https://unpkg.com/bootstrap-table@1.22.1/dist/bootstrap-table.min.css">
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+crossorigin=""/>
 
 {% compress css %}
 <link type="text/x-scss" href="{% static 'custom.scss' %}" rel="stylesheet" media="screen">
@@ -17,6 +20,9 @@
 
 <head>
   <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_public_key }}"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+     integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+     crossorigin=""></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
   <title>{% block title %}Satellite Constellation Observation Repository{% endblock %}</title>
 </head>
@@ -538,6 +544,11 @@
       }
     )};
   </script>
+
+  {% block extra_js %}
+  {% endblock %}
+
+
 
 </body>
 

@@ -35,12 +35,14 @@ logger = logging.getLogger(__name__)
 def index(request):
     stats = get_stats()
     template = loader.get_template("repository/index.html")
+
     context = {
         "filename": "",
         "satellite_count": stats.satellite_count,
         "observation_count": stats.observation_count,
         "observer_count": stats.observer_count,
         "latest_obs_list": stats.latest_obs_list,
+        "observer_locations": stats.observer_locations,
     }
 
     if request.method == "POST" and not request.FILES:
