@@ -316,24 +316,24 @@ class GenerateCSVForm(Form):
     )
     sigma_2_ra = forms.FloatField(
         required=False,
-        label="σ² RA (deg)",
-        help_text="Uncertainty in RA²",
+        label="σ² RA (arcsec²)",
+        help_text="Variance of RA",
         widget=forms.NumberInput(
             attrs={"class": "form-control", "step": "any", "id": "sigma_2_ra"}
         ),
     )
     sigma_ra_sigma_dec = forms.FloatField(
         required=False,
-        label="σ RA * σ Dec (deg)",
-        help_text="Uncertainty in RA * Uncertainty in Dec",
+        label="σ RA * σ Dec (arcsec²)",
+        help_text="Covariance of RA and Dec",
         widget=forms.NumberInput(
             attrs={"class": "form-control", "step": "any", "id": "sigma_ra_sigma_dec"}
         ),
     )
     sigma_2_dec = forms.FloatField(
         required=False,
-        label="σ² Dec (deg)",
-        help_text="Uncertainty in Dec²",
+        label="σ² Dec (arcsec²)",
+        help_text="Variance of Dec",
         widget=forms.NumberInput(
             attrs={"class": "form-control", "step": "any", "id": "sigma_2_dec"}
         ),
