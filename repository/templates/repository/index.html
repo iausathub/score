@@ -161,8 +161,70 @@
           {% endif %}
         </div>
       </div>
+
+      <div class="shadow bg-body rounded-2 mb-3" style="min-height: 50px;">
+        <h5 class="card-title text-center bg-accent1 rounded-top-3 p-3">Observer Map</h5>
+        <div class="card-body bg-light p-3 rounded-bottom-2 text-center">
+          {% if observer_locations %}
+          <div id="map"></div>
+          {% else %}
+          <p>No observer locations are available.</p>
+          {% endif %}
+        </div>
+      </div>
+
+
     </div>
   </div>
 </div>
 </div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+  // on document ready
+  $(document).ready(function () {
+    //if there is a div with the id "map"
+    if ($('#map').length) {
+      var map = L.map('map', {
+        minZoom: 0,
+        maxZoom: 2,
+        maxBounds: [ // keeps map from wrapping around
+          [-90, -180], // South west
+          [90, 180]  // North east
+        ],
+        maxBoundsViscosity: 1.0
+      });
+
+      var cartodbAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attribution">CARTO</a>';
+
+      var positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+          attribution: cartodbAttribution
+      }).addTo(map);
+
+      map.setView([0, 0], 0);
+
+      // add observer locations to map - observer_locations is from the Django context object
+      var observerLocations = JSON.parse("{{ observer_locations|escapejs }}");
+      var group = L.layerGroup().addTo(map);
+
+      for (var i = 0; i < observerLocations.length; i++) {
+          var location = observerLocations[i];
+          var circle = L.circle([location.location_id__obs_lat_deg, location.location_id__obs_long_deg], {
+              color: 'red',
+              fillColor: '#f03',
+              fillOpacity: 0.5,
+              // this number is in meters, so as the number of observations
+              // increases, the size might need to be revisited
+              radius: location.count * 3000
+          }).addTo(group);
+
+          // add popup on click with observer location details (exact location and number of observations)
+          circle.bindPopup("Latitude: " + location.location_id__obs_lat_deg + "<br>Longitude: " + location.location_id__obs_long_deg + "<br>Observations: " + location.count);
+
+      }
+
+    }
+  });
+</script>
 {% endblock %}

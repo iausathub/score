@@ -89,7 +89,7 @@ $font-size-base: .9rem;
 $form-file-button-color:         #000000;
 $form-file-button-bg:            map-get($theme-colors, "tertiary");
 //$form-file-button-hover-bg:       #fdce60;
-
+#map { height: 200px; }
 
 
 @import "scss/bootstrap";

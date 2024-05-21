@@ -35,12 +35,14 @@ logger = logging.getLogger(__name__)
 def index(request):
     stats = get_stats()
     template = loader.get_template("repository/index.html")
+
     context = {
         "filename": "",
         "satellite_count": stats.satellite_count,
         "observation_count": stats.observation_count,
         "observer_count": stats.observer_count,
         "latest_obs_list": stats.latest_obs_list,
+        "observer_locations": stats.observer_locations,
     }
 
     if request.method == "POST" and not request.FILES:
@@ -77,7 +79,16 @@ def index(request):
         task_id = request.session["task_id"]
         task = AsyncResult(task_id)
 
-        if task.ready():
+        # Get the current time and the time the task was added
+        current_time = datetime.datetime.now()
+        date_added = datetime.datetime.strptime(
+            request.session["date_added"], "%Y-%m-%d %H:%M:%S.%f"
+        )
+        time_difference = (current_time - date_added).total_seconds()
+
+        # remove the task id if complete or if it got stuck due to an error
+        # that occured before Celery picked it up
+        if task.ready() or (task.status == "PENDING" and time_difference > 60):
             # If the task is complete, delete the task ID from the session
             del request.session["task_id"]
             del request.session["date_added"]

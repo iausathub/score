@@ -66,6 +66,13 @@ def process_upload(
             if isinstance(additional_data, str):
                 raise UploadError(additional_data + " - " + obs_error_reference)
 
+            # Special error message cases
+            if column[4] == "" and column[5] != "":
+                error_message = (
+                    "Apparent magnitude uncertainty without apparent magnitude."
+                )
+                raise UploadError(error_message + " - " + obs_error_reference)
+
             satellite, sat_created = Satellite.objects.get_or_create(
                 sat_name=column[0],
                 sat_number=column[1],
@@ -178,7 +185,10 @@ def process_upload(
         raise UploadError(str(e) + " - check number of fields in csv file.") from e
 
     except ValueError as e:
-        raise UploadError(str(e)) from e
+        error_message = str(e)
+        if obs_error_reference:
+            error_message += " - " + obs_error_reference
+        raise UploadError(error_message) from e
 
     except ValidationError as e:
         if len(e.messages) > 1:

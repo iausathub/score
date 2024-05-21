@@ -37,6 +37,7 @@
                                 email, and location.</p>
                             <p>Location will be pre-filled with the last used location with the given ORCID iD, but this
                                 can be changed.</p>
+                            <p class="fw-bold">This fields in this section remain filled out between data rows.</p>
                         </div>
                     </div>
                     <div class="col-sm-8">
@@ -121,6 +122,9 @@
                             <p>For non-detections, please check the box.</p>
                             <p>If you do not know the NORAD ID to use for the satellite number, you can find it using the
                                 <a href="{% url 'tools' %}">Satellite Name/NORAD ID Lookup</a> tool</p>
+                            <p class="text-black bg-accent2 p-2">The fields in this section will be cleared between data rows - except
+                                <span class="fst-italic">Observation Mode</span>, <span class="fst-italic">Instrument</span>, and <span class="fst-italic">Observation Filter</span>.
+                            </p>
                         </div>
                     </div>
                     <div class="col-sm-8">
@@ -289,6 +293,7 @@
                             <p>This section is optional, but encouraged if data is available.</p>
                             <p>Reference positional data from SatChecker will also be saved with the observation for
                                 comparison.</p>
+                                <p class="fw-bold">The fields in this section will be cleared between data rows.</p>
                         </div>
                     </div>
                     <div class="col-sm-8">
