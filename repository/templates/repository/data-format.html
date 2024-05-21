@@ -22,7 +22,7 @@
       license.
     </p>
     <div class="px-3 pt-3 mb-3 text-primary-emphasis bg-accent1-subtle border border-accent1 rounded-3">
-      <b>Notes:</b> <br />
+      <b>Important:</b> <br />
       <ul>
         <li>
           Please refer to the sample file for the correct column ordering - the information here is for reference only.
@@ -30,6 +30,9 @@
         <li>Optional fields should be left blank if not applicable. Please avoid using "n/a", none, 0, or other similar values.</li>
         <li>All columns must be used in the file uploaded for submission, just left blank if there is no data.
       The example file contains sample observations with both required and optional fields.</li>
+        <li>For non-detections, leave the absolute magnitude and magnitude uncertainty fields blank, and
+          add a comment with "non-detection" or similar to the comments field.</li>
+        </li>
       </ul>
     </div>
     <a href="{% static 'observation_format_example.csv' %}" download>
