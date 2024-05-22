@@ -501,3 +501,67 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
     zipped_file.seek(0)
 
     return zipped_file, zipfile_name
+
+
+def get_satellite_name(norad_id):
+    """
+    Queries the SatChecker API to get the name of the satellite associated with the
+    provided NORAD ID.
+
+    The function sends a GET request to the SatChecker API with the NORAD ID as a
+    parameter. If the API returns a response, the function extracts the satellite name
+    from the response and returns it. If the API does not return a response, or if the
+    response does not contain a satellite name, the function returns None.
+
+    If an error occurs while sending the request or processing the response, the
+    function catches the exception and returns None.
+
+    Parameters:
+    norad_id (str): The NORAD ID of the satellite.
+
+    Returns:
+    str or None: The name of the satellite associated with the NORAD ID, or None if no
+    satellite was found or an error occurred.
+    """
+    url = "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/"
+    params = {"id": norad_id}
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        if not response.json() or response.json()[0] == []:
+            return None
+        return response.json()[0]["name"]
+    except requests.exceptions.RequestException:
+        return None
+
+
+def get_norad_id(satellite_name):
+    """
+    Queries the SatChecker API to get the NORAD ID of the satellite associated with the
+    provided name.
+
+    The function sends a GET request to the SatChecker API with the satellite name as a
+    parameter. If the API returns a response, the function extracts the NORAD ID from
+    the response and returns it. If the API does not return a response, or if the
+    response does not contain a NORAD ID, the function returns None.
+
+    If an error occurs while sending the request or processing the response, the
+    function catches the exception and returns None.
+
+    Parameters:
+    satellite_name (str): The name of the satellite.
+
+    Returns:
+    str or None: The NORAD ID of the satellite associated with the name, or None if no
+    satellite was found or an error occurred.
+    """
+    url = "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/"
+    params = {"name": satellite_name}
+    try:
+        response = requests.get(url, params=params, timeout=10)
+        response.raise_for_status()
+        if not response.json():
+            return None
+        return response.json()[0]["norad_id"]
+    except requests.exceptions.RequestException:
+        return None

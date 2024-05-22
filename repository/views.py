@@ -22,6 +22,8 @@ from repository.forms import (
 from repository.tasks import process_upload
 from repository.utils import (
     create_csv,
+    get_norad_id,
+    get_satellite_name,
     get_stats,
     send_data_change_email,
 )
@@ -251,35 +253,24 @@ def search(request):
     if request.method == "POST":
         form = SearchForm(request.POST)
         if form.is_valid():
-            sat_name = form.cleaned_data["sat_name"]
-            sat_number = form.cleaned_data["sat_number"]
-            obs_mode = form.cleaned_data["obs_mode"]
-            start_date_range = form.cleaned_data["start_date_range"]
-            end_date_range = form.cleaned_data["end_date_range"]
-            observation_id = form.cleaned_data["observation_id"]
-            observer_orcid = form.cleaned_data["observer_orcid"]
-            mpc_code = form.cleaned_data["mpc_code"]
+            # Define a dictionary mapping form fields to filter conditions
+            filters = {
+                "sat_name": "satellite_id__sat_name__icontains",
+                "sat_number": "satellite_id__sat_number",
+                "obs_mode": "obs_mode__icontains",
+                "start_date_range": "obs_time_utc__gte",
+                "end_date_range": "obs_time_utc__lte",
+                "observation_id": "id",
+                "observer_orcid": "obs_orc_id__icontains",
+                "mpc_code": "mpc_code",
+            }
 
-            # filter observations based on search criteria
+            # Filter observations based on search criteria
             observations = Observation.objects.all()
-            if sat_name:
-                observations = observations.filter(
-                    satellite_id__sat_name__icontains=sat_name
-                )
-            if sat_number:
-                observations = observations.filter(satellite_id__sat_number=sat_number)
-            if obs_mode:
-                observations = observations.filter(obs_mode__icontains=obs_mode)
-            if start_date_range:
-                observations = observations.filter(obs_time_utc__gte=start_date_range)
-            if end_date_range:
-                observations = observations.filter(obs_time_utc__lte=end_date_range)
-            if observation_id:
-                observations = observations.filter(id=observation_id)
-            if observer_orcid:
-                observations = observations.filter(obs_orc_id__icontains=observer_orcid)
-            if mpc_code:
-                observations = observations.filter(mpc_code=mpc_code)
+            for field, condition in filters.items():
+                value = form.cleaned_data[field]
+                if value:
+                    observations = observations.filter(**{condition: value})
 
             # JSON is also needed for the modal view to show the observation details
             observation_list_json = [
@@ -438,88 +429,51 @@ def generate_csv(request):
 @csrf_exempt
 def name_id_lookup(request):
     """
-    This view returns the satellite name or NORAD ID based on the provided information.
+    This view returns a JSON response containing either the satellite name and NORAD ID
+    based on the provided information, or an error message.
 
-    The NORAD ID or satellite name is received from a POST request. If only the NORAD ID
-    is provided, the function queries the SatChecker API to get the associated satellite
-    name. If only the satellite name is provided, the function queries the SatChecker
-    API to get the associated NORAD ID.
+    The function expects a POST request with either a NORAD ID or a satellite name.
+    If a NORAD ID is provided, the function queries the SatChecker API to get the
+    associated satellite name. If a satellite name is provided, the function queries
+    the SatChecker API to get the associated NORAD ID.
 
-    If both the NORAD ID and satellite name are provided, the function returns a JSON
-    response with an error message. If neither is provided, the function does nothing
-    and returns None.
+    If both the NORAD ID and satellite name are provided, or if neither is provided,
+    the function returns a JSON response with an appropriate error message.
 
-    If the NORAD ID or satellite name is not valid/complete or there is no satellite
-    associated with it, the function returns a JSON response with an error message.
+    If the provided NORAD ID or satellite name is not associated with any satellite,
+    the function returns a JSON response with an error message.
 
     Parameters:
-    request (HttpRequest): The Django request object.
+    request (HttpRequest): The Django request object containing either a NORAD ID
+    or a satellite name.
 
     Returns:
-    JsonResponse: A JSON response with the satellite name and NORAD ID or an error
-    message.
+    JsonResponse: A JSON response containing either the satellite name and NORAD ID,
+    or an error message.
     """
     norad_id = request.POST.get("satellite_id")
     satellite_name = request.POST.get("satellite_name").upper()
-    error = None
 
     if norad_id and satellite_name:
-        print("Both norad_id and satellite_name provided")
         return JsonResponse(
-            {
-                "error": "Please provide either a NORAD ID or a satellite name.",
-            }
+            {"error": "Please provide either a NORAD ID or a satellite name."}
         )
 
     if norad_id:
-        # query SatChecker for satellite name
-        url = "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/"
-        params = {
-            "id": norad_id,
-        }
-        try:
-            response = requests.get(url, params=params, timeout=10)
-            if response.status_code != 200:
-                error = "Satellite info check failed - check the input and try again."
-            if not response.json() or response.json()[0] == []:
-                error = "No satellite found for the provided NORAD ID."
-            else:
-                satellite_name = response.json()[0]["name"]
-        except requests.exceptions.RequestException:
-            error = "Satellite info check failed - try again later."
+        satellite_name = get_satellite_name(norad_id)
+        if satellite_name is None:
+            return JsonResponse(
+                {"error": "No satellite found for the provided NORAD ID."}
+            )
 
-    elif satellite_name:
-        # query SatChecker for NORAD ID
-        url = "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/"
-        params = {
-            "name": satellite_name,
-        }
-        try:
-            print(url)
-            response = requests.get(url, params=params, timeout=10)
-            if response.status_code != 200:
-                error = "Satellite info check failed - check the input and try again."
-                error += " Status code: " + str(response.status_code)
-            if not response.json():
-                error = "No satellite found for the provided satellite name."
-            else:
-                norad_id = response.json()[0]["norad_id"]
-        except requests.exceptions.RequestException:
-            error = "Satellite info check failed - try again later."
+    if satellite_name:
+        norad_id = get_norad_id(satellite_name)
+        if norad_id is None:
+            return JsonResponse(
+                {"error": "No satellite found for the provided satellite name."}
+            )
 
-    if not error:
-        return JsonResponse(
-            {
-                "satellite_name": satellite_name,
-                "norad_id": norad_id,
-            }
-        )
-
-    return JsonResponse(
-        {
-            "error": error,
-        }
-    )
+    return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
 
 
 @csrf_exempt
