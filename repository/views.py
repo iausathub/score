@@ -45,6 +45,17 @@ def index(request):
         "observer_locations": stats.observer_locations,
     }
 
+    # Make sure that the progress bar is shown only if the page was redirected
+    # right after task creation -- remove the task id after so that it doesn't
+    # stick around when the page is manually refreshed
+    if "recent" in request.session and "task_id" in request.session:
+        task_id = request.session["task_id"]
+        task = AsyncResult(task_id)
+        if task.ready():
+            context["task_id"] = request.session["task_id"]
+            del request.session["task_id"]
+        del request.session["recent"]
+
     if request.method == "POST" and not request.FILES:
         context["error"] = "Please select a file to upload."
         return HttpResponse(template.render(context, request))
@@ -73,6 +84,7 @@ def index(request):
         # This prevents the file from being re-uploaded if the page is refreshed
         request.session["task_id"] = task_id
         request.session["date_added"] = str(datetime.datetime.now())
+        request.session["recent"] = True
         return redirect(request.path)
 
     if "task_id" in request.session and "date_added" in request.session:

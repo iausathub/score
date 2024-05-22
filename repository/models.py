@@ -7,6 +7,13 @@ from django.db import models
 from django.utils import timezone
 
 
+def validate_orcid(value):
+    pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
+    for orc_id in value:
+        if not pattern.match(orc_id):
+            raise ValidationError(f"{orc_id} is not a valid ORCID")
+
+
 class Satellite(models.Model):
 
     sat_name = models.CharField(max_length=200, null=True, blank=True)
@@ -54,14 +61,6 @@ class Location(models.Model):
     class Meta:
         db_table = "location"
 
-    def clean(self):
-        if not self.obs_lat_deg:
-            raise ValidationError("Latitude is required.")
-        if not self.obs_long_deg:
-            raise ValidationError("Longitude is required.")
-        if self.obs_alt_m is None:
-            raise ValidationError("Altitude is required.")
-
     def save(self, *args, **kwargs):
         self.full_clean()
         super().save(*args, **kwargs)
@@ -77,21 +76,35 @@ class Observation(models.Model):
     ]
 
     obs_time_utc = models.DateTimeField("observation time")
-    obs_time_uncert_sec = models.FloatField(default=0)
+    obs_time_uncert_sec = models.FloatField(validators=[MinValueValidator(0)])
     apparent_mag = models.FloatField(null=True, blank=True)
-    apparent_mag_uncert = models.FloatField(null=True, blank=True)
+    apparent_mag_uncert = models.FloatField(
+        validators=[MinValueValidator(0)], null=True, blank=True
+    )
     instrument = models.CharField(max_length=200)
     obs_mode = models.CharField(max_length=200, choices=OBS_MODE_CHOICES)
     obs_filter = models.CharField(max_length=200)
-    obs_email = models.TextField()
-    obs_orc_id = ArrayField(models.CharField(max_length=19), default=list)
-    sat_ra_deg = models.FloatField(default=0, null=True, blank=True)
-    sat_dec_deg = models.FloatField(default=0, null=True, blank=True)
+    obs_email = models.EmailField()
+    obs_orc_id = ArrayField(
+        models.CharField(max_length=19), default=list, validators=[validate_orcid]
+    )
+    sat_ra_deg = models.FloatField(
+        validators=[MinValueValidator(0), MaxValueValidator(360)], null=True, blank=True
+    )
+    sat_dec_deg = models.FloatField(
+        validators=[MinValueValidator(-90), MaxValueValidator(90)],
+        null=True,
+        blank=True,
+    )
     sigma_2_ra = models.FloatField(null=True, blank=True)
     sigma_2_dec = models.FloatField(null=True, blank=True)
     sigma_ra_sigma_dec = models.FloatField(null=True, blank=True)
-    range_to_sat_km = models.FloatField(default=0, null=True, blank=True)
-    range_to_sat_uncert_km = models.FloatField(default=0, null=True, blank=True)
+    range_to_sat_km = models.FloatField(
+        validators=[MinValueValidator(0)], null=True, blank=True
+    )
+    range_to_sat_uncert_km = models.FloatField(
+        validators=[MinValueValidator(0)], null=True, blank=True
+    )
     range_rate_sat_km_s = models.FloatField(default=0, null=True, blank=True)
     range_rate_sat_uncert_km_s = models.FloatField(default=0, null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
@@ -132,59 +145,23 @@ class Observation(models.Model):
         db_table = "observation"
 
     def clean(self):
-        if not self.obs_time_utc:
-            raise ValidationError("Observation time is required.")
-        if self.obs_time_uncert_sec is None:
-            raise ValidationError("Observation time uncertainty is required.")
-        if self.obs_time_uncert_sec < 0:
-            raise ValidationError("Observation time uncertainty must be positive.")
         if self.apparent_mag is not None and self.apparent_mag_uncert is None:
             raise ValidationError(
-                "Apparent magnitude uncertainty is required if apparent magnitude is provided."  # noqa: E501
+                "Apparent magnitude uncertainty is required if "
+                "apparent magnitude is provided."
             )
         if self.apparent_mag is None and self.apparent_mag_uncert is not None:
             raise ValidationError(
                 "Apparent magnitude must be provided if \
                                   uncertainty is provided."
             )
-        if self.apparent_mag_uncert is not None and self.apparent_mag_uncert < 0:
-            raise ValidationError("Apparent magnitude uncertainty must be positive.")
-        if not self.obs_mode:
-            raise ValidationError("Observation mode is required.")
         if self.obs_mode not in ["VISUAL", "BINOCULARS", "CCD", "CMOS", "OTHER"]:
             raise ValidationError(
                 "Observation mode must be one of the following: VISUAL,\
                                   BINOCULARS, CCD, CMOS, OTHER"
             )
-        if not self.obs_filter:
-            raise ValidationError("Observation filter is required.")
-        if not self.obs_email:
-            raise ValidationError("Observer email is required.")
-        if not re.match(
-            r"^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$", self.obs_email
-        ):
-            raise ValidationError("Observer email is not correctly formatted.")
-        if not self.instrument:
-            raise ValidationError("Instrument is required.")
-        if not self.obs_orc_id:
-            raise ValidationError("Observer ORCID is required.")
-
-        for id in self.obs_orc_id:
-            if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", id):
-                raise ValidationError("Observer ORCID not correctly formatted.")
-
-        if self.sat_ra_deg and (self.sat_ra_deg < 0 or self.sat_ra_deg > 360):
-            raise ValidationError("Right ascension must be between 0 and 360 degrees.")
-        if self.sat_dec_deg and (self.sat_dec_deg < -90 or self.sat_dec_deg > 90):
-            raise ValidationError("Declination must be between -90 and 90 degrees.")
-        if self.range_to_sat_km and (self.range_to_sat_km < 0):
-            raise ValidationError("Range to satellite must be positive.")
-        if self.range_to_sat_uncert_km and (self.range_to_sat_uncert_km < 0):
-            raise ValidationError("Range to satellite uncertainty must be positive.")
-        if self.range_rate_sat_km_s and (self.range_rate_sat_km_s < 0):
-            raise ValidationError("Range rate must be positive.")
-        if self.range_rate_sat_uncert_km_s and (self.range_rate_sat_uncert_km_s < 0):
-            raise ValidationError("Range rate uncertainty must be positive.")
+        if self.obs_orc_id and self.obs_orc_id[0] == "":
+            raise ValidationError("ORCID cannot be empty.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
