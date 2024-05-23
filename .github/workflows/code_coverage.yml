@@ -12,8 +12,17 @@ permissions:
 
 jobs:
   test:
-
     runs-on: ubuntu-latest
+
+    services:
+        postgres:
+          image: postgres:11
+          env:
+            POSTGRES_USER: postgres
+            POSTGRES_PASSWORD: postgres
+            POSTGRES_DB: score_test
+          ports: ['5432:5432']
+          options: --health-cmd pg_isready --health-interval 10s --health-timeout 5s --health-retries 5
 
     steps:
     - uses: actions/checkout@v3
@@ -29,8 +38,10 @@ jobs:
       run: |
         pip install pytest pytest-mock pytest-cov
     - name: Test with pytest
+      env:
+            DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
-        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=. repository/tests/ | tee pytest-coverage.txt
+        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=. --ignore=score/settings repository/tests/ | tee pytest-coverage.txt
     - name: Pytest coverage comment
       id: coverageComment
       uses: MishaKav/pytest-coverage-comment@main
