@@ -3,7 +3,7 @@ import requests
 from django.utils import timezone
 
 from repository.models import Location, Observation, Satellite
-from repository.utils import validate_position
+from repository.utils import get_norad_id, get_satellite_name, validate_position
 
 
 @pytest.fixture
@@ -87,3 +87,105 @@ def test_validate_position_not_visible(requests_mock, setup_data):
     )
     result = validate_position(response, "TestSat", "2024-02-22T04:09:38.150")
     assert result == "Satellite with this ID not visible at this time and location"
+
+
+@pytest.mark.django_db
+def test_get_norad_id(requests_mock):
+    # Mock the response from the API
+    requests_mock.get(
+        "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/",
+        status_code=200,
+        json=[{"norad_id": "12345"}],
+    )
+
+    result = get_norad_id("TestSat")
+    assert result == "12345"
+
+
+@pytest.mark.django_db
+def test_get_norad_id_invalid_sat_name(requests_mock):
+    # Mock the response from the API
+    requests_mock.get(
+        "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/",
+        status_code=200,
+        json=[],
+    )
+
+    result = get_norad_id("InvalidSat")
+    assert result is None, "Expected None when satellite name does not exist"
+
+
+@pytest.mark.django_db
+def test_get_norad_id_no_data(requests_mock):
+    # Mock the response from the API
+    requests_mock.get(
+        "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/",
+        status_code=200,
+        json=[],
+    )
+
+    result = get_norad_id("TestSat")
+    assert result is None, "Expected None when no data is returned from API"
+
+
+@pytest.mark.django_db
+def test_get_norad_id_request_exception(requests_mock):
+    # Mock the response from the API to raise a RequestException
+    requests_mock.get(
+        "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/",
+        exc=requests.exceptions.RequestException,
+    )
+
+    result = get_norad_id("TestSat")
+    assert result is None, "Expected None when a RequestException is raised"
+
+
+@pytest.mark.django_db
+def test_get_satellite_name(requests_mock):
+    # Mock the response from the API
+    requests_mock.get(
+        "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/",
+        status_code=200,
+        json=[{"name": "TestSat"}],
+    )
+
+    result = get_satellite_name("12345")
+    assert result == "TestSat"
+
+
+@pytest.mark.django_db
+def test_get_satellite_name_invalid_norad_id(requests_mock):
+    # Mock the response from the API
+    requests_mock.get(
+        "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/",
+        status_code=200,
+        json=[],
+    )
+
+    result = get_satellite_name("InvalidID")
+    assert result is None, "Expected None when NORAD ID does not exist"
+
+
+@pytest.mark.django_db
+def test_get_satellite_name_no_data(requests_mock):
+    # Mock the response from the API
+    requests_mock.get(
+        "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/",
+        status_code=200,
+        json=[],
+    )
+
+    result = get_satellite_name("12345")
+    assert result is None, "Expected None when no data is returned from API"
+
+
+@pytest.mark.django_db
+def test_get_satellite_name_request_exception(requests_mock):
+    # Mock the response from the API to raise a RequestException
+    requests_mock.get(
+        "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/",
+        exc=requests.exceptions.RequestException,
+    )
+
+    result = get_satellite_name("12345")
+    assert result is None, "Expected None when a RequestException is raised"
