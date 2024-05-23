@@ -60,7 +60,7 @@ def process_upload(
             )
 
             obs_error_reference = (
-                "Observation: " + column[0] + " " + column[1] + " " + column[2]
+                "Observation: " + column[0] + " " + str(column[1]) + " " + column[2]
             )
 
             if isinstance(additional_data, str):

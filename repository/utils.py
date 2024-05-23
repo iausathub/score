@@ -172,8 +172,12 @@ def add_additional_data(
     except requests.exceptions.RequestException:
         return "Satellite position check failed - try again later."
 
-    is_valid = False
-    if obs_time < Time("2024-05-01T00:00:00.000", format="isot"):
+    is_valid = validate_position(r, satellite_name, observation_time)
+
+    if (
+        obs_time < Time("2024-05-01T00:00:00.000", format="isot")
+        and not is_valid == "archival data"
+    ):
         # Temporary fix for satellite name changes
 
         url = "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/"
@@ -202,8 +206,7 @@ def add_additional_data(
             return "Satellite name not found"
         elif satellite_found:
             is_valid = True
-    else:
-        is_valid = validate_position(r, satellite_name, observation_time)
+
     if isinstance(is_valid, str):
         if is_valid == "archival data":
             return SatCheckerData(
@@ -248,13 +251,13 @@ def validate_position(
         return "Satellite position check failed - verify uploaded data is correct."
     if not response.json():
         return "Satellite with this ID not visible at this time and location"
-    obs_time = Time(obs_time, format="isot")
-    if satellite_name and response.json()[0]["NAME"] != satellite_name:
-        return "Satellite name and number do not match"
-    tle_date = Time(response.json()[0]["TLE-DATE"], format="iso")
 
+    obs_time = Time(obs_time, format="isot")
+    tle_date = Time(response.json()[0]["TLE-DATE"], format="iso")
     if (tle_date - obs_time).jd > 14:
         return "archival data"
+    if satellite_name and response.json()[0]["NAME"] != satellite_name:
+        return "Satellite name and number do not match"
     if float(response.json()[0]["ALTITUDE-DEG"]) < -5:
         return "Satellite below horizon at this time and location"
 
