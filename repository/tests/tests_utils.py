@@ -64,12 +64,18 @@ def test_validate_position_invalid_sat_name(requests_mock, setup_data):
     requests_mock.get(
         "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/",
         status_code=200,
-        json=[{"NAME": "TestSat", "ALTITUDE-DEG": "10"}],
+        json=[
+            {
+                "NAME": "TestSat",
+                "ALTITUDE-DEG": "10",
+                "TLE-DATE": "2024-05-20 00:36:13",
+            }
+        ],
     )
     response = requests.get(
         "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/", timeout=5
     )
-    result = validate_position(response, "InvalidSat", "2024-02-22T04:09:38.150")
+    result = validate_position(response, "InvalidSat", "2024-05-22T04:09:38.150")
 
     assert result == "Satellite name and number do not match"
 
