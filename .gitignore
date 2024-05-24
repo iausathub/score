@@ -23,6 +23,11 @@
 *.pyc
 /static/scss/tests/
 /static/CACHE/
+/static/admin/*
+/static/vendor/*
+/tmp/*
+/static/rest_framework/*
+/static/jazzmin/*
 
 # debug
 npm-debug.log*

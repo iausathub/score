@@ -1,14 +1,24 @@
-from datetime import datetime
+import re
 
+from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.utils import timezone
+
+
+def validate_orcid(value):
+    pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
+    for orc_id in value:
+        if not pattern.match(orc_id):
+            raise ValidationError(f"{orc_id} is not a valid ORCID")
 
 
 class Satellite(models.Model):
-    sat_name = models.CharField(max_length=200)
+
+    sat_name = models.CharField(max_length=200, null=True, blank=True)
     sat_number = models.IntegerField(default=0)
-    constellation = models.CharField(max_length=100, default="", null=True)
-    date_added = models.DateTimeField("date added", default=datetime.now)
+    date_added = models.DateTimeField("date added", default=timezone.now)
 
     def __str__(self):
         return self.sat_name
@@ -17,12 +27,12 @@ class Satellite(models.Model):
         db_table = "satellite"
 
     def clean(self):
-        if not self.sat_name:
-            raise ValidationError("Satellite name is required.")
         if not self.sat_number:
             raise ValidationError("Satellite number is required.")
-        if len(str(self.sat_number)) > 5:
-            raise ValidationError("NORAD ID must be 5 digits or less.")
+        if len(str(self.sat_number)) > 6:
+            raise ValidationError("NORAD ID must be 6 digits or less.")
+        if int(self.sat_number) < 0:
+            raise ValidationError("Satellite number must be positive.")
 
     def save(self, *args, **kwargs):
         self.full_clean()
@@ -30,10 +40,14 @@ class Satellite(models.Model):
 
 
 class Location(models.Model):
-    obs_lat_deg = models.FloatField(default=0)
-    obs_long_deg = models.FloatField(default=0)
+    obs_lat_deg = models.FloatField(
+        validators=[MinValueValidator(-90), MaxValueValidator(90)]
+    )
+    obs_long_deg = models.FloatField(
+        validators=[MinValueValidator(-180), MaxValueValidator(180)]
+    )
     obs_alt_m = models.FloatField(default=0)
-    date_added = models.DateTimeField("date added", default=datetime.now)
+    date_added = models.DateTimeField("date added", default=timezone.now)
 
     def __str__(self):
         return (
@@ -47,87 +61,108 @@ class Location(models.Model):
     class Meta:
         db_table = "location"
 
-    def clean(self):
-        if not self.obs_lat_deg:
-            raise ValidationError("Latitude is required.")
-        if not self.obs_long_deg:
-            raise ValidationError("Longitude is required.")
-        if not self.obs_alt_m:
-            raise ValidationError("Altitude is required.")
-        if self.obs_lat_deg < -90 or self.obs_lat_deg > 90:
-            raise ValidationError("Latitude must be between -90 and 90 degrees.")
-        if self.obs_long_deg < -180 or self.obs_long_deg > 180:
-            raise ValidationError("Longitude must be between -180 and 180 degrees.")
-        if self.obs_alt_m < 0:
-            raise ValidationError("Altitude must be greater than 0 meters.")
-
-
-class Image(models.Model):
-    image_name = models.TextField()
-    image_path = models.TextField()
-    date_added = models.DateTimeField("date added", default=datetime.now)
-
-    def __str__(self):
-        return self.image_name
-
-    class Meta:
-        db_table = "image"
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)
 
 
 class Observation(models.Model):
+    OBS_MODE_CHOICES = [
+        ("VISUAL", "Visual"),
+        ("BINOCULARS", "Binoculars"),
+        ("CCD", "CCD"),
+        ("CMOS", "CMOS"),
+        ("OTHER", "Other"),
+    ]
+
     obs_time_utc = models.DateTimeField("observation time")
-    obs_time_uncert_sec = models.FloatField(default=0)
-    apparent_mag = models.FloatField(default=0)
-    apparent_mag_uncert = models.FloatField(default=0)
+    obs_time_uncert_sec = models.FloatField(validators=[MinValueValidator(0)])
+    apparent_mag = models.FloatField(null=True, blank=True)
+    apparent_mag_uncert = models.FloatField(
+        validators=[MinValueValidator(0)], null=True, blank=True
+    )
     instrument = models.CharField(max_length=200)
-    obs_mode = models.CharField(max_length=200)
+    obs_mode = models.CharField(max_length=200, choices=OBS_MODE_CHOICES)
     obs_filter = models.CharField(max_length=200)
-    obs_email = models.TextField()
-    obs_orc_id = models.CharField(max_length=200, null=True)
-    sat_ra_deg = models.FloatField(default=0, null=True)
-    sat_ra_uncert_deg = models.FloatField(default=0, null=True)
-    sat_dec_deg = models.FloatField(default=0, null=True)
-    sat_dec_uncert_deg = models.FloatField(default=0, null=True)
-    range_to_sat_km = models.FloatField(default=0, null=True)
-    range_to_sat_uncert_km = models.FloatField(default=0, null=True)
-    range_rate_sat_km_s = models.FloatField(default=0, null=True)
-    range_rate_sat_uncert_km_s = models.FloatField(default=0, null=True)
-    comments = models.TextField(null=True)
-    data_archive_link = models.TextField(null=True)
-    flag = models.CharField(max_length=100, null=True)
-    satellite_id = models.ForeignKey(Satellite, on_delete=models.CASCADE)
-    location_id = models.ForeignKey(Location, on_delete=models.CASCADE)
-    image_id = models.ForeignKey(Image, on_delete=models.CASCADE, null=True)
-    date_added = models.DateTimeField("date added", default=datetime.now)
+    obs_email = models.EmailField()
+    obs_orc_id = ArrayField(
+        models.CharField(max_length=19), default=list, validators=[validate_orcid]
+    )
+    sat_ra_deg = models.FloatField(
+        validators=[MinValueValidator(0), MaxValueValidator(360)], null=True, blank=True
+    )
+    sat_dec_deg = models.FloatField(
+        validators=[MinValueValidator(-90), MaxValueValidator(90)],
+        null=True,
+        blank=True,
+    )
+    sigma_2_ra = models.FloatField(null=True, blank=True)
+    sigma_2_dec = models.FloatField(null=True, blank=True)
+    sigma_ra_sigma_dec = models.FloatField(null=True, blank=True)
+    range_to_sat_km = models.FloatField(
+        validators=[MinValueValidator(0)], null=True, blank=True
+    )
+    range_to_sat_uncert_km = models.FloatField(
+        validators=[MinValueValidator(0)], null=True, blank=True
+    )
+    range_rate_sat_km_s = models.FloatField(default=0, null=True, blank=True)
+    range_rate_sat_uncert_km_s = models.FloatField(default=0, null=True, blank=True)
+    comments = models.TextField(null=True, blank=True)
+    data_archive_link = models.URLField(null=True, blank=True)
+    flag = models.CharField(max_length=100, null=True, blank=True)
+    phase_angle = models.FloatField(null=True, blank=True)
+    range_to_sat_km_satchecker = models.FloatField(null=True, blank=True)
+    range_rate_sat_km_s_satchecker = models.FloatField(null=True, blank=True)
+    sat_ra_deg_satchecker = models.FloatField(null=True, blank=True)
+    sat_dec_deg_satchecker = models.FloatField(null=True, blank=True)
+    ddec_deg_s_satchecker = models.FloatField(null=True, blank=True)
+    dra_cosdec_deg_s_satchecker = models.FloatField(null=True, blank=True)
+    alt_deg_satchecker = models.FloatField(null=True, blank=True)
+    az_deg_satchecker = models.FloatField(null=True, blank=True)
+    illuminated = models.BooleanField(null=True, blank=True)
+    limiting_magnitude = models.FloatField(null=True, blank=True)
+    mpc_code = models.CharField(max_length=10, null=True, blank=True)
+    satellite_id = models.ForeignKey(
+        Satellite, on_delete=models.CASCADE, related_name="observations"
+    )
+    location_id = models.ForeignKey(
+        Location, on_delete=models.CASCADE, related_name="observations"
+    )
+    date_added = models.DateTimeField("date added", default=timezone.now)
 
     def __str__(self):
         return (
-            str(self.obs_time_utc)
-            + ", "
-            + self.obs_email
+            str(self.id)
             + ", "
             + self.satellite_id.sat_name
+            + ", "
+            + str(self.obs_time_utc)
+            + ", "
+            + self.obs_email
         )
 
     class Meta:
         db_table = "observation"
 
     def clean(self):
-        if not self.obs_time_utc:
-            raise ValidationError("Observation time is required.")
-        if not self.obs_time_uncert_sec:
-            raise ValidationError("Observation time uncertainty is required.")
-        if not self.apparent_mag:
-            raise ValidationError("Apparent magnitude is required.")
-        if not self.apparent_mag_uncert:
-            raise ValidationError("Apparent magnitude uncertainty is required.")
-        if not self.obs_mode:
-            raise ValidationError("Observation mode is required.")
-        if not self.obs_filter:
-            raise ValidationError("Observation filter is required.")
-        if not self.obs_email:
-            raise ValidationError("Observer email is required.")
-        if not self.instrument:
-            raise ValidationError("Instrument is required.")
-        if not self.obs_orc_id:
-            raise ValidationError("Observer ORCID is required.")
+        if self.apparent_mag is not None and self.apparent_mag_uncert is None:
+            raise ValidationError(
+                "Apparent magnitude uncertainty is required if "
+                "apparent magnitude is provided."
+            )
+        if self.apparent_mag is None and self.apparent_mag_uncert is not None:
+            raise ValidationError(
+                "Apparent magnitude must be provided if \
+                                  uncertainty is provided."
+            )
+        if self.obs_mode not in ["VISUAL", "BINOCULARS", "CCD", "CMOS", "OTHER"]:
+            raise ValidationError(
+                "Observation mode must be one of the following: VISUAL,\
+                                  BINOCULARS, CCD, CMOS, OTHER"
+            )
+        if self.obs_orc_id and self.obs_orc_id[0] == "":
+            raise ValidationError("ORCID cannot be empty.")
+
+    def save(self, *args, **kwargs):
+        self.full_clean()
+        super().save(*args, **kwargs)

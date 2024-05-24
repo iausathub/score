@@ -1,152 +1,116 @@
 import csv
 import datetime
 import io
+import logging
 import zipfile
-from collections import namedtuple
+from typing import Union
 
-from django.db.models import Avg
-from django.forms import ValidationError
-from django.http import HttpResponse
-from django.shortcuts import render
+import requests
+from celery.result import AsyncResult
+from django.conf import settings
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import redirect, render
 from django.template import loader
+from django.views.decorators.csrf import csrf_exempt
+from rest_framework.renderers import JSONRenderer
 
-from repository.forms import SearchForm
+from repository.forms import (
+    DataChangeForm,
+    GenerateCSVForm,
+    SearchForm,
+)
+from repository.tasks import process_upload
+from repository.utils import (
+    create_csv,
+    get_norad_id,
+    get_satellite_name,
+    get_stats,
+    send_data_change_email,
+)
 
-from .models import Location, Observation, Satellite
+from .models import Observation
+from .serializers import ObservationSerializer
+
+logger = logging.getLogger(__name__)
 
 
 def index(request):
-    if request.method == "POST" and not request.FILES:
-        return render(
-            request,
-            "repository/index.html",
-            {"error": "Please select a file to upload."},
-        )
-    if request.method == "POST" and request.FILES["uploaded_file"]:
-        uploaded_file = request.FILES["uploaded_file"]
-        # parse csv file into models
-        data_set = uploaded_file.read().decode("UTF-8")
-        io_string = io.StringIO(data_set)
-        # check if first row is header or not
-
-        next(io_string)  # Skip the header
-        obs_ids = []
-        try:
-
-            for column in csv.reader(io_string, delimiter=",", quotechar="|"):
-                satellite, sat_created = Satellite.objects.update_or_create(
-                    sat_name=column[0],
-                    sat_number=column[1],
-                    constellation=column[24],
-                    defaults={
-                        "sat_name": column[0],
-                        "sat_number": column[1],
-                        "constellation": column[24],
-                        "date_added": datetime.datetime.now(),
-                    },
-                )
-
-                location, loc_created = Location.objects.update_or_create(
-                    obs_lat_deg=column[6],
-                    obs_long_deg=column[7],
-                    obs_alt_m=column[8],
-                    defaults={
-                        "obs_lat_deg": column[6],
-                        "obs_long_deg": column[7],
-                        "obs_alt_m": column[8],
-                        "date_added": datetime.datetime.now(),
-                    },
-                )
-
-                observation, obs_created = Observation.objects.update_or_create(
-                    obs_time_utc=column[2],
-                    obs_time_uncert_sec=column[3],
-                    apparent_mag=column[4],
-                    apparent_mag_uncert=column[5],
-                    instrument=column[9],
-                    obs_mode=column[10],
-                    obs_filter=column[11],
-                    obs_email=column[12],
-                    obs_orc_id=column[13],
-                    sat_ra_deg=column[14],
-                    sat_ra_uncert_deg=column[15],
-                    sat_dec_deg=column[16],
-                    sat_dec_uncert_deg=column[17],
-                    range_to_sat_km=column[18],
-                    range_to_sat_uncert_km=column[19],
-                    range_rate_sat_km_s=column[20],
-                    range_rate_sat_uncert_km_s=column[21],
-                    comments=column[22],
-                    data_archive_link=column[23],
-                    satellite_id=satellite,
-                    location_id=location,
-                    defaults={
-                        "obs_time_utc": column[2],
-                        "obs_time_uncert_sec": column[3],
-                        "apparent_mag": column[4],
-                        "apparent_mag_uncert": column[5],
-                        "instrument": column[9],
-                        "obs_mode": column[10],
-                        "obs_filter": column[11],
-                        "obs_email": column[12],
-                        "obs_orc_id": column[13],
-                        "sat_ra_deg": column[14],
-                        "sat_ra_uncert_deg": column[15],
-                        "sat_dec_deg": column[16],
-                        "sat_dec_uncert_deg": column[17],
-                        "range_to_sat_km": column[18],
-                        "range_to_sat_uncert_km": column[19],
-                        "range_rate_sat_km_s": column[20],
-                        "range_rate_sat_uncert_km_s": column[21],
-                        "comments": column[22],
-                        "data_archive_link": column[23],
-                        "flag": None,
-                        "satellite_id": satellite,
-                        "location_id": location,
-                        "date_added": datetime.datetime.now(),
-                    },
-                )
-                obs_ids.append(observation.id)
-
-        except ValueError as e:
-            return render(request, "repository/index.html", {"error": e})
-        except ValidationError as e:
-            if len(e.messages) > 1:
-                return render(
-                    request, "repository/index.html", {"error": e.messages[1]}
-                )
-            else:
-                message_text = ""
-                for key in e.message_dict.keys():
-                    message_text += f"{key}: {e.message_dict[key][0]}\n"
-
-                return render(request, "repository/index.html", {"error": message_text})
-            return render(request, "repository/index.html", {"error": e.messages[0]})
-        stats = get_stats()
-        return render(
-            request,
-            "repository/index.html",
-            {
-                "obs_id": obs_ids,
-                "satellite_count": stats.satellite_count,
-                "observation_count": stats.observation_count,
-                "observer_count": stats.observer_count,
-                "latest_obs_list": stats.latest_obs_list,
-                "avg_mag": stats.avg_mag,
-            },
-        )
-    # else:
-    #     form = UploadObservationFileForm()
     stats = get_stats()
     template = loader.get_template("repository/index.html")
+
     context = {
         "filename": "",
         "satellite_count": stats.satellite_count,
         "observation_count": stats.observation_count,
         "observer_count": stats.observer_count,
         "latest_obs_list": stats.latest_obs_list,
-        "avg_mag": stats.avg_mag,
+        "observer_locations": stats.observer_locations,
     }
+
+    # Make sure that the progress bar is shown only if the page was redirected
+    # right after task creation -- remove the task id after so that it doesn't
+    # stick around when the page is manually refreshed
+    if "recent" in request.session and "task_id" in request.session:
+        task_id = request.session["task_id"]
+        task = AsyncResult(task_id)
+        if task.ready():
+            context["task_id"] = request.session["task_id"]
+            del request.session["task_id"]
+        del request.session["recent"]
+
+    if request.method == "POST" and not request.FILES:
+        context["error"] = "Please select a file to upload."
+        return HttpResponse(template.render(context, request))
+
+    # Handle file upload
+    if request.method == "POST" and request.FILES["uploaded_file"]:
+        uploaded_file = request.FILES["uploaded_file"]
+
+        data_set = uploaded_file.read().decode("UTF-8")
+        io_string = io.StringIO(data_set)
+
+        # Skip the header if it exists
+        first_line = next(io_string)
+        if first_line.startswith("satellite_name"):
+            pass
+        else:
+            io_string.seek(0)
+
+        read_data = csv.reader(io_string, delimiter=",")
+        obs = list(read_data)
+
+        # Create Task
+        upload_task = process_upload.delay(obs)
+        task_id = upload_task.task_id
+
+        # This prevents the file from being re-uploaded if the page is refreshed
+        request.session["task_id"] = task_id
+        request.session["date_added"] = str(datetime.datetime.now())
+        request.session["recent"] = True
+        return redirect(request.path)
+
+    if "task_id" in request.session and "date_added" in request.session:
+        task_id = request.session["task_id"]
+        task = AsyncResult(task_id)
+
+        # Get the current time and the time the task was added
+        current_time = datetime.datetime.now()
+        date_added = datetime.datetime.strptime(
+            request.session["date_added"], "%Y-%m-%d %H:%M:%S.%f"
+        )
+        time_difference = (current_time - date_added).total_seconds()
+
+        # remove the task id if complete or if it got stuck due to an error
+        # that occured before Celery picked it up
+        if task.ready() or (task.status == "PENDING" and time_difference > 60):
+            # If the task is complete, delete the task ID from the session
+            del request.session["task_id"]
+            del request.session["date_added"]
+        else:
+            # If the task is not complete, pass the task ID to the context
+            context["task_id"] = task_id
+            context["date_added"] = request.session["date_added"]
+
     return HttpResponse(template.render(context, request))
 
 
@@ -156,125 +120,165 @@ def data_format(request):
     return HttpResponse(template.render(context, request))
 
 
-def view_data(request):
-    observation_list = Observation.objects.all()
-    return render(request, "repository/view.html", {"observations": observation_list})
+def view_data(request) -> HttpResponse:
+    """
+    Show the 500 most recent observations and render the 'repository/view.html'
+    template.
 
+    Args:
+        request (HttpRequest): The request object.
 
-def download_all(request):
-    # create csv from observation models (All)
-    header = [
-        "satellite_name",
-        "norad_cat_id",
-        "observation_time_utc",
-        "observation_time_uncertainty_sec",
-        "apparent_magnitude",
-        "apparent_magnitude_uncertainty",
-        "observer_latitude_deg",
-        "observer_longitude_deg",
-        "observer_altitude_m",
-        "instrument",
-        "observing_mode",
-        "observing_filter",
-        "observer_email",
-        "observer_orcid",
-        "satellite_right_ascension_deg",
-        "satellite_right_ascension_uncertainty_deg",
-        "satellite_declination_deg",
-        "satellite_declination_uncertainty_deg",
-        "range_to_satellite_km",
-        "range_to_satellite_uncertainty_km",
-        "range_rate_of_satellite_km_per_sec",
-        "range_rate_of_satellite_uncertainty_km_per_sec",
-        "comments",
-        "data_archive_link",
-        "constellation",
+    Returns:
+        HttpResponse: The HttpResponse object with the rendered template.
+    """
+    # Show the 500 most recent observations
+    observation_list = Observation.objects.order_by("-date_added")[:500]
+
+    # JSON is also needed for the modal view to show the observation details
+    observation_list_json = [
+        (JSONRenderer().render(ObservationSerializer(observation).data))
+        for observation in observation_list
     ]
+    observations_and_json = zip(observation_list, observation_list_json)
+    return render(
+        request,
+        "repository/view.html",
+        {"observations_and_json": observations_and_json},
+    )
 
-    observations = Observation.objects.all()
 
-    csv_lines = []
-    for observation in observations:
-        csv_lines.append(
-            [
-                observation.satellite_id.sat_name,
-                observation.satellite_id.sat_number,
-                observation.obs_time_utc,
-                observation.obs_time_uncert_sec,
-                observation.apparent_mag,
-                observation.apparent_mag_uncert,
-                observation.location_id.obs_lat_deg,
-                observation.location_id.obs_long_deg,
-                observation.location_id.obs_alt_m,
-                observation.instrument,
-                observation.obs_mode,
-                observation.obs_filter,
-                observation.obs_email,
-                observation.obs_orc_id,
-                observation.sat_ra_deg,
-                observation.sat_ra_uncert_deg,
-                observation.sat_dec_deg,
-                observation.sat_dec_uncert_deg,
-                observation.range_to_sat_km,
-                observation.range_to_sat_uncert_km,
-                observation.range_rate_sat_km_s,
-                observation.range_rate_sat_uncert_km_s,
-                observation.comments,
-                observation.data_archive_link,
-                observation.satellite_id.constellation,
-            ]
+def download_all(request) -> HttpResponse:
+    """
+    Create a CSV file, zip it, and return it as a downloadable file.
+
+    Args:
+        request (HttpRequest): The request object.
+
+    Returns:
+        HttpResponse: The HttpResponse object with the zipped CSV file.
+    """
+    if request.method == "POST" and settings.RECAPTCHA_PUBLIC_KEY != "":
+        # Get the reCAPTCHA response from the POST data
+        recaptcha_response = request.POST.get("g-recaptcha-response")
+
+        data = {
+            "secret": settings.RECAPTCHA_PRIVATE_KEY,
+            "response": recaptcha_response,
+        }
+
+        # Send a POST request to the Google reCAPTCHA API
+        r = requests.post(
+            "https://www.google.com/recaptcha/api/siteverify", data=data, timeout=30
         )
 
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(header)
-    writer.writerows(csv_lines)
+        # Get the result
+        result = r.json()
 
-    zipfile_name = "satellite_observations_all.zip"
-    zipped_file = io.BytesIO()
+        # If the reCAPTCHA was valid, proceed with the download
+        if result["score"] > 0.7:
+            return create_and_return_csv(False)
+        else:
+            # If the reCAPTCHA was not valid, return an error message
+            return JsonResponse({"error": "Invalid reCAPTCHA. Please try again."})
+    # If reCAPTCHA is not enabled (development mode), proceed with the download
+    else:
+        return create_and_return_csv(False)
 
-    with zipfile.ZipFile(zipped_file, "w") as zip:
-        zip.writestr("observations.csv", output.getvalue())
-    zipped_file.seek(0)
 
+def create_and_return_csv(observations: Union[list[Observation], bool]) -> HttpResponse:
+    """
+    Create a CSV file from the provided observations and return it as a zipped file
+    in an HTTP response.
+
+    Args:
+        observations (Union[List[Observation], bool]): A list of Observation objects
+        or False. If false, all observations will be included in the CSV file.
+
+    Returns:
+        HttpResponse: An HTTP response containing the zipped CSV file. The Content-Type
+        of the response is set to "application/zip", and the Content-Disposition is set
+        to make the file a download with the appropriate filename.
+    """
+    zipped_file, zipfile_name = create_csv(observations)
     response = HttpResponse(zipped_file, content_type="application/zip")
-
     response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
     return response
+
+
+def download_obs_ids(request):
+    # Provide the observation IDs for the observations that were just uploaded
+    # with the satellite name and date observed for context (CSV)
+    if request.method == "POST":
+        observation_ids = request.POST.get("obs_ids").split(",")
+
+        header = [
+            "observation_id",
+            "satellite_name",
+            "satellite_number",
+            "date_observed",
+        ]
+
+        csv_lines = []
+        for observation_id in observation_ids:
+            observation = Observation.objects.get(id=observation_id)
+            csv_lines.append(
+                [
+                    observation.id,
+                    observation.satellite_id.sat_name,
+                    observation.satellite_id.sat_number,
+                    observation.obs_time_utc,
+                ]
+            )
+
+        output = io.StringIO()
+        writer = csv.writer(output)
+        writer.writerow(header)
+        writer.writerows(csv_lines)
+
+        zipfile_name = "satellite_observation_ids.zip"
+        zipped_file = io.BytesIO()
+
+        with zipfile.ZipFile(zipped_file, "w") as zip:
+            zip.writestr("satellite_observation_ids.csv", output.getvalue())
+        zipped_file.seek(0)
+
+        response = HttpResponse(zipped_file, content_type="application/zip")
+
+        response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
+        return response
+    return HttpResponse()
 
 
 def search(request):
     if request.method == "POST":
         form = SearchForm(request.POST)
         if form.is_valid():
-            sat_name = form.cleaned_data["sat_name"]
-            sat_number = form.cleaned_data["sat_number"]
-            obs_mode = form.cleaned_data["obs_mode"]
-            start_date_range = form.cleaned_data["start_date_range"]
-            end_date_range = form.cleaned_data["end_date_range"]
-            constellation = form.cleaned_data["constellation"]
-            observation_id = form.cleaned_data["observation_id"]
+            # Define a dictionary mapping form fields to filter conditions
+            filters = {
+                "sat_name": "satellite_id__sat_name__icontains",
+                "sat_number": "satellite_id__sat_number",
+                "obs_mode": "obs_mode__icontains",
+                "start_date_range": "obs_time_utc__gte",
+                "end_date_range": "obs_time_utc__lte",
+                "observation_id": "id",
+                "observer_orcid": "obs_orc_id__icontains",
+                "mpc_code": "mpc_code",
+            }
 
-            # filter observations based on search criteria
+            # Filter observations based on search criteria
             observations = Observation.objects.all()
-            if sat_name:
-                observations = observations.filter(
-                    satellite_id__sat_name__icontains=sat_name
-                )
-            if sat_number:
-                observations = observations.filter(satellite_id__sat_number=sat_number)
-            if obs_mode:
-                observations = observations.filter(obs_mode__icontains=obs_mode)
-            if start_date_range:
-                observations = observations.filter(obs_time_utc__gte=start_date_range)
-            if end_date_range:
-                observations = observations.filter(obs_time_utc__lte=end_date_range)
-            if constellation:
-                observations = observations.filter(
-                    satellite_id__constellation__icontains=constellation
-                )
-            if observation_id:
-                observations = observations.filter(id=observation_id)
+            for field, condition in filters.items():
+                value = form.cleaned_data[field]
+                if value:
+                    observations = observations.filter(**{condition: value})
+
+            # JSON is also needed for the modal view to show the observation details
+            observation_list_json = [
+                (JSONRenderer().render(ObservationSerializer(observation).data))
+                for observation in observations
+            ]
+            observations_and_json = zip(observations, observation_list_json)
+            observation_ids = [observation.id for observation in observations]
 
             if observations.count() == 0:
                 return render(
@@ -286,120 +290,234 @@ def search(request):
             return render(
                 request,
                 "repository/search.html",
-                {"observations": observations, "form": SearchForm},
+                {
+                    "observations": observations_and_json,
+                    "obs_ids": observation_ids,
+                    "form": SearchForm,
+                },
             )
-        # handle search form
-        return render(request, "repository/search.html", {"form": SearchForm})
+        else:
+            return render(request, "repository/search.html", {"form": form})
 
     return render(request, "repository/search.html", {"form": SearchForm})
 
 
 def download_results(request):
-    # create csv from observation models (All)
-    header = [
-        "satellite_name",
-        "norad_cat_id",
-        "observation_time_utc",
-        "observation_time_uncertainty_sec",
-        "apparent_magnitude",
-        "apparent_magnitude_uncertainty",
-        "observer_latitude_deg",
-        "observer_longitude_deg",
-        "observer_altitude_m",
-        "instrument",
-        "observing_mode",
-        "observing_filter",
-        "observer_email",
-        "observer_orcid",
-        "satellite_right_ascension_deg",
-        "satellite_right_ascension_uncertainty_deg",
-        "satellite_declination_deg",
-        "satellite_declination_uncertainty_deg",
-        "range_to_satellite_km",
-        "range_to_satellite_uncertainty_km",
-        "range_rate_of_satellite_km_per_sec",
-        "range_rate_of_satellite_uncertainty_km_per_sec",
-        "comments",
-        "data_archive_link",
-        "constellation",
-    ]
+    # Download the search results as a CSV file
+    if request.method == "POST":
+        observation_ids = request.POST.get("obs_ids").split(", ")
+        observation_ids = [int(i.strip("[]")) for i in observation_ids]
 
-    observations = []
+        observations = Observation.objects.filter(id__in=observation_ids)
 
-    csv_lines = []
-    for observation in observations:
-        csv_lines.append(
-            [
-                observation.satellite_id.sat_name,
-                observation.satellite_id.sat_number,
-                observation.obs_time_utc,
-                observation.obs_time_uncert_sec,
-                observation.apparent_mag,
-                observation.apparent_mag_uncert,
-                observation.location_id.obs_lat_deg,
-                observation.location_id.obs_long_deg,
-                observation.location_id.obs_alt_m,
-                observation.instrument,
-                observation.obs_mode,
-                observation.obs_filter,
-                observation.obs_email,
-                observation.obs_orc_id,
-                observation.sat_ra_deg,
-                observation.sat_ra_uncert_deg,
-                observation.sat_dec_deg,
-                observation.sat_dec_uncert_deg,
-                observation.range_to_sat_km,
-                observation.range_to_sat_uncert_km,
-                observation.range_rate_sat_km_s,
-                observation.range_rate_sat_uncert_km_s,
-                observation.comments,
-                observation.data_archive_link,
-                observation.satellite_id.constellation,
+        return create_and_return_csv(observations)
+
+    return HttpResponse()
+
+
+def about(request):
+    template = loader.get_template("repository/about.html")
+    context = {"": ""}
+    return HttpResponse(template.render(context, request))
+
+
+def download_data(request):
+    template = loader.get_template("repository/download-data.html")
+    context = {
+        "recaptcha_public_key": settings.RECAPTCHA_PUBLIC_KEY,
+    }
+    return HttpResponse(template.render(context, request))
+
+
+def data_change(request):
+    if request.method == "POST":
+        form = DataChangeForm(request.POST)
+        if form.is_valid():
+            contact_email = form.cleaned_data["contact_email"]
+            obs_ids = form.cleaned_data["obs_ids"]
+            reason = form.cleaned_data["reason"]
+
+            # Send the confirmation email
+            send_data_change_email(contact_email, obs_ids, reason)
+            return render(
+                request,
+                "repository/data-change.html",
+                {
+                    "msg": "Your request has been submitted. "
+                    "You will receive an email confirmation "
+                    "when your request is reviewed.",
+                    "form": DataChangeForm,
+                },
+            )
+    else:
+        form = DataChangeForm()
+
+    return render(request, "repository/data-change.html", {"form": DataChangeForm})
+
+
+def tools(request):
+    template = loader.get_template("repository/tools.html")
+    context = {"": ""}
+    return HttpResponse(template.render(context, request))
+
+
+def generate_csv(request):
+    if request.method == "POST":
+        form = GenerateCSVForm(request.POST)
+        if form.is_valid():
+
+            # not the exact same header as the observation download header since this
+            # one needs observer_email
+            header = [
+                "satellite_name",
+                "norad_cat_id",
+                "observation_time_utc",
+                "observation_time_uncertainty_sec",
+                "apparent_magnitude",
+                "apparent_magnitude_uncertainty",
+                "observer_latitude_deg",
+                "observer_longitude_deg",
+                "observer_altitude_m",
+                "limiting_magnitude",
+                "instrument",
+                "observing_mode",
+                "observing_filter",
+                "observer_email",
+                "observer_orcid",
+                "satellite_right_ascension_deg",
+                "satellite_declination_deg",
+                "sigma_2_ra",
+                "sigma_ra_sigma_dec",
+                "sigma_2_dec",
+                "range_to_satellite_km",
+                "range_to_satellite_uncertainty_km",
+                "range_rate_of_satellite_km_per_sec",
+                "range_rate_of_satellite_uncertainty_km_per_sec",
+                "comments",
+                "data_archive_link",
+                "mpc_code",
             ]
+
+            # for each line in the output field in the form,
+            # add the line to a new csv file
+            csv_lines = []
+            for line in form.cleaned_data["output"].split("\n"):
+                reader = csv.reader(io.StringIO(line))
+                csv_lines.append(next(reader))
+
+            output = io.StringIO()
+            writer = csv.writer(output)
+            writer.writerow(header)
+            writer.writerows(csv_lines)
+
+            zipfile_name = "score_upload.zip"
+            zipped_file = io.BytesIO()
+
+            with zipfile.ZipFile(zipped_file, "w") as zip:
+                zip.writestr("score_upload.csv", output.getvalue())
+            zipped_file.seek(0)
+
+            response = HttpResponse(zipped_file, content_type="application/zip")
+            response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
+            return response
+
+        else:
+            return render(request, "repository/generate-csv.html", {"form": form})
+    return render(request, "repository/generate-csv.html", {"form": GenerateCSVForm})
+
+
+@csrf_exempt
+def name_id_lookup(request):
+    """
+    This view returns a JSON response containing either the satellite name and NORAD ID
+    based on the provided information, or an error message.
+
+    The function expects a POST request with either a NORAD ID or a satellite name.
+    If a NORAD ID is provided, the function queries the SatChecker API to get the
+    associated satellite name. If a satellite name is provided, the function queries
+    the SatChecker API to get the associated NORAD ID.
+
+    If both the NORAD ID and satellite name are provided, or if neither is provided,
+    the function returns a JSON response with an appropriate error message.
+
+    If the provided NORAD ID or satellite name is not associated with any satellite,
+    the function returns a JSON response with an error message.
+
+    Parameters:
+    request (HttpRequest): The Django request object containing either a NORAD ID
+    or a satellite name.
+
+    Returns:
+    JsonResponse: A JSON response containing either the satellite name and NORAD ID,
+    or an error message.
+    """
+    norad_id = request.POST.get("satellite_id")
+    satellite_name = request.POST.get("satellite_name").upper()
+
+    if norad_id and satellite_name:
+        return JsonResponse(
+            {"error": "Please provide either a NORAD ID or a satellite name."}
         )
 
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(header)
-    writer.writerows(csv_lines)
+    if norad_id:
+        satellite_name = get_satellite_name(norad_id)
+        if satellite_name is None:
+            return JsonResponse(
+                {"error": "No satellite found for the provided NORAD ID."}
+            )
 
-    zipfile_name = "satellite_observations_search_results.zip"
-    zipped_file = io.BytesIO()
+    if satellite_name:
+        norad_id = get_norad_id(satellite_name)
+        if norad_id is None:
+            return JsonResponse(
+                {"error": "No satellite found for the provided satellite name."}
+            )
 
-    with zipfile.ZipFile(zipped_file, "w") as zip:
-        zip.writestr("observations.csv", output.getvalue())
-    zipped_file.seek(0)
-
-    response = HttpResponse(zipped_file, content_type="application/zip")
-
-    response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
-    return response
+    return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
 
 
-def get_stats():
-    stats = namedtuple(
-        "stats",
-        [
-            "satellite_count",
-            "observation_count",
-            "observer_count",
-            "latest_obs_list",
-            "avg_mag",
-        ],
-    )
+@csrf_exempt
+def last_observer_location(request):
+    """
+    This view returns the last location of an observer based on the provided ORCID.
 
-    satellite_count = Satellite.objects.count()
-    observation_count = Observation.objects.count()
-    observer_count = (
-        Observation.objects.values("location_id", "obs_email").distinct().count()
-    )
-    latest_obs_list = Observation.objects.order_by("-date_added")[:7]
-    avg_mag = float(
-        "{:.2f}".format(
-            Observation.objects.aggregate(Avg("apparent_mag"))["apparent_mag__avg"]
+    The ORCID is received from a POST request. If the ORCID is valid and there are
+    observations associated with it, the function returns a JSON response with the
+    latitude, longitude, and altitude of the observer's last location.
+
+    If the ORCID is not valid/complete or there are no observations associated with it,
+    the function returns a JSON response with an error message.
+
+    Parameters:
+    request (HttpRequest): The Django request object.
+
+    Returns:
+    JsonResponse: A JSON response with the observer's last location or an error message.
+    """
+    observer_orcid = request.POST.get("observer_orcid")
+    if len(observer_orcid) != 19:
+        return JsonResponse(
+            {
+                "error": "pass",
+            }
         )
-    )
+    if observer_orcid:
+        observer = (
+            Observation.objects.filter(obs_orc_id__icontains=observer_orcid)
+            .order_by("-date_added")
+            .first()
+        )
+        if observer:
+            return JsonResponse(
+                {
+                    "observer_latitude_deg": observer.location_id.obs_lat_deg,
+                    "observer_longitude_deg": observer.location_id.obs_long_deg,
+                    "observer_altitude_m": observer.location_id.obs_alt_m,
+                }
+            )
 
-    return stats(
-        satellite_count, observation_count, observer_count, latest_obs_list, avg_mag
+    return JsonResponse(
+        {
+            "error": "No observations found for the provided ORCID.",
+        }
     )

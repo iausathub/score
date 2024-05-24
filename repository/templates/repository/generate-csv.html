@@ -1,0 +1,440 @@
+{% extends "repository/base.html" %}
+
+{% block content %}
+
+<div class="container-fluid p-3">
+    <div class="container-sm ">
+        <h2 class="text-center p-2 pb-2">Generate CSV File</h2>
+        <div class="">
+            <p>To generate a CSV file following SCORE's data format, please fill out the required fields marked with an asterisk (*).
+            </p>
+            <p>
+                Click <span class="fw-bold">Add data row</span> to add a new comma separated row with the data provided below.
+                The basic data common to multiple observations (such as observer information) will remain in the form after adding a new row, but fields such as
+                observation date and brightness will be cleared between rows.
+            </p>
+            <p>
+                Click <span class="fw-bold">Download CSV</span> to download the generated CSV file.
+            </p>
+            <p class="alert alert-primary">The advanced data section is optional but encouraged if data is available. Reference positional data from SatChecker will automatically
+            be added to the uploaded observation for comparison.
+            </p>
+        </div>
+        <div class="text-end my-3">
+            <span class="text-danger">*</span> denotes required field
+        </div>
+        <div class="justify-content-center px-5">
+            <form action="{% url 'generate-csv' %}" method="post" enctype="multipart/form-data" id="generate-csv">
+                {% csrf_token %}
+                <div class="row">
+                    <hr />
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="fw-bold fs-5">Observer information</div>
+                        <div class="form-text text-muted">
+                            <p>Please provide your ORCID iD (or a comma separated list of all observer ORCID iDs),
+                                email, and location.</p>
+                            <p>Location will be pre-filled with the last used location with the given ORCID iD, but this
+                                can be changed.</p>
+                            <p class="fw-bold">This fields in this section remain filled out between data rows.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="row">
+                            <div class="col">
+                                <div class="pb-2">
+                                    {{ form.observer_orcid.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.observer_orcid }}
+                                    <div class="text-danger">
+                                        {{ form.observer_orcid.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="pb-2">
+                                    {{ form.observer_email.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.observer_email }}
+                                    <div class="text-danger">
+                                        {{ form.observer_email.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="pb-2">
+                                    {{ form.mpc_code.label_tag}}
+                                    {{ form.mpc_code }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.observer_latitude_deg.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.observer_latitude_deg }}
+                                    <div class="text-danger">
+                                        {{ form.observer_latitude_deg.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.observer_longitude_deg.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.observer_longitude_deg }}
+                                    <div class="text-danger">
+                                        {{ form.observer_longitude_deg.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.observer_altitude_m.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.observer_altitude_m }}
+                                    <div class="text-danger">
+                                        {{ form.observer_altitude_m.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.limiting_magnitude.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.limiting_magnitude }}
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                            </div>
+                            <div class="col align-self-end">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <hr />
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="fw-bold fs-5">Basic data</div>
+                        <div class="form-text text-muted">
+                            <p>Satellite name is optional, but if given, it must match the NORAD ID on the date of the
+                                observation.</p>
+                            <p>For non-detections, please check the box.</p>
+                            <p>If you do not know the NORAD ID to use for the satellite number, you can find it using the
+                                <a href="{% url 'tools' %}">Satellite Name/NORAD ID Lookup</a> tool</p>
+                            <p class="text-black bg-accent2 p-2">The fields in this section will be cleared between data rows - except
+                                <span class="fst-italic">Observation Mode</span>, <span class="fst-italic">Instrument</span>, and <span class="fst-italic">Observation Filter</span>.
+                            </p>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <div class="row">
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.sat_name.label_tag }}
+                                    {{ form.sat_name }}
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.sat_number.label_tag }} <span class="text-danger">*</span>
+                                    {{ form.sat_number }}
+                                    <div class="text-danger">
+                                        {{ form.sat_number.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.obs_mode.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.obs_mode }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col">
+                                <div class=" pb-2">
+                                    {{ form.instrument.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.instrument }}
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class=" pb-2">
+                                    {{ form.filter.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.filter }}
+                                    <div class="form-text text-muted">
+                                        {{ form.filter.help_text }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+
+                            </div>
+                        </div>
+                        <div class="row fw-bold">
+                            Observation Date/Time (UTC)
+                        </div>
+                        <div class="row">
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.obs_date_day.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.obs_date_day }}
+                                    <div class="text-danger">
+                                        {{ form.obs_date_day.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.obs_date_month.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.obs_date_month }}
+                                    <div class="text-danger">
+                                        {{ form.obs_date_month.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.obs_date_year.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.obs_date_year }}
+                                    <div class="text-danger">
+                                        {{ form.obs_date_year.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col">
+                                <div class="pb-2">
+                                    {{ form.obs_date_uncert.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.obs_date_uncert }}
+                                    <div class="text-danger">
+                                        {{ form.obs_date_uncert.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.obs_date_hour.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.obs_date_hour }}
+                                    <div class="text-danger">
+                                        {{ form.obs_date_hour.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.obs_date_min.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.obs_date_min }}
+                                    <div class="text-danger">
+                                        {{ form.obs_date_min.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.obs_date_sec.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.obs_date_sec }}
+                                    <div class="text-danger">
+                                        {{ form.obs_date_sec.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+
+                            </div>
+                        </div>
+                        <div class="row fw-bold">
+                            Brightness
+                        </div>
+                        <div class="row">
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.apparent_mag.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.apparent_mag }}
+                                    <div class="text-danger">
+                                        {{ form.apparent_mag.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.apparent_mag_uncert.label_tag}} <span class="text-danger">*</span>
+                                    {{ form.apparent_mag_uncert }}
+                                    <div class="text-danger">
+                                        {{ form.apparent_mag_uncert.errors }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col align-self-end">
+                                <div class="pb-2">
+                                    {{ form.not_detected }}
+                                    {{ form.not_detected.label}}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col align-self-end">
+                                <div class=" pb-2">
+                                    {{ form.comments.label_tag}}
+                                    {{ form.comments }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row mt-3">
+                    <hr />
+                </div>
+                <div class="row">
+                    <div class="col-sm-4">
+                        <div class="fw-bold fs-5">Advanced data</div>
+                        <div class="form-text text-muted">
+                            <p>This section is optional, but encouraged if data is available.</p>
+                            <p>Reference positional data from SatChecker will also be saved with the observation for
+                                comparison.</p>
+                                <p class="fw-bold">The fields in this section will be cleared between data rows.</p>
+                        </div>
+                    </div>
+                    <div class="col-sm-8">
+                        <button class="btn btn-secondary text-light" type="button" data-bs-toggle="collapse" data-bs-target="#collapseAdvanced" aria-expanded="false" aria-controls="collapseAdvanced">
+                            Show/hide advanced data fields
+                        </button>
+                        <div class="collapse p-4" id="collapseAdvanced">
+                            <div class="">
+                            <div class="card card-body">
+                                <div class="row fw-bold px-2">
+                                    Position - RA/Dec
+                                    <br /><br />
+                                </div>
+                                <div class="row">
+                                    <div class="col align-self-end">
+                                        <div class=" pb-2">
+                                            {{ form.sat_ra_deg.label_tag}}
+                                            {{ form.sat_ra_deg }}
+                                        </div>
+                                    </div>
+                                    <div class="col align-self-end">
+                                        <div class=" pb-2">
+                                            {{ form.sat_dec_deg.label_tag}}
+                                            {{ form.sat_dec_deg }}
+                                        </div>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row fw-bold px-2">
+                                    Position Uncertainty
+                                    <br /><br />
+                                </div>
+                                <div class="row">
+                                    <div class="col ">
+                                        <div class=" pb-2">
+                                            {{ form.sigma_2_ra.label_tag}}
+                                            {{ form.sigma_2_ra }}
+                                            <div class="form-text text-muted">
+                                                {{ form.sigma_2_ra.help_text }}
+                                            </div>
+                                            <div class="text-danger">
+                                                {{ form.sigma_2_ra.errors }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col align-self-end">
+                                        <div class=" pb-2">
+                                            {{ form.sigma_ra_sigma_dec.label_tag}}
+                                            {{ form.sigma_ra_sigma_dec }}
+                                            <div class="form-text text-muted">
+                                                {{ form.sigma_ra_sigma_dec.help_text }}
+                                            </div>
+                                            <div class="text-danger">
+                                                {{ form.sigma_ra_sigma_dec.errors }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col ">
+                                        <div class=" pb-2">
+                                            {{ form.sigma_2_dec.label_tag}}
+                                            {{ form.sigma_2_dec }}
+                                            <div class="form-text text-muted">
+                                                {{ form.sigma_2_dec.help_text }}
+                                            </div>
+                                            <div class="text-danger">
+                                                {{ form.sigma_2_dec.errors }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <br/>
+                                <div class="row fw-bold px-2">
+                                    Range and Range Rate
+                                </div>
+                                <div class="row">
+                                    <div class="col align-self-end">
+                                        <div class=" pb-2">
+                                            {{ form.range_to_sat_km.label_tag}}
+                                            {{ form.range_to_sat_km }}
+                                        </div>
+                                    </div>
+                                    <div class="col align-self-end">
+                                        <div class="pb-2">
+                                            {{ form.range_to_sat_uncert_km.label_tag}}
+                                            {{ form.range_to_sat_uncert_km }}
+                                            <div class="text-danger">
+                                                {{ form.range_to_sat_uncert_km.errors }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="col align-self-end">
+                                        <div class="pb-2">
+                                            {{ form.range_rate_sat_km_s.label_tag}}
+                                            {{ form.range_rate_sat_km_s }}
+                                        </div>
+                                    </div>
+                                    <div class="col align-self-end">
+                                        <div class="pb-2">
+                                            {{ form.range_rate_sat_uncert_km_s.label_tag}}
+                                            {{ form.range_rate_sat_uncert_km_s }}
+                                            <div class="text-danger">
+                                                {{ form.range_rate_sat_uncert_km_s.errors }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="row">
+
+                                    <div class="col align-self-end">
+                                        <div class=" pb-2">
+                                            {{ form.data_archive_link.label_tag}}
+                                            {{ form.data_archive_link }}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="row justify-content-end pb-2">
+                    <div class="col-auto">
+                        <button class="btn btn-primary text-light" id="addDataRow" type="button" disabled>
+                        Add data row
+                        </button>
+                    </div>
+                </div>
+                <div class="row">
+                    <hr />
+                </div>
+                <div class="pb-2">
+                    {{ form.output.label_tag}}
+                    {{ form.output }}
+                </div>
+                <div class="form-group">
+                    <input class="btn btn-primary" type="submit" value="Download CSV" id="download-csv" disabled>
+                    <input class="btn btn-primary" type="reset" value="Clear Output" id="clear-output" disabled>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
