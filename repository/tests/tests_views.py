@@ -1,9 +1,11 @@
-from django.test import Client, TestCase
+import pytest
+from django.test import Client, RequestFactory, TestCase
 from django.urls import reverse
 from django.utils import timezone
 
 from repository.forms import SearchForm
 from repository.models import Location, Observation, Satellite
+from repository.views import generate_csv
 
 
 class TestViews(TestCase):
@@ -81,6 +83,55 @@ class TestViews(TestCase):
         response = self.client.get("/generate-csv")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/generate-csv.html")
+
+    def test_last_observer_location_with_observations(self):
+        response = self.client.post(
+            reverse("last_observer_location"),
+            {
+                "observer_orcid": "0123-4567-8910-1112",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json() == {
+            "observer_latitude_deg": 33,
+            "observer_longitude_deg": -117,
+            "observer_altitude_m": 100,
+        }
+
+    def test_last_observer_location_invalid_orcid(self):
+        response = self.client.post(
+            reverse("last_observer_location"),
+            {
+                "observer_orcid": "0",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json() == {"error": "pass"}
+
+    def test_last_observer_location_no_observations(self):
+        response = self.client.post(
+            reverse("last_observer_location"),
+            {
+                "observer_orcid": "0123-4567-8910-1113",
+            },
+        )
+        assert response.status_code == 200
+        assert response.json() == {
+            "error": "No observations found for the provided ORCID."
+        }
+
+
+@pytest.fixture
+def request_factory():
+    return RequestFactory()
+
+
+@pytest.mark.django_db
+def test_generate_csv_get(request_factory):
+    request = request_factory.get("/generate_csv/")
+    response = generate_csv(request)
+    assert response.status_code == 200
+    assert "form" in str(response.content)
 
 
 class SearchViewTest(TestCase):
