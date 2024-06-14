@@ -101,7 +101,7 @@ def test_get_norad_id(requests_mock):
     requests_mock.get(
         "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/",
         status_code=200,
-        json=[{"norad_id": "12345"}],
+        json=[{"norad_id": "12345", "date_added": "2022-01-01 00:00:00 UTC"}],
     )
 
     result = get_norad_id("TestSat")
