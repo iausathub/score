@@ -4,6 +4,8 @@ Test Django settings for score project.
 
 from socket import gethostbyname, gethostname
 
+from score.settings.base import get_secret  # noqa: F403
+
 from .base import *  # noqa: F403
 
 SECRET_KEY = get_secret("score-secret-key")["secret-key"]  # noqa: F405
@@ -41,3 +43,10 @@ ADMINS = get_secret("score-settings")["admins"]  # noqa: F405
 
 RECAPTCHA_PUBLIC_KEY = get_secret("score-settings")["recaptcha-public"]  # noqa: F405
 RECAPTCHA_PRIVATE_KEY = get_secret("score-settings")["recaptcha-private"]  # noqa: F405
+
+AWS_STORAGE_BUCKET_NAME = get_secret("score-settings")[
+    "static-bucket-name"
+]  # noqa: F405
+AWS_S3_CUSTOM_DOMAIN = "%s.s3.amazonaws.com" % AWS_STORAGE_BUCKET_NAME
+
+STATICFILES_STORAGE = "storages.backends.s3boto3.S3Boto3Storage"
