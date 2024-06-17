@@ -3,6 +3,8 @@ import io
 import json
 import zipfile
 from collections import namedtuple
+from datetime import datetime
+from functools import cmp_to_key
 from typing import Tuple, Union
 
 import requests
@@ -538,6 +540,15 @@ def get_satellite_name(norad_id):
         return None
 
 
+def compare_satellite_results(x, y):
+    if x["date_added"] > y["date_added"]:
+        return -1
+    elif x["date_added"] < y["date_added"]:
+        return 1
+    else:
+        return x["norad_id"] - y["norad_id"]
+
+
 def get_norad_id(satellite_name):
     """
     Queries the SatChecker API to get the NORAD ID of the satellite associated with the
@@ -563,8 +574,17 @@ def get_norad_id(satellite_name):
     try:
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
-        if not response.json():
+        data = response.json()
+        if not data:
             return None
-        return response.json()[0]["norad_id"]
+
+        for item in data:
+            item["date_added"] = datetime.strptime(
+                item["date_added"], "%Y-%m-%d %H:%M:%S %Z"
+            )
+        # Sort by timestamp (descending) and norad_id (ascending)
+        data.sort(key=cmp_to_key(compare_satellite_results))
+        print(data[0]["norad_id"])
+        return data[0]["norad_id"]
     except requests.exceptions.RequestException:
         return None
