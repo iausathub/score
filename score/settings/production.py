@@ -4,16 +4,9 @@ Production Django settings for score project.
 
 from socket import gethostbyname, gethostname
 
-from storages.backends.s3boto3 import S3Boto3Storage
-
 from score.settings.base import get_secret  # noqa: F403
 
 from .base import *  # noqa: F403
-
-
-class StaticStorage(S3Boto3Storage):
-    location = "static"
-
 
 SECRET_KEY = get_secret("score-secret-key")["secret-key"]  # noqa: F405
 SECRET_HEALTH_CHECK_TOKEN = get_secret("score-secret-key")[  # noqa: F405
@@ -50,9 +43,3 @@ ADMINS = get_secret("score-settings")["admins"]  # noqa: F405
 
 RECAPTCHA_PUBLIC_KEY = get_secret("score-settings")["recaptcha-public"]  # noqa: F405
 RECAPTCHA_PRIVATE_KEY = get_secret("score-settings")["recaptcha-private"]  # noqa: F405
-
-
-AWS_STORAGE_BUCKET_NAME = get_secret("score-settings")["static-bucket-name"]
-AWS_S3_CUSTOM_DOMAIN = f"{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com"
-
-STATICFILES_STORAGE = "score.settings.production.StaticStorage"

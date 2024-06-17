@@ -136,7 +136,6 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.0/howto/static-files/
 
 STATIC_URL = "https://d14txihk1czyln.cloudfront.net/static/"
-COMPRESS_URL = STATIC_URL
 STATICFILES_DIRS = [
     BASE_DIR / "static",
 ]
