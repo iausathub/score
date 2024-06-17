@@ -146,9 +146,9 @@ def add_additional_data(
         missing_fields.append("sat_number")
     if not observation_time:
         missing_fields.append("observation_time")
-    if not latitude:
+    if not latitude or not (-90 <= latitude <= 90):
         missing_fields.append("latitude")
-    if not longitude:
+    if not longitude or not (-180 <= longitude <= 180):
         missing_fields.append("longitude")
     if altitude is None:
         missing_fields.append("altitude")
@@ -157,7 +157,7 @@ def add_additional_data(
         missing_fields_str = ", ".join(missing_fields)
         return (
             "Satellite position check failed - check your data. "
-            f"Missing fields: {missing_fields_str}"
+            f"Missing or incorrect fields: {missing_fields_str}"
         )
     obs_time = Time(observation_time, format="isot", scale="utc")
     url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
