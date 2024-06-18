@@ -32,6 +32,7 @@ SatCheckerData = namedtuple(
         "dra_cosdec_deg_s",
         "sat_dec_deg",
         "sat_ra_deg",
+        "satellite_name",
     ],
 )
 
@@ -212,7 +213,17 @@ def add_additional_data(
     if isinstance(is_valid, str):
         if is_valid == "archival data":
             return SatCheckerData(
-                None, None, None, None, None, None, None, None, None, None
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                satellite_name,
             )
         return is_valid
 
@@ -229,6 +240,7 @@ def add_additional_data(
             dra_cosdec_deg_s=round(float(data["DRA_COSDEC-DEG_PER_SEC"]), 7),
             sat_dec_deg=round(float(data["DECLINATION-DEG"]), 7),
             sat_ra_deg=round(float(data["RIGHT_ASCENSION-DEG"]), 7),
+            satellite_name=data["NAME"],
         )
         return satellite_data
 

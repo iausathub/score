@@ -84,7 +84,9 @@ def process_upload(
                 sat_name=column[0],
                 sat_number=column[1],
                 defaults={
-                    "sat_name": column[0],
+                    "sat_name": column[0]
+                    if column[0]
+                    else additional_data.satellite_name,
                     "sat_number": column[1],
                     "date_added": timezone.now(),
                 },
