@@ -41,6 +41,8 @@ def process_upload(
     observation_count = len(data)
     obs_num = 0
     confirmation_email = False
+    obs_error_reference = None
+
     try:
         for column in data:
             # Check for data from the sample CSV file
@@ -56,7 +58,12 @@ def process_upload(
             column[0] = column[0].upper()
             # Check if satellite is above the horizon
             additional_data = add_additional_data(
-                column[0], column[1], column[2], column[6], column[7], column[8]
+                column[0],
+                column[1],
+                column[2],
+                float(column[6]),
+                float(column[7]),
+                float(column[8]),
             )
 
             obs_error_reference = (
@@ -77,7 +84,9 @@ def process_upload(
                 sat_name=column[0],
                 sat_number=column[1],
                 defaults={
-                    "sat_name": column[0],
+                    "sat_name": (
+                        column[0] if column[0] else additional_data.satellite_name
+                    ),
                     "sat_number": column[1],
                     "date_added": timezone.now(),
                 },

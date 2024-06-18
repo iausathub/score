@@ -32,6 +32,7 @@ SatCheckerData = namedtuple(
         "dra_cosdec_deg_s",
         "sat_dec_deg",
         "sat_ra_deg",
+        "satellite_name",
     ],
 )
 
@@ -146,9 +147,9 @@ def add_additional_data(
         missing_fields.append("sat_number")
     if not observation_time:
         missing_fields.append("observation_time")
-    if not latitude:
+    if not latitude or not (-90 <= latitude <= 90):
         missing_fields.append("latitude")
-    if not longitude:
+    if not longitude or not (-180 <= longitude <= 180):
         missing_fields.append("longitude")
     if altitude is None:
         missing_fields.append("altitude")
@@ -157,7 +158,7 @@ def add_additional_data(
         missing_fields_str = ", ".join(missing_fields)
         return (
             "Satellite position check failed - check your data. "
-            f"Missing fields: {missing_fields_str}"
+            f"Missing or incorrect fields: {missing_fields_str}"
         )
     obs_time = Time(observation_time, format="isot", scale="utc")
     url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
@@ -212,7 +213,17 @@ def add_additional_data(
     if isinstance(is_valid, str):
         if is_valid == "archival data":
             return SatCheckerData(
-                None, None, None, None, None, None, None, None, None, None
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                satellite_name,
             )
         return is_valid
 
@@ -229,6 +240,7 @@ def add_additional_data(
             dra_cosdec_deg_s=round(float(data["DRA_COSDEC-DEG_PER_SEC"]), 7),
             sat_dec_deg=round(float(data["DECLINATION-DEG"]), 7),
             sat_ra_deg=round(float(data["RIGHT_ASCENSION-DEG"]), 7),
+            satellite_name=data["NAME"],
         )
         return satellite_data
 
