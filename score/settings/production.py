@@ -20,7 +20,8 @@ ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_TRUSTED_ORIGINS = [
-    get_secret("score-allowed-hosts")["score-prod-alb-csrf"]  # noqa: F405
+    get_secret("score-allowed-hosts")["score-prod-alb-csrf"],  # noqa: F405
+    get_secret("score-allowed-hosts")["redirect-csrf"],  # noqa: F405
 ]  # noqa: F405
 
 # Database
