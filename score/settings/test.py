@@ -2,6 +2,7 @@
 Test Django settings for score project.
 """
 
+import ast
 from socket import gethostbyname, gethostname
 
 from score.settings.base import get_secret  # noqa: F403
@@ -19,9 +20,9 @@ ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-CSRF_TRUSTED_ORIGINS = [
+CSRF_TRUSTED_ORIGINS = ast.literal_eval(
     get_secret("score-allowed-hosts")["score-prod-alb-csrf"]
-]  # noqa: F405
+)  # noqa: F405
 print(CSRF_TRUSTED_ORIGINS)
 
 # Database
