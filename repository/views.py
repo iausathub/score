@@ -39,8 +39,8 @@ def index(request):
     template = loader.get_template("repository/index.html")
     origin = request.META.get("HTTP_ORIGIN")
     referer = request.META.get("HTTP_REFERER")
-    logger.log(f"Origin: {origin}")
-    logger.log(f"Referer: {referer}")
+    logger.log(logging.info, f"Origin: {origin}")
+    logger.log(logging.info, f"Referer: {referer}")
     context = {
         "filename": "",
         "satellite_count": stats.satellite_count,
