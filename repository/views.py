@@ -34,6 +34,10 @@ from .serializers import ObservationSerializer
 logger = logging.getLogger(__name__)
 
 
+def temp_health_check(request):
+    return HttpResponse("OK", status=200)
+
+
 def index(request):
     stats = get_stats()
     template = loader.get_template("repository/index.html")
