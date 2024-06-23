@@ -1,5 +1,5 @@
 from django.conf import settings
-from django.urls import include, path  # noqa: F401
+from django.urls import include, path
 from django.views.generic.base import RedirectView
 
 from . import views
@@ -13,7 +13,7 @@ urlpatterns = [
     path("download-results", views.download_results, name="download-results"),
     path("search", views.search, name="search"),
     path("download-ids", views.download_obs_ids, name="download-obs-ids"),
-    path(r"ht/" + settings.SECRET_HEALTH_CHECK_TOKEN, views.temp_health_check),
+    path(r"ht/" + settings.SECRET_HEALTH_CHECK_TOKEN, include("health_check.urls")),
     path("about", views.about, name="about"),
     path("download", views.download_data, name="download-data"),
     path(
