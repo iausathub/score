@@ -23,7 +23,7 @@ SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_TRUSTED_ORIGINS = ast.literal_eval(
     get_secret("score-allowed-hosts")["score-prod-alb-csrf"]
 )  # noqa: F405
-print(CSRF_TRUSTED_ORIGINS)
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
