@@ -551,8 +551,8 @@ def get_satellite_name(norad_id):
             return None
         data = response.json()
         for item in data:
-            if item["is_current_version"] == "true":
-                return data[0]["name"]
+            if item["is_current_version"] is True:
+                return item["name"]
     except requests.exceptions.RequestException:
         return None
 
@@ -587,8 +587,8 @@ def get_norad_id(satellite_name):
             return None
 
         for item in data:
-            if item["is_current_version"] == "true":
-                return data[0]["norad_id"]
+            if item["is_current_version"] is True:
+                return item["norad_id"]
 
     except requests.exceptions.RequestException:
         return None

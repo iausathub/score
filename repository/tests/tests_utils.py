@@ -128,7 +128,7 @@ def test_get_norad_id(requests_mock):
             {
                 "norad_id": "12345",
                 "date_added": "2022-01-01 00:00:00 UTC",
-                "is_current_version": "true",
+                "is_current_version": True,
             }
         ],
     )
@@ -184,7 +184,7 @@ def test_get_satellite_name(requests_mock):
         json=[
             {
                 "name": "TestSat",
-                "is_current_version": "true",
+                "is_current_version": True,
             }
         ],
     )
