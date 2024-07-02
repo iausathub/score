@@ -3,8 +3,6 @@ import io
 import json
 import zipfile
 from collections import namedtuple
-from datetime import datetime
-from functools import cmp_to_key
 from typing import Tuple, Union
 
 import requests
@@ -263,16 +261,19 @@ def validate_position(
     """
     if response.status_code != 200:
         return "Satellite position check failed - verify uploaded data is correct."
-    if not response.json():
+    response_data = response.json()
+    if not response_data.get("data"):
         return "Satellite with this ID not visible at this time and location"
 
+    satellite_info = response_data["data"][0]
     obs_time = Time(obs_time, format="isot")
-    tle_date = Time(response.json()[0]["TLE-DATE"], format="iso")
+    date_str = satellite_info[6].replace(" UTC", "")
+    tle_date = Time(date_str, format="iso", scale="utc")
     if (tle_date - obs_time).jd > 14:
         return "archival data"
-    if satellite_name and response.json()[0]["NAME"] != satellite_name:
+    if satellite_name and satellite_info[0] != satellite_name:
         return "Satellite name and number do not match"
-    if float(response.json()[0]["ALTITUDE-DEG"]) < -5:
+    if float(satellite_info[9]) < -5:
         return "Satellite below horizon at this time and location"
 
     return True
@@ -545,20 +546,15 @@ def get_satellite_name(norad_id):
     try:
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
+
         if not response.json() or response.json()[0] == []:
             return None
-        return response.json()[0]["name"]
+        data = response.json()
+        for item in data:
+            if item["is_current_version"] == "true":
+                return data[0]["name"]
     except requests.exceptions.RequestException:
         return None
-
-
-def compare_satellite_results(x, y):
-    if x["date_added"] > y["date_added"]:
-        return -1
-    elif x["date_added"] < y["date_added"]:
-        return 1
-    else:
-        return x["norad_id"] - y["norad_id"]
 
 
 def get_norad_id(satellite_name):
@@ -591,12 +587,8 @@ def get_norad_id(satellite_name):
             return None
 
         for item in data:
-            item["date_added"] = datetime.strptime(
-                item["date_added"], "%Y-%m-%d %H:%M:%S %Z"
-            )
-        # Sort by timestamp (descending) and norad_id (ascending)
-        data.sort(key=cmp_to_key(compare_satellite_results))
-        print(data[0]["norad_id"])
-        return data[0]["norad_id"]
+            if item["is_current_version"] == "true":
+                return data[0]["norad_id"]
+
     except requests.exceptions.RequestException:
         return None
