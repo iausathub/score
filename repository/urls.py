@@ -24,5 +24,8 @@ urlpatterns = [
     path("data-change", views.data_change, name="data-change"),
     path("tools", views.tools, name="tools"),
     path("name-id-lookup", views.name_id_lookup, name="name-id-lookup"),
+    path(
+        "satellite-pos-lookup", views.satellite_pos_lookup, name="satellite-pos-lookup"
+    ),
     path("generate-csv", views.generate_csv, name="generate-csv"),
 ]

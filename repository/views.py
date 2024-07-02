@@ -6,6 +6,7 @@ import zipfile
 from typing import Union
 
 import requests
+from astropy.time import Time
 from celery.result import AsyncResult
 from django.conf import settings
 from django.http import HttpResponse, JsonResponse
@@ -32,6 +33,10 @@ from .models import Observation
 from .serializers import ObservationSerializer
 
 logger = logging.getLogger(__name__)
+
+
+def temp_health_check(request):
+    return HttpResponse("OK", status=200)
 
 
 def index(request):
@@ -461,10 +466,12 @@ def name_id_lookup(request):
 
     if norad_id:
         satellite_name = get_satellite_name(norad_id)
+
         if satellite_name is None:
             return JsonResponse(
                 {"error": "No satellite found for the provided NORAD ID."}
             )
+        return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
 
     if satellite_name:
         norad_id = get_norad_id(satellite_name)
@@ -472,8 +479,144 @@ def name_id_lookup(request):
             return JsonResponse(
                 {"error": "No satellite found for the provided satellite name."}
             )
+        return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
 
-    return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
+
+@csrf_exempt
+def satellite_pos_lookup(request):
+    """
+    This view returns a JSON response containing the satellite's position and other
+    details based on the provided observer's location and time, or an error message.
+
+    The function expects a POST request with the observer's latitude, longitude,
+    altitude, and the date and time of observation. It also requires either a NORAD
+    ID or a satellite name.
+
+    If a NORAD ID is provided, the function queries the SatChecker API to get the
+    associated satellite's position. If a satellite name is provided, the function
+    queries the SatChecker API to get the associated satellite's position.
+
+    If the provided NORAD ID or satellite name is not associated with any satellite,
+    the function returns a JSON response with an error message.
+
+    Parameters:
+    request (HttpRequest): The Django request object containing the observer's
+    location, date and time of observation, and either a NORAD ID or a satellite name.
+
+    Returns:
+    JsonResponse: A JSON response containing either the satellite's position and other
+    details, or an error message.
+    """
+    observer_latitude = request.POST.get("obs_lat")
+    observer_longitude = request.POST.get("obs_long")
+    observer_altitude = request.POST.get("obs_alt")
+    day = request.POST.get("day")
+    month = request.POST.get("month")
+    year = request.POST.get("year")
+    hour = request.POST.get("hour")
+    minutes = request.POST.get("minutes")
+    seconds = request.POST.get("seconds")
+    norad_id = request.POST.get("satellite_id")
+    satellite_name = request.POST.get("satellite_name")
+
+    # Check if any of the values are empty
+    if (
+        not observer_latitude
+        or not observer_longitude
+        or not observer_altitude
+        or not day
+        or not month
+        or not year
+        or not hour
+        or not minutes
+        or not seconds
+    ):
+        return JsonResponse({"error": "One or more required fields are empty."})
+
+    # Convert day, month, year, hour, and minutes to integers
+    day = int(day)
+    month = int(month)
+    year = int(year)
+    hour = int(hour)
+    minutes = int(minutes)
+
+    if norad_id and satellite_name:
+        return JsonResponse(
+            {"error": "Please provide either a NORAD ID or a satellite name."}
+        )
+
+    # combine date and time to make a julian date with astropy
+    date_time_str = f"{year}-{month:02d}-{day:02d}T{hour:02d}:{minutes:02d}:{seconds}"
+
+    julian_date = Time(date_time_str, format="isot", scale="utc").jd
+
+    response = None
+    if norad_id:
+        url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
+        params = {
+            "catalog": norad_id,
+            "latitude": observer_latitude,
+            "longitude": observer_longitude,
+            "elevation": observer_altitude,
+            "julian_date": julian_date,
+            "min_altitude": -90,
+        }
+        try:
+            response = requests.get(url, params=params, timeout=10)
+        except requests.exceptions.RequestException:
+            return "Satellite position check failed - try again later."
+    else:
+        url = "https://cps.iau.org/tools/satchecker/api/ephemeris/name/"
+        params = {
+            "name": satellite_name,
+            "latitude": observer_latitude,
+            "longitude": observer_longitude,
+            "elevation": observer_altitude,
+            "julian_date": julian_date,
+            "min_altitude": -90,
+        }
+        try:
+            response = requests.get(url, params=params, timeout=10)
+        except requests.exceptions.RequestException:
+            return "Satellite position check failed - try again later."
+
+    if response.status_code != 200 or not response.json():
+        return JsonResponse(
+            {
+                "error": "Satellite position check failed"
+                " - check your input and try again."
+            }
+        )
+
+    response_json = response.json()
+    if "data" not in response_json or not response_json["data"]:
+        return JsonResponse({"error": "No satellite data found."})
+
+    satellite_data = response_json["data"][0]
+    fields = response_json.get("fields", [])
+
+    # Mapping fields to their values for easier access
+    data_dict = dict(zip(fields, satellite_data))
+
+    name = data_dict.get("name")
+    id = data_dict.get("catalog_id")
+    alt = round(data_dict.get("altitude_deg", 0), 6)
+    az = round(data_dict.get("azimuth_deg", 0), 6)
+    ra = round(data_dict.get("right_ascension_deg", 0), 6)
+    dec = round(data_dict.get("declination_deg", 0), 6)
+    tle_retrieval_date = data_dict.get("tle_date")
+
+    return JsonResponse(
+        {
+            "satellite_name": name,
+            "norad_id": id,
+            "altitude": alt,
+            "azimuth": az,
+            "ra": ra,
+            "dec": dec,
+            "tle_date": tle_retrieval_date,
+        }
+    )
 
 
 @csrf_exempt

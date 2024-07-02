@@ -21,7 +21,7 @@ class Satellite(models.Model):
     date_added = models.DateTimeField("date added", default=timezone.now)
 
     def __str__(self):
-        return self.sat_name
+        return str(self.sat_number) + ", " + self.sat_name
 
     class Meta:
         db_table = "satellite"

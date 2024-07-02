@@ -17,7 +17,7 @@ class SatelliteTest(TestCase):
     def test_satellite_creation(self):
         sat = self.create_satellite()
         self.assertTrue(isinstance(sat, Satellite))
-        self.assertEqual(sat.__str__(), sat.sat_name)
+        self.assertEqual(sat.__str__(), str(sat.sat_number) + ", " + sat.sat_name)
 
     def test_satellite_validation(self):
         # field is required

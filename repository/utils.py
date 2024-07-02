@@ -30,6 +30,7 @@ SatCheckerData = namedtuple(
         "dra_cosdec_deg_s",
         "sat_dec_deg",
         "sat_ra_deg",
+        "satellite_name",
     ],
 )
 
@@ -144,9 +145,9 @@ def add_additional_data(
         missing_fields.append("sat_number")
     if not observation_time:
         missing_fields.append("observation_time")
-    if not latitude:
+    if not latitude or not (-90 <= latitude <= 90):
         missing_fields.append("latitude")
-    if not longitude:
+    if not longitude or not (-180 <= longitude <= 180):
         missing_fields.append("longitude")
     if altitude is None:
         missing_fields.append("altitude")
@@ -155,7 +156,7 @@ def add_additional_data(
         missing_fields_str = ", ".join(missing_fields)
         return (
             "Satellite position check failed - check your data. "
-            f"Missing fields: {missing_fields_str}"
+            f"Missing or incorrect fields: {missing_fields_str}"
         )
     obs_time = Time(observation_time, format="isot", scale="utc")
     url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
@@ -210,7 +211,17 @@ def add_additional_data(
     if isinstance(is_valid, str):
         if is_valid == "archival data":
             return SatCheckerData(
-                None, None, None, None, None, None, None, None, None, None
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                satellite_name,
             )
         return is_valid
 
@@ -227,6 +238,7 @@ def add_additional_data(
             dra_cosdec_deg_s=round(float(data["DRA_COSDEC-DEG_PER_SEC"]), 7),
             sat_dec_deg=round(float(data["DECLINATION-DEG"]), 7),
             sat_ra_deg=round(float(data["RIGHT_ASCENSION-DEG"]), 7),
+            satellite_name=data["NAME"],
         )
         return satellite_data
 
@@ -249,16 +261,19 @@ def validate_position(
     """
     if response.status_code != 200:
         return "Satellite position check failed - verify uploaded data is correct."
-    if not response.json():
+    response_data = response.json()
+    if not response_data.get("data"):
         return "Satellite with this ID not visible at this time and location"
 
+    satellite_info = response_data["data"][0]
     obs_time = Time(obs_time, format="isot")
-    tle_date = Time(response.json()[0]["TLE-DATE"], format="iso")
+    date_str = satellite_info[6].replace(" UTC", "")
+    tle_date = Time(date_str, format="iso", scale="utc")
     if (tle_date - obs_time).jd > 14:
         return "archival data"
-    if satellite_name and response.json()[0]["NAME"] != satellite_name:
+    if satellite_name and satellite_info[0] != satellite_name:
         return "Satellite name and number do not match"
-    if float(response.json()[0]["ALTITUDE-DEG"]) < -5:
+    if float(satellite_info[9]) < -5:
         return "Satellite below horizon at this time and location"
 
     return True
@@ -531,9 +546,13 @@ def get_satellite_name(norad_id):
     try:
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
+
         if not response.json() or response.json()[0] == []:
             return None
-        return response.json()[0]["name"]
+        data = response.json()
+        for item in data:
+            if item["is_current_version"] is True:
+                return item["name"]
     except requests.exceptions.RequestException:
         return None
 
@@ -563,8 +582,13 @@ def get_norad_id(satellite_name):
     try:
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
-        if not response.json():
+        data = response.json()
+        if not data:
             return None
-        return response.json()[0]["norad_id"]
+
+        for item in data:
+            if item["is_current_version"] is True:
+                return item["norad_id"]
+
     except requests.exceptions.RequestException:
         return None

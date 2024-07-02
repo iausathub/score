@@ -41,7 +41,7 @@
               <div class="col">
                   Optional fields should be left blank if not applicable. Please avoid using "n/a", none, 0, or other similar values.<br />
                   All columns must be used in the file uploaded for submission - leave a column blank if there is no data.<br/>
-                  For more information, refer to the <a class="link-info" href="{% url 'data-format' %}">data format</a> page.
+                  For more information, refer to the <a class="link-dark" href="{% url 'data-format' %}">data format</a> page.
               </div>
             </div>
           </div>
@@ -63,20 +63,20 @@
             <div class="row">
               {% if task_id %}
               <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv"
-                required="required" disabled="true">
+                required="required" disabled="true" aria-label="File upload control disabled">
               {% else %}
               <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv"
-                required="required">
+                required="required" aria-label="File upload control">
               {% endif %}
             </div>
             <div class="row d-inline-flex flex-row pt-3 align-items-center ">
               <div class="col">
                 {% if task_id %}
                 <input type="submit" class="btn btn-primary" value="Upload" name="submit_obs" id="upload_btn"
-                  disabled="true">
+                  disabled="true" aria-label="Upload button disabled">
                 {% else %}
                 <input type="submit" class="btn btn-primary" value="Upload" onclick="this.form.submit(); this.disabled=true;
-                            return true;" name="submit_obs" id="upload_btn">
+                            return true;" name="submit_obs" id="upload_btn" aria-label="Upload button">
                 {% endif %}
 
               </div>
@@ -89,7 +89,7 @@
             </div>
           </div>
           <div class='progress-wrapper'>
-            <div id='progress-bar' class='progress-bar progress-bar-striped' role='progressbar'>&nbsp;</div>
+            <div id='progress-bar' class='progress-bar progress-bar-striped' role='progressbar' aria-label="Progress bar">&nbsp;</div>
           </div>
           <div id="celery-result"></div>
 
