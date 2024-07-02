@@ -462,10 +462,12 @@ def name_id_lookup(request):
 
     if norad_id:
         satellite_name = get_satellite_name(norad_id)
+
         if satellite_name is None:
             return JsonResponse(
                 {"error": "No satellite found for the provided NORAD ID."}
             )
+        return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
 
     if satellite_name:
         norad_id = get_norad_id(satellite_name)
@@ -473,8 +475,7 @@ def name_id_lookup(request):
             return JsonResponse(
                 {"error": "No satellite found for the provided satellite name."}
             )
-
-    return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
+        return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
 
 
 @csrf_exempt
