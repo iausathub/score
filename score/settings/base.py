@@ -2,14 +2,44 @@
 Base Django settings for score project.
 """
 
-import json
+import json, os
 from pathlib import Path
 
 import boto3
 from botocore.exceptions import ClientError
 
 
+def get_secret_env(secret_name):
+
+    if secret_name == "score_prod_db":
+        score_prod_db = {
+            "NAME": os.environ.get("DB_NAME"),
+            "USER": os.environ.get("DB_USERNAME"),
+            "PASSWORD": os.environ.get("DB_PASSWORD"),
+            "HOST": os.environ.get("DB_HOST"),
+            "PORT": os.environ.get("DB_PORT"),
+        }
+
+        return score_prod_db
+
+    if secret_name == "score-settings":
+        score_settings = {
+            "recaptcha-public": os.environ.get("RECAPTCHA_PUBLIC_KEY"),
+            "recaptcha-private": os.environ.get("RECAPTCHA_PRIVATE_KEY"),
+            "server-email": os.environ.get("EMAIL_HOST_USER"),
+            "temp-gmail-pw": os.environ.get("EMAIL_HOST_PASSWORD"),
+            "admins": os.environ.get("ADMINS"),
+        }
+
+        return score_settings
+
+
 def get_secret(secret_name):
+
+    # conditionally get secret from environment variables if they exist
+    if os.environ.get("DB_NAME") is not None:
+        return get_secret_env(secret_name)
+
     region_name = "us-east-1"
 
     # Create a Secrets Manager client
