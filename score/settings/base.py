@@ -33,7 +33,7 @@ def get_secret_env(secret_name):
 
         return score_settings
 
-    if secret_name == "score-secret_key":
+    if secret_name == "score-secret-key":
         score_secret_key = {
             "secret-key": os.environ.get("SECRET_KEY"),
             "health-check-token": os.environ.get("SECRET_HEALTH_CHECK_TOKEN"),
