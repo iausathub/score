@@ -2,7 +2,7 @@
 Production Django settings for score project.
 """
 
-import ast
+import ast, os
 from socket import gethostbyname, gethostname
 
 from score.settings.base import get_secret  # noqa: F403
@@ -37,6 +37,7 @@ DATABASES = {
         "PORT": get_secret("score_prod_db")["port"],  # noqa: F405
     },
 }
+
 
 EMAIL_HOST_USER = get_secret("score-settings")["server-email"]  # noqa: F405
 EMAIL_HOST_PASSWORD = get_secret("score-settings")["temp-gmail-pw"]  # noqa: F405
