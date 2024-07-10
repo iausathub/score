@@ -33,6 +33,23 @@ def get_secret_env(secret_name):
 
         return score_settings
 
+    if secret_name == "score-secret_key":
+        score_secret_key = {
+            "secret-key": os.environ.get("SECRET_KEY"),
+            "health-check-token": os.environ.get("SECRET_HEALTH_CHECK_TOKEN"),
+            "admin-token": os.environ.get("SECRET_ADMIN_TOKEN"),
+        }
+
+        return score_secret_key
+
+    if secret_name == "score-allowed_hosts":
+        score_allowed_hosts = {
+            "score-prod-alb": os.environ.get("ALLOWED_HOSTS"),
+            "score-prod-alb-csrf": os.environ.get("CSRF_TRUSTED_ORIGINS"),
+        }
+
+        return score_allowed_hosts
+
 
 def get_secret(secret_name):
 
