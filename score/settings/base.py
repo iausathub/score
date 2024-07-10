@@ -54,7 +54,7 @@ def get_secret_env(secret_name):
 def get_secret(secret_name):
 
     # conditionally get secret from environment variables if they exist
-    if os.environ.get("DB_NAME") is not None:
+    if os.environ.get("SECRET_KEY") is not None:
         return get_secret_env(secret_name)
 
     region_name = "us-east-1"
