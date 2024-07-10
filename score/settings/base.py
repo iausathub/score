@@ -13,11 +13,11 @@ def get_secret_env(secret_name):
 
     if secret_name == "score_prod_db":
         score_prod_db = {
-            "NAME": os.environ.get("DB_NAME"),
-            "USER": os.environ.get("DB_USERNAME"),
-            "PASSWORD": os.environ.get("DB_PASSWORD"),
-            "HOST": os.environ.get("DB_HOST"),
-            "PORT": os.environ.get("DB_PORT"),
+            "dbname": os.environ.get("DB_NAME"),
+            "username": os.environ.get("DB_USERNAME"),
+            "password": os.environ.get("DB_PASSWORD"),
+            "host": os.environ.get("DB_HOST"),
+            "port": os.environ.get("DB_PORT"),
         }
 
         return score_prod_db
