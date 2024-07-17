@@ -226,19 +226,23 @@ def add_additional_data(
         return is_valid
 
     if is_valid and r.json():
-        data = r.json()[0]
+        satellite_data = r.json()["data"][0]
+        fields = r.json().get("fields", [])
+
+        # Mapping fields to their values for easier access
+        data_dict = dict(zip(fields, satellite_data))
         satellite_data = SatCheckerData(
-            phase_angle=round(float(data["PHASE_ANGLE-DEG"]), 7),
-            range_to_sat=round(float(data["RANGE-KM"]), 7),
-            range_rate=round(float(data["RANGE_RATE-KM_PER_SEC"]), 7),
-            illuminated=data["ILLUMINATED"],
-            alt_deg=round(float(data["ALTITUDE-DEG"]), 7),
-            az_deg=round(float(data["AZIMUTH-DEG"]), 7),
-            ddec_deg_s=round(float(data["DDEC-DEG_PER_SEC"]), 7),
-            dra_cosdec_deg_s=round(float(data["DRA_COSDEC-DEG_PER_SEC"]), 7),
-            sat_dec_deg=round(float(data["DECLINATION-DEG"]), 7),
-            sat_ra_deg=round(float(data["RIGHT_ASCENSION-DEG"]), 7),
-            satellite_name=data["NAME"],
+            phase_angle=round(data_dict.get("phase_angle_deg", 0), 7),
+            range_to_sat=round(data_dict.get("range_km", 0), 7),
+            range_rate=round(data_dict.get("range_rate_km_per_sec", 0), 7),
+            illuminated=data_dict.get("illuminated"),
+            alt_deg=round(data_dict.get("altitude_deg", 0), 7),
+            az_deg=round(data_dict.get("azimuth_deg", 0), 7),
+            ddec_deg_s=round(data_dict.get("ddec_deg_per_sec", 0), 7),
+            dra_cosdec_deg_s=round(data_dict.get("dra_cosdec_deg_per_sec", 0), 7),
+            sat_dec_deg=round(data_dict.get("declination_deg", 0), 7),
+            sat_ra_deg=round(data_dict.get("right_ascension_deg", 0), 7),
+            satellite_name=data_dict.get("name"),
         )
         return satellite_data
 
