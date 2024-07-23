@@ -280,8 +280,9 @@ crossorigin=""/>
         $(resultElement).append(
           $('<br>')
         );
+        var formattedResult = result.replace(/\n/g, '<br>');
         $(resultElement).append(
-          $('<p>').text(result)
+          $('<p>').html(formattedResult)
         );
       }
     }
@@ -289,7 +290,7 @@ crossorigin=""/>
     function customError(progressBarElement, progressBarMessageElement) {
       progressBarElement.style.backgroundColor = '#c21e1b';
       progressBarMessageElement.innerHTML = 'Upload failed - check the error and try again.';
-}
+    }
 
     $(function () {
       // Initialize the progress bar
