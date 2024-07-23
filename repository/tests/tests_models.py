@@ -192,24 +192,24 @@ class ObservationTest(TestCase):
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(obs_time_utc=None)
+                obs = self.create_observation(obs_time_utc=None, sat_number=123)
             self.assertIn("This field cannot be null", str(error.exception))
 
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(obs_time_utc="")
+                obs = self.create_observation(obs_time_utc="", sat_number=1)
             self.assertIn("value has an invalid format", str(error.exception))
 
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(obs_time_uncert_sec=None)
+                obs = self.create_observation(obs_time_uncert_sec=None, sat_number=2)
             self.assertIn("This field cannot be null", str(error.exception))
 
         # field must be positive
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(obs_time_uncert_sec=-1)
+            obs = self.create_observation(obs_time_uncert_sec=-1, sat_number=3)
             obs.full_clean()
         self.assertIn(
             "Ensure this value is greater than or equal to 0.", str(error.exception)
@@ -217,7 +217,7 @@ class ObservationTest(TestCase):
 
         # field is required
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(obs_email="")
+            obs = self.create_observation(obs_email="", sat_number=4)
             print(error.exception)
             obs.full_clean()
         self.assertIn("This field cannot be blank.", str(error.exception))
@@ -225,20 +225,22 @@ class ObservationTest(TestCase):
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(obs_email=None)
+                obs = self.create_observation(obs_email=None, sat_number=5)
                 print(error.exception)
             self.assertIn("This field cannot be null", str(error.exception))
 
         # field must be valid email
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(obs_email="test")
+            obs = self.create_observation(obs_email="test", sat_number=6)
             obs.full_clean()
         self.assertIn("Enter a valid email address", str(error.exception))
 
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(apparent_mag=3, apparent_mag_uncert=None)
+                obs = self.create_observation(
+                    apparent_mag=3, apparent_mag_uncert=None, sat_number=7
+                )
             self.assertIn(
                 "Apparent magnitude uncertainty is required if apparent magnitude is provided.",  # noqa: E501
                 str(error.exception),
@@ -246,7 +248,7 @@ class ObservationTest(TestCase):
 
         # field must be positive
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(apparent_mag_uncert=-1)
+            obs = self.create_observation(apparent_mag_uncert=-1, sat_number=8)
             obs.full_clean()
         self.assertIn(
             "Ensure this value is greater than or equal to 0.", str(error.exception)
@@ -254,19 +256,19 @@ class ObservationTest(TestCase):
 
         # field is required
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(obs_mode="")
+            obs = self.create_observation(obs_mode="", sat_number=9)
             obs.full_clean()
         self.assertIn("This field cannot be blank", str(error.exception))
 
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(obs_mode=None)
+                obs = self.create_observation(obs_mode=None, sat_number=10)
             self.assertIn("This field cannot be null", str(error.exception))
 
         # field is required
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(obs_mode="test")
+            obs = self.create_observation(obs_mode="test", sat_number=11)
             obs.full_clean()
         self.assertIn(
             "Observation mode must be one of the following", str(error.exception)
@@ -274,49 +276,49 @@ class ObservationTest(TestCase):
 
         # field is required
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(obs_filter="")
+            obs = self.create_observation(obs_filter="", sat_number=12)
             obs.full_clean()
         self.assertIn("This field cannot be blank", str(error.exception))
 
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(obs_filter=None)
+                obs = self.create_observation(obs_filter=None, sat_number=13)
             self.assertIn("This field cannot be null", str(error.exception))
 
         # field is required
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(instrument="")
+            obs = self.create_observation(instrument="", sat_number=14)
             obs.full_clean()
         self.assertIn("This field cannot be blank", str(error.exception))
 
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(instrument=None)
+                obs = self.create_observation(instrument=None, sat_number=15)
             self.assertIn("This field cannot be null", str(error.exception))
 
         # field is required
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(obs_orc_id=[""])
+            obs = self.create_observation(obs_orc_id=[""], sat_number=16)
             obs.full_clean()
         self.assertIn("ORCID cannot be empty", str(error.exception))
 
         # field is required
         with transaction.atomic():
             with self.assertRaises(ValidationError) as error:
-                obs = self.create_observation(obs_orc_id=None)
+                obs = self.create_observation(obs_orc_id=None, sat_number=17)
             self.assertIn("This field cannot be null.", str(error.exception))
 
         # field must be valid ORCID
         with self.assertRaises(TypeError) as error:
-            obs = self.create_observation(obs_orc_id=1)
+            obs = self.create_observation(obs_orc_id=1, sat_number=18)
             obs.full_clean()
         self.assertIn("is not iterable", str(error.exception))
 
         # field must be valid ORCID
         with self.assertRaises(ValidationError) as error:
-            obs = self.create_observation(obs_orc_id=["n/a"])
+            obs = self.create_observation(obs_orc_id=["n/a"], sat_number=19)
             obs.full_clean()
         self.assertIn("not a valid ORCID", str(error.exception))
 
