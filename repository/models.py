@@ -25,6 +25,7 @@ class Satellite(models.Model):
 
     class Meta:
         db_table = "satellite"
+        unique_together = ("sat_name", "sat_number")
 
     def clean(self):
         if not self.sat_number:

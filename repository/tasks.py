@@ -52,7 +52,9 @@ def process_upload(
                 )
 
             if len(column) != 27:
-                raise UploadError("Incorrect number of fields in csv file.")
+                raise UploadError(
+                    f"Incorrect number of fields in csv file: expected 27, got {len(column)}."  # noqa: E501
+                )
 
             # Satellite names are always upper case for some reason
             column[0] = column[0].upper()
@@ -200,14 +202,25 @@ def process_upload(
         raise UploadError(error_message) from e
 
     except ValidationError as e:
-        if len(e.messages) > 1:
-            raise UploadError(e.messages[1]) from e
-
+        if hasattr(e, "message_dict"):
+            error_message = ""
+            for field, messages in e.message_dict.items():
+                if field == "__all__":
+                    error_message += "Notes: "
+                else:
+                    error_message += f"Field '{field}':"
+                for message in messages:
+                    error_message += f" {message}"
+                error_message += "\n"
+            raise UploadError(error_message) from e
         else:
-            message_text = ""
-            for key in e.message_dict.keys():
-                message_text += f"{key}: {e.message_dict[key][0]}\n"
-            raise UploadError(message_text) from e
+            if len(e.messages) > 1:
+                error_message = ""
+                for message in e.messages:
+                    error_message += message + "\n"
+                raise UploadError(error_message) from e
+            else:
+                raise UploadError(e.messages[0]) from e
 
     except Exception as e:
         raise UploadError(e) from e
