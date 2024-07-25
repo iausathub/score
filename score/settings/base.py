@@ -33,6 +33,7 @@ def get_secret_env(secret_name):
 
         return score_settings
 
+<<<<<<< HEAD
     if secret_name == "score-secret-key":
         score_secret_key = {
             "secret-key": os.environ.get("SECRET_KEY"),
@@ -42,6 +43,8 @@ def get_secret_env(secret_name):
 
         return score_secret_key
 
+=======
+>>>>>>> 82bb4cb (fix syntax error)
     if secret_name == "score-allowed-hosts":
         score_allowed_hosts = {
             "score-prod-alb-csrf": os.environ.get("CSRF_TRUSTED_ORIGINS"),
