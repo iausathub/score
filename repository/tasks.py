@@ -82,6 +82,15 @@ def process_upload(
                 )
                 raise UploadError(error_message + " - " + obs_error_reference)
 
+            try:
+                obs_lat_deg = float(column[6])
+                obs_long_deg = float(column[7])
+                obs_alt_m = float(column[8])
+            except ValueError as e:
+                raise UploadError(
+                    f"Invalid value: {str(e)} - {obs_error_reference}"
+                ) from e
+
             satellite, sat_created = Satellite.objects.get_or_create(
                 sat_name=column[0],
                 sat_number=column[1],
@@ -94,13 +103,13 @@ def process_upload(
                 },
             )
             location, loc_created = Location.objects.get_or_create(
-                obs_lat_deg=column[6],
-                obs_long_deg=column[7],
-                obs_alt_m=column[8],
+                obs_lat_deg=obs_lat_deg,
+                obs_long_deg=obs_long_deg,
+                obs_alt_m=obs_alt_m,
                 defaults={
-                    "obs_lat_deg": column[6],
-                    "obs_long_deg": column[7],
-                    "obs_alt_m": column[8],
+                    "obs_lat_deg": obs_lat_deg,
+                    "obs_long_deg": obs_long_deg,
+                    "obs_alt_m": obs_alt_m,
                     "date_added": timezone.now(),
                 },
             )
