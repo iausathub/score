@@ -487,11 +487,15 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
         if "," in orc_id:
             orc_id = f'"{orc_id}"'
 
+        # format date/time to match upload format
+        obs_time_utc = observation.obs_time_utc.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        obs_time_utc = obs_time_utc[:-4] + "Z"  # Trim to 3 digits
+
         csv_lines.append(
             [
                 observation.satellite_id.sat_name,
                 observation.satellite_id.sat_number,
-                observation.obs_time_utc,
+                obs_time_utc,
                 observation.obs_time_uncert_sec,
                 observation.apparent_mag,
                 observation.apparent_mag_uncert,
