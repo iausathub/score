@@ -475,6 +475,18 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
 
     csv_lines = []
     for observation in observation_list:
+        # format ORC ID string properly - remove brackets and only have quotes around
+        # the field if there is more than one ORCID separated by commas (otherwise no
+        # quotes)
+
+        if isinstance(observation.obs_orc_id, list):
+            orc_id = ", ".join(observation.obs_orc_id)
+        else:
+            orc_id = observation.obs_orc_id.replace("[", "").replace("]", "")
+
+        if "," in orc_id:
+            orc_id = f'"{orc_id}"'
+
         csv_lines.append(
             [
                 observation.satellite_id.sat_name,
@@ -490,7 +502,7 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
                 observation.instrument,
                 observation.obs_mode,
                 observation.obs_filter,
-                observation.obs_orc_id,
+                orc_id,
                 observation.sat_ra_deg,
                 observation.sat_dec_deg,
                 observation.sigma_2_ra,
