@@ -446,6 +446,16 @@ def get_csv_header() -> list[str]:
         "comments",
         "data_archive_link",
         "mpc_code",
+        "sat_ra_deg_satchecker",
+        "sat_dec_deg_satchecker",
+        "range_to_sat_km_satchecker",
+        "range_rate_sat_km_s_satchecker",
+        "ddec_deg_s_satchecker",
+        "dra_cosdec_deg_s_satchecker",
+        "phase_angle_deg_satchecker",
+        "alt_deg_satchecker",
+        "az_deg_satchecker",
+        "illuminated",
     ]
     return header
 
@@ -519,6 +529,16 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
                 observation.comments,
                 observation.data_archive_link,
                 observation.mpc_code,
+                observation.sat_ra_deg_satchecker,
+                observation.sat_dec_deg_satchecker,
+                observation.range_to_sat_km_satchecker,
+                observation.range_rate_sat_km_s_satchecker,
+                observation.ddec_deg_s_satchecker,
+                observation.dra_cosdec_deg_s_satchecker,
+                observation.phase_angle,
+                observation.alt_deg_satchecker,
+                observation.az_deg_satchecker,
+                observation.illuminated,
             ]
         )
 
