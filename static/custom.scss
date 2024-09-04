@@ -1,21 +1,5 @@
 // Custom.scss
-
-$theme-colors: (
-  "light":      #f5f5f5,
-  "dark":       #1c1e27,
-  "primary":    #142943,
-  "secondary":  #5c7da7,
-  "tertiary":   #d7cfc5,
-  "info":       #1a69bd,
-  "accent1":    #fbb552,
-  "accent1-subtle": lighten(#fbb552, 25%),
-  "accent2":    #b7d3df,
-  "accent3":    #bcc1ce,
-  "success":    #20671d,
-  "warning":    #ebd119,
-  "danger":     #fe1712,
-);
-
+@import "theme";
 
 .page-item.active .page-link{
   background-color: map-get($theme-colors, "primary");
@@ -92,4 +76,99 @@ $form-file-button-bg:            map-get($theme-colors, "tertiary");
 #map { height: 200px; }
 
 
+
 @import "scss/bootstrap";
+
+$custom-colors-dark: (
+  "primary": darken(map-get($theme-colors, "primary"), 10%),
+  "secondary": darken(map-get($theme-colors, "secondary"), 60%),
+  "tertiary": darken(map-get($theme-colors, "tertiary"), 10%),
+  "success": darken(map-get($theme-colors, "success"), 10%),
+  "danger": darken(map-get($theme-colors, "danger"), 10%),
+  "warning": darken(map-get($theme-colors, "warning"), 10%),
+  "info": darken(map-get($theme-colors, "info"), 10%),
+  "light": darken(map-get($theme-colors, "light"), 75%),
+  "dark": darken(map-get($theme-colors, "dark"), 5%),
+  "accent1": darken(map-get($theme-colors, "accent1"), 35%),
+  "accent1-subtle": darken(map-get($theme-colors, "accent1-subtle"), 15%),
+  "accent2": darken(map-get($theme-colors, "accent2"), 0%),
+  "accent3": darken(map-get($theme-colors, "accent3"), 55%),
+);
+
+// Merge custom colors into the theme colors map
+$theme-colors: map-merge($theme-colors, $theme-colors);
+
+// Define dark theme colors
+$theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
+
+[data-bs-theme="dark"] {
+  --bs-primary: #{shade-color($primary, 80%)};
+  --bs-bg-primary-dark: #{map-get($theme-colors-dark, "primary")};
+  --bs-primary-bg-subtle-dark: #{map-get($theme-colors, "primary")};
+  --bs-bg-light-dark: #{map-get($theme-colors-dark, "light")};
+  --bs-bg-accent1-dark: #{map-get($theme-colors-dark, "accent1")};
+  --bs-bg-secondary-dark: #{map-get($theme-colors-dark, "secondary")};
+  --bs-bg-tertiary-dark: #{map-get($theme-colors-dark, "tertiary")};
+  --bs-border-secondary-dark: #{map-get($theme-colors-dark, "secondary")};
+  --bs-border-accent1-dark: #{map-get($theme-colors-dark, "dark")};
+  --bs-bg-accent3-dark: #{map-get($theme-colors-dark, "accent3")};
+  --bs-bg-modal-header-dark: #{map-get($theme-colors-dark, "accent3")};
+  --bs-border-modal-header-dark: #{map-get($theme-colors-dark, "primary")};
+  --bs-bg-dark-dark: #{map-get($theme-colors-dark, "dark")};
+  --bs-link-dark-color: #{map-get($theme-colors, "accent3")};
+  --bs-bg-accent1-subtle-dark: #{map-get($theme-colors-dark, "accent1-subtle")};
+  --bs-bg-alert-primary-dark: #{lighten(map-get($theme-colors-dark, "primary"), 2%)};
+
+
+  .bg-light {
+    background-color: var(--bs-bg-light-dark) !important;
+  }
+  .bg-dark {
+    background-color: var(--bs-bg-dark-dark) !important;
+  }
+  .bg-primary {
+    background-color: var(--bs-bg-primary-dark) !important;
+  }
+  .bg-accent1 {
+    background-color: var(--bs-bg-accent1-dark) !important;
+  }
+  .bg-secondary {
+    background-color: var(--bs-bg-secondary-dark) !important;
+  }
+  .bg-tertiary {
+    background-color: var(--bs-bg-tertiary-dark) !important;
+  }
+  .bg-accent3 {
+    background-color: var(--bs-bg-accent3-dark) !important;
+  }
+  .border-secondary {
+    border-color: var(--bs-border-secondary-dark) !important;
+  }
+  .border-accent1 {
+    border-color: var(--bs-border-accent1-dark) !important;
+  }
+  .modal-header {
+    background-color: var(--bs-bg-modal-header-dark) !important;
+    border-color: var(--bs-border-modal-header-dark) !important;
+  }
+  .btn-primary {
+    --bs-btn-bg: #{map-get($theme-colors-dark, "primary")};
+  }
+  .link-dark {
+    color: var(--bs-link-dark-color) !important;
+    text-decoration: underline;
+  }
+  .bg-accent1-subtle {
+    background-color: var(--bs-bg-accent1-subtle-dark) !important;
+  }
+  .alert-primary {
+    background-color: var(--bs-bg-alert-primary-dark) !important;
+  }
+  .form-control-output {
+    background-color: var(--bs-bg-light-dark) !important;
+    color: var(--bs-link-dark-color) !important;
+  }
+  .bg-png{
+    background-color: var(--bs-bg-tertiary-dark) !important;
+  }
+}

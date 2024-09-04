@@ -399,7 +399,7 @@ class GenerateCSVForm(Form):
         label="Output",
         widget=forms.Textarea(
             attrs={
-                "class": "form-control",
+                "class": "form-control form-control-output",
                 "rows": 10,
                 "readonly": "readonly",
                 "id": "output",
