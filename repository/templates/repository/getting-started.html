@@ -1,0 +1,22 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-3">
+  <div class="container-md">
+    <h2 class="text-center p-2">Getting Started</h2>
+    <div class="p-3">
+      <ol>
+        <li class="mb-2"><b>Familiarize yourself with the data format:</b> Download the sample observation CSV file to understand the required and optional fields. Make sure to follow the correct column ordering as outlined in the sample file.</li>
+        <li class="mb-2"><b>Prepare your data:</b> Organize your satellite brightness and position measurements in a CSV file format, using the SCORE-specific columns. Leave blank any fields that are not applicable, and avoid using "n/a", none, 0, or similar values.</li>
+        <li class="mb-2"><b>Generate a CSV file from individual observations:</b> If you don't have a CSV file ready, use the web tool to generate one from individual observations.</li>
+        <li class="mb-2"><b>Review and validate your data:</b> Double-check your data for errors and ensure it meets the SCORE format requirements.</li>
+        <li class="mb-2"><b>Upload your data:</b> Submit your CSV file to SCORE, and the system will process and store your data. If there are errors, you'll receive an error message, but correctly formatted observations will be saved.</li>
+        <li><b>Cite SCORE in your research:</b> If you use SCORE data in your research, be sure to include the required acknowledgement paragraph in your publication.</li>
+      </ol>
+
+    </div>
+
+  </div>
+</div>
+{% endblock %}

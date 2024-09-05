@@ -326,6 +326,12 @@ def about(request):
     return HttpResponse(template.render(context, request))
 
 
+def getting_started(request):
+    template = loader.get_template("repository/getting-started.html")
+    context = {"": ""}
+    return HttpResponse(template.render(context, request))
+
+
 def download_data(request):
     template = loader.get_template("repository/download-data.html")
     context = {
