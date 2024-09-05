@@ -1,0 +1,15 @@
+$theme-colors: (
+  "light":      #f5f5f5,
+  "dark":       #1c1e27,
+  "primary":    #142943,
+  "secondary":  #5c7da7,
+  "tertiary":   #d7cfc5,
+  "info":       #1a69bd,
+  "accent1":    #fbb552,
+  "accent1-subtle": lighten(#fbb552, 25%),
+  "accent2":    #b7d3df,
+  "accent3":    #bcc1ce,
+  "success":    #20671d,
+  "warning":    #ebd119,
+  "danger":     #fe1712,
+);

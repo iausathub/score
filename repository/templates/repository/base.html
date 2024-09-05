@@ -23,12 +23,28 @@ crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
+    <script src="{% static 'js/theme_switcher.js' %}"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
   <title>{% block title %}Satellite Constellation Observation Repository{% endblock %}</title>
 </head>
 
 <body class="d-flex flex-column h-100">
-  <nav class="navbar navbar-expand-lg bg-primary border-bottom border-5 border-secondary py-0">
+  <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="check2" viewBox="0 0 16 16">
+      <path d="M13.854 3.646a.5.5 0 0 1 0 .708l-7 7a.5.5 0 0 1-.708 0l-3.5-3.5a.5.5 0 1 1 .708-.708L6.5 10.293l6.646-6.647a.5.5 0 0 1 .708 0"/>
+    </symbol>
+    <symbol id="circle-half" viewBox="0 0 16 16">
+      <path d="M8 15A7 7 0 1 0 8 1zm0 1A8 8 0 1 1 8 0a8 8 0 0 1 0 16"/>
+    </symbol>
+    <symbol id="moon-stars-fill" viewBox="0 0 16 16">
+      <path d="M6 .278a.77.77 0 0 1 .08.858 7.2 7.2 0 0 0-.878 3.46c0 4.021 3.278 7.277 7.318 7.277q.792-.001 1.533-.16a.79.79 0 0 1 .81.316.73.73 0 0 1-.031.893A8.35 8.35 0 0 1 8.344 16C3.734 16 0 12.286 0 7.71 0 4.266 2.114 1.312 5.124.06A.75.75 0 0 1 6 .278"/>
+      <path d="M10.794 3.148a.217.217 0 0 1 .412 0l.387 1.162c.173.518.579.924 1.097 1.097l1.162.387a.217.217 0 0 1 0 .412l-1.162.387a1.73 1.73 0 0 0-1.097 1.097l-.387 1.162a.217.217 0 0 1-.412 0l-.387-1.162A1.73 1.73 0 0 0 9.31 6.593l-1.162-.387a.217.217 0 0 1 0-.412l1.162-.387a1.73 1.73 0 0 0 1.097-1.097zM13.863.099a.145.145 0 0 1 .274 0l.258.774c.115.346.386.617.732.732l.774.258a.145.145 0 0 1 0 .274l-.774.258a1.16 1.16 0 0 0-.732.732l-.258.774a.145.145 0 0 1-.274 0l-.258-.774a1.16 1.16 0 0 0-.732-.732l-.774-.258a.145.145 0 0 1 0-.274l.774-.258c.346-.115.617-.386.732-.732z"/>
+    </symbol>
+    <symbol id="sun-fill" viewBox="0 0 16 16">
+      <path d="M8 12a4 4 0 1 0 0-8 4 4 0 0 0 0 8M8 0a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 0m0 13a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-1 0v-2A.5.5 0 0 1 8 13m8-5a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2a.5.5 0 0 1 .5.5M3 8a.5.5 0 0 1-.5.5h-2a.5.5 0 0 1 0-1h2A.5.5 0 0 1 3 8m10.657-5.657a.5.5 0 0 1 0 .707l-1.414 1.415a.5.5 0 1 1-.707-.708l1.414-1.414a.5.5 0 0 1 .707 0m-9.193 9.193a.5.5 0 0 1 0 .707L3.05 13.657a.5.5 0 0 1-.707-.707l1.414-1.414a.5.5 0 0 1 .707 0m9.193 2.121a.5.5 0 0 1-.707 0l-1.414-1.414a.5.5 0 0 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .707M4.464 4.465a.5.5 0 0 1-.707 0L2.343 3.05a.5.5 0 1 1 .707-.707l1.414 1.414a.5.5 0 0 1 0 .708"/>
+    </symbol>
+  </svg>
+  <nav class="navbar navbar-expand-lg bg-primary border-bottom border-3 border-secondary py-0">
     <div class="w-100">
       <div class="py-3">
         <img src="{% static 'images/CPS_Logo_Mono_Alt.png' %}" alt="IAU CPS logo" class="img-fluid px-4" width="130px">
@@ -43,6 +59,7 @@ crossorigin=""/>
         </button>
         <div class="collapse navbar-collapse" id="navbarSupportedContent">
           <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+
             <li class="nav-item dropdown">
               <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
                 aria-expanded="false">
@@ -75,6 +92,49 @@ crossorigin=""/>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'search' %}">Search</a>
+            </li>
+            <li class="nav-item dropdown d-flex align-items-center ms-3">
+              <button class="btn btn-link nav-link px-0 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (auto)">
+                <svg class="theme-icon-active" width="16" height="16" fill="currentColor" aria-hidden="true">
+                  <use href="#circle-half"></use>
+                </svg>
+                <span class="ms-2" id="bd-theme-text"></span>
+              </button>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="bd-theme-text">
+                <li>
+                  <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="light" aria-pressed="false">
+                    <svg class="bi me-2 opacity-50" width="16" height="16" fill="currentColor" aria-hidden="true">
+                      <use href="#sun-fill"></use>
+                    </svg>
+                    Light
+                    <svg class="bi ms-auto d-none" width="16" height="16" fill="currentColor" aria-hidden="true">
+                      <use href="#check2"></use>
+                    </svg>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item d-flex align-items-center" data-bs-theme-value="dark" aria-pressed="false">
+                    <svg class="bi me-2 opacity-50" width="16" height="16" fill="currentColor" aria-hidden="true">
+                      <use href="#moon-stars-fill"></use>
+                    </svg>
+                    Dark
+                    <svg class="bi ms-auto d-none" width="16" height="16" fill="currentColor" aria-hidden="true">
+                      <use href="#check2"></use>
+                    </svg>
+                  </button>
+                </li>
+                <li>
+                  <button type="button" class="dropdown-item d-flex align-items-center active" data-bs-theme-value="auto" aria-pressed="true">
+                    <svg class="bi me-2 opacity-50" width="16" height="16" fill="currentColor" aria-hidden="true">
+                      <use href="#circle-half"></use>
+                    </svg>
+                    Auto
+                    <svg class="bi ms-auto d-none" width="16" height="16" fill="currentColor" aria-hidden="true">
+                      <use href="#check2"></use>
+                    </svg>
+                  </button>
+                </li>
+              </ul>
             </li>
           </ul>
         </div>
@@ -170,449 +230,21 @@ crossorigin=""/>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-python.min.js"></script>
 
-  <script>
-    // Populate observation modal dialog
-    $(document).ready(function () {
-      $(document).on('click', '#obsTable tr, #showObsModal', function () {
-        var rowData = $(this).data('content');
-        var escapedJSON = rowData.replace(/\\u0022/g, '\"').replace(/\\u002D/g, '-').replace(/b\\u0027/g, '').replace(/\\u0027/g, '');
-
-        var observation = JSON.parse(escapedJSON);
-        $('#observation_id_label').text(observation.id);
-        $('#satellite_name').text(observation.satellite_id.sat_name);
-        $('#satellite_number').text(observation.satellite_id.sat_number);
-        $('#obs_time_utc').text(observation.obs_time_utc);
-        $('#obs_time_uncert').text(observation.obs_time_uncert_sec);
-        $('#date_added_label').text(observation.date_added);
-        $('#apparent_mag').text(observation.apparent_mag);
-        $('#apparent_mag_uncert').text(observation.apparent_mag_uncert);
-        $('#obs_lat_deg').text(observation.location_id.obs_lat_deg);
-        $('#obs_long_deg').text(observation.location_id.obs_long_deg);
-        $('#obs_alt_m').text(observation.location_id.obs_alt_m);
-        $('#obs_mode').text(observation.obs_mode);
-        $('#obs_filter').text(observation.obs_filter);
-        $('#obs_instrument').text(observation.instrument);
-        $('#obs_orc_id').html(observation.obs_orc_id.toString().replace(/,/g, ',<br/>'));
-        $('#obs_comments').text(observation.obs_comments);
-        $('#mpc_code').text(observation.mpc_code);
-        $('#sat_ra_deg').text(observation.sat_ra_deg);
-        $('#sat_dec_deg').text(observation.sat_dec_deg);
-        $('#sigma_2_ra').text(observation.sigma_2_ra);
-        $('#sigma_ra_sigma_dec').text(observation.sigma_ra_sigma_dec);
-        $('#sigma_2_dec').text(observation.sigma_2_dec);
-        $('#range_to_sat_km').text(observation.range_to_sat_km);
-        $('#range_to_sat_uncert_km').text(observation.range_to_sat_uncert_km);
-        $('#range_rate_km_s').text(observation.range_rate_sat_km_s);
-        $('#range_rate_uncert_km_s').text(observation.range_rate_sat_uncert_km_s);
-        if (observation.data_archive_link != ""){
-          $('#data_archive_link').html('<a href="' + observation.data_archive_link + '">Data link</a>');
-        }
-        $('#limiting_magnitude').text(observation.limiting_magnitude);
-        $('#phase_angle').text(observation.phase_angle);
-        $('#range_to_sat_km_satchecker').text(observation.range_to_sat_km_satchecker);
-        $('#range_rate_sat_km_s_satchecker').text(observation.range_rate_sat_km_s_satchecker);
-        $('#sat_ra_deg_satchecker').text(observation.sat_ra_deg_satchecker);
-        $('#sat_dec_deg_satchecker').text(observation.sat_dec_deg_satchecker);
-        $('#ddec_deg_s_satchecker').text(observation.ddec_deg_s_satchecker);
-        $('#dra_cosdec_deg_s_satchecker').text(observation.dra_cosdec_deg_s_satchecker);
-        $('#alt_deg_satchecker').text(observation.alt_deg_satchecker);
-        $('#az_deg_satchecker').text(observation.az_deg_satchecker);
-        $('#illuminated').text(observation.illuminated);
-      });
-    });
-  </script>
-
-  <script>
-    // Enable or disable apparent magnitude and uncertainty inputs based on the 'not detected' checkbox
-    $(document).ready(function () {
-      $('#not_detected').change(function () {
-        if (this.checked) {
-          $('#apparent_mag').prop('disabled', true);
-          $('#apparent_mag').prop('required', false);
-          $('#apparent_mag').val(''); // Clear the input
-          $('#apparent_mag_uncert').prop('disabled', true);
-          $('#apparent_mag_uncert').prop('required', false);
-          $('#apparent_mag_uncert').val(''); // Clear the input
-        } else {
-          $('#apparent_mag').prop('disabled', false);
-          $('#apparent_mag').prop('required', true);
-          $('#apparent_mag_uncert').prop('disabled', false);
-          $('#apparent_mag_uncert').prop('required', true);
-        }
-      });
-    });
-  </script>
-
-  <script>
-    // Enable or disable the download button based on the Output content
-    $(document).ready(function () {
-        $('#output').on('input', function() {
-            if ($(this).val()) {
-                $('#download-csv').prop('disabled', false);
-            } else {
-                $('#download-csv').prop('disabled', true);
-            }
-        });
-    });
-  </script>
+  <script src="{% static 'js/modal_data.js' %}"></script>
 
   {% if task_id %}
-  <script type="text/javascript">
-    // Progress Bar (JQuery)
-    function customResult(resultElement, result) {
-      document.getElementById('upload_btn').disabled = false;
-      document.getElementById('upload_ctrl').disabled = false;
-      $('#upload_ctrl').val('');
-      if (result.status == "success") {
-        var date = new Date(result.date_added);
-        var formattedDate = date.toUTCString().replace('GMT', 'UTC');
-
-        document.getElementById('obs_added_text').innerText =
-          result.obs_ids.length + " observation(s) added to the database at " + formattedDate + ".";
-        document.getElementById('success_message').hidden = false;
-        //remove progress bar
-        document.getElementById('progress-bar').hidden = true;
-        document.getElementById('progress-bar-message').hidden = true;
-        document.getElementById('download_obs_ids').value = result.obs_ids;
-        document.getElementById('email').innerText = result.email;
-      }
-      else {
-        $(resultElement).append(
-          $('<br>')
-        );
-        var formattedResult = result.replace(/\n/g, '<br>');
-        $(resultElement).append(
-          $('<p>').html(formattedResult)
-        );
-      }
-    }
-
-    function customError(progressBarElement, progressBarMessageElement) {
-      progressBarElement.style.backgroundColor = '#c21e1b';
-      progressBarMessageElement.innerHTML = 'Upload failed - check the error and try again.';
-    }
-
-    $(function () {
-      // Initialize the progress bar
-      var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
-      CeleryProgressBar.initProgressBar(progressUrl, {
-        onResult: customResult,
-        defaultMessages: {
-          waiting: "Waiting for upload to start...",
-          started: "Upload started...",
-        },
-        onError: customError,
-      })
-    });
+  <script>
+    var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
   </script>
+  <script src="{% static 'js/upload_progress.js' %}"></script>
   {% endif %}
 
-  <script>
-    // Execute reCAPTCHA v3 when the download button is clicked
-    var downloadButton = document.getElementById('download-button');
-    if (downloadButton) {
-      downloadButton.addEventListener('click', function () {
-        // When in development mode the reCAPTCHA public key is an empty string
-        if ('{{ recaptcha_public_key }}' === '') {
-          document.getElementById('download-form').submit();
-        } else {
-          // Execute reCAPTCHA v3
-          grecaptcha.execute('{{ recaptcha_public_key }}', { action: 'download' }).then(function (token) {
-            // Set the value of the 'g-recaptcha-response' input
-            document.getElementById('g-recaptcha-response').value = token;
+  <script src="{% static 'js/tools.js' %}"></script>
 
-            // Submit the form
-            document.getElementById('download-form').submit();
-          });
-        }
-      });
-    }
-  </script>
-
-  <script>
-    // Enable or disable the addDataRow button based on the form inputs
-    $(document).ready(function () {
-        function validateForm() {
-            var isFormValid = true;
-
-            // Check if all required inputs have a value
-            $('form :input[required]').each(function() {
-                if (!$(this).val()) {
-                    isFormValid = false;
-                }
-            });
-
-            // Custom validation for apparent magnitude and not detected
-            var apparentMag = $('#apparent_mag').val();
-            var apparentMagUncert = $('#apparent_mag_uncert').val();
-            var notDetected = $('#not_detected').is(':checked');
-
-            if (!(apparentMag && apparentMagUncert) && !notDetected) {
-                isFormValid = false;
-            }
-
-            if (isFormValid) {
-                $('#addDataRow').prop('disabled', false);
-            } else {
-                $('#addDataRow').prop('disabled', true);
-            }
-        }
-
-        $('form :input').on('input', validateForm);
-        $('#not_detected').on('change', validateForm);
-    });
-  </script>
-
-  <script>
-    // Populate the last used observer location fields based on the observer ORCID
-    $(document).ready(function () {
-      $('#observer_orcid').blur(function () {
-        var observer_orcid = $(this).val();
-        $.post('/last_observer_location/', { 'observer_orcid': observer_orcid }, function (data) {
-          if (!data.error) {
-            $('#observer_altitude_m').val(data.observer_altitude_m);
-            $('#observer_latitude_deg').val(data.observer_latitude_deg);
-            $('#observer_longitude_deg').val(data.observer_longitude_deg);
-          }
-        });
-      });
-    });
-  </script>
-
-  <script>
-    // Lookup the NORAD ID based on the satellite name (and vice versa)
-    $(document).ready(function () {
-      $('#name-id-lookup').on('submit', function (event) {
-        event.preventDefault(); // Prevent the form from being submitted normally
-
-        var satellite_name = $('#satellite_name').val();
-        var satellite_id = $('#satellite_id').val();
-
-        $.post('/name-id-lookup', { 'satellite_name': satellite_name, 'satellite_id': satellite_id }, function (data) {
-          if (!data.error) {
-            $('#satellite_id').val(data.norad_id);
-            $('#satellite_name').val(data.satellite_name);
-            $('#lookup_error').text('');
-          } else {
-            $('#lookup_error').text(data.error);
-          }
-        });
-      });
-    });
-  </script>
-
-  <script>
-    // Lookup the satellite position based on the observer location, date/time, and satellite identifier
-    $(document).ready(function () {
-      $('#satellite_pos_lookup').on('submit', function (event) {
-        event.preventDefault(); // Prevent the form from being submitted normally
-
-        var obs_lat = $('#obs_lat').val();
-        var obs_long = $('#obs_long').val();
-        var obs_alt = $('#obs_alt').val();
-        var day = $('#day').val();
-        var month = $('#month').val();
-        var year = $('#year').val();
-        var hour = $('#hour').val();
-        var minutes = $('#minutes').val();
-        var seconds = $('#seconds').val();
-        var satellite_id = $('#norad_id').val();
-        var satellite_name = $('#sat_name').val();
-
-        $.post('/satellite-pos-lookup', {
-          'obs_lat': obs_lat,
-          'obs_long': obs_long,
-          'obs_alt': obs_alt,
-          'day': day,
-          'month': month,
-          'year': year,
-          'hour': hour,
-          'minutes': minutes,
-          'seconds': seconds,
-          'satellite_id': satellite_id,
-          'satellite_name': satellite_name
-        }, function (data) {
-          if (!data.error) {
-            $('#pos_check_ra').text(data.ra);
-            $('#pos_check_dec').text(data.dec);
-            $('#pos_check_altitude').text(data.altitude);
-            $('#pos_check_azimuth').text(data.azimuth);
-            $('#pos_check_date').text(data.tle_date);
-            $('#pos_check_name').text(data.satellite_name);
-            $('#pos_check_id').text(data.norad_id);
-            $('#sat_pos_lookup_error').text("");
-            document.getElementById('results').hidden = false;
-          } else {
-            $('#sat_pos_lookup_error').text(data.error);
-          }
-        });
-      });
-    });
-
-    $('#satellite_pos_lookup').on('reset', function (event) {
-      $('#results').prop('hidden', true);
-      $('#pos_check_ra').text("");
-      $('#pos_check_dec').text("");
-      $('#pos_check_altitude').text("");
-      $('#pos_check_azimuth').text("");
-      $('#pos_check_date').text("");
-      $('#pos_check_name').text("");
-      $('#pos_check_id').text("");
-      $('#sat_pos_lookup_error').text("");
-    });
-
-  </script>
-
-  <script>
-    // Add a new row to the output field when the addDataRow button is clicked
-    var addDataRowButton = document.getElementById('addDataRow');
-    if (addDataRowButton) {
-      addDataRowButton.addEventListener('click', function () {
-
-        // get the current contents of the form
-        var formValues = {
-        satellite_name: $('#sat_name').val(),
-        norad_cat_id: $('#sat_number').val(),
-        observing_mode: $('#obs_mode').val(),
-        obs_date_year: $('#obs_date_year').val(),
-        obs_date_month: $('#obs_date_month').val(),
-        obs_date_day: $('#obs_date_day').val(),
-        obs_date_hour: $('#obs_date_hour').val(),
-        obs_date_min: $('#obs_date_min').val(),
-        obs_date_sec: $('#obs_date_sec').val(),
-        observation_time_uncertainty_sec: $('#obs_date_uncert').val(),
-        apparent_magnitude: $('#apparent_mag').val(),
-        apparent_magnitude_uncertainty: $('#apparent_mag_uncert').val(),
-        not_detected: $('#not_detected').is(':checked'),
-        limiting_magnitude: $('#limiting_magnitude').val(),
-        instrument: $('#instrument').val(),
-        observer_latitude_deg: $('#observer_latitude_deg').val(),
-        observer_longitude_deg: $('#observer_longitude_deg').val(),
-        observer_altitude_m: $('#observer_altitude_m').val(),
-        observing_filter: $('#filter').val(),
-        observer_orcid: $('#observer_orcid').val(),
-        observer_email: $('#observer_email').val(),
-        satellite_right_ascension_deg: $('#sat_ra_deg').val(),
-        satellite_declination_deg: $('#sat_dec_deg').val(),
-        sigma_2_ra: $('#sigma_2_ra').val(),
-        sigma_ra_sigma_dec: $('#sigma_ra_sigma_dec').val(),
-        sigma_2_dec: $('#sigma_2_dec').val(),
-        range_to_satellite_km: $('#range_to_sat_km').val(),
-        range_to_satellite_uncertainty_km: $('#range_to_sat_uncert_km').val(),
-        range_rate_of_satellite_km_per_sec: $('#range_rate_sat_km_s').val(),
-        range_rate_of_satellite_uncertainty_km_per_sec: $('#range_rate_sat_uncert_km_s').val(),
-        data_archive_link: $('#data_archive_link').val(),
-        comments: $('#comments').val(),
-        mpc_code: $('#mpc_code').val(),
-        };
-
-        // Clear form values that change between adding observations
-        $('#sat_name').val('');
-        $('#sat_number').val('');
-        $('#obs_date_year').val('');
-        $('#obs_date_month').val('');
-        $('#obs_date_day').val('');
-        $('#obs_date_hour').val('');
-        $('#obs_date_min').val('');
-        $('#obs_date_sec').val('');
-        $('#obs_date_uncert').val('');
-        $('#apparent_mag').val('');
-        $('#apparent_mag_uncert').val('');
-        $('#not_detected').prop('checked', false);
-        $('#sat_ra_deg').val('');
-        $('#sat_dec_deg').val('');
-        $('#sigma_2_ra').val('');
-        $('#sigma_ra_sigma_dec').val('');
-        $('#sigma_2_dec').val('');
-        $('#range_to_sat_km').val('');
-        $('#range_to_sat_uncert_km').val('');
-        $('#range_rate_sat_km_s').val('');
-        $('#range_rate_sat_uncert_km_s').val('');
-        $('#comments').val('');
-
-        //create a csv row from that data
-        header = [
-          "satellite_name",
-          "norad_cat_id",
-          "observation_time_utc",
-          "observation_time_uncertainty_sec",
-          "apparent_magnitude",
-          "apparent_magnitude_uncertainty",
-          "observer_latitude_deg",
-          "observer_longitude_deg",
-          "observer_altitude_m",
-          "limiting_magnitude",
-          "instrument",
-          "observing_mode",
-          "observing_filter",
-          "observer_email",
-          "observer_orcid",
-          "satellite_right_ascension_deg",
-          "satellite_declination_deg",
-          "sigma_2_ra",
-          "sigma_ra_sigma_dec",
-          "sigma_2_dec",
-          "range_to_satellite_km",
-          "range_to_satellite_uncertainty_km",
-          "range_rate_of_satellite_km_per_sec",
-          "range_rate_of_satellite_uncertainty_km_per_sec",
-          "comments",
-          "data_archive_link",
-          "mpc_code",
-        ];
-
-        var csvString = '';
-        header.forEach(function(item, index) {
-            if (item === 'observation_time_utc') {
-                // Combine the date and time values into a single string
-                var date = new Date(Date.UTC(formValues['obs_date_year'], formValues['obs_date_month'] - 1, formValues['obs_date_day'], formValues['obs_date_hour'], formValues['obs_date_min'], formValues['obs_date_sec']));
-                csvString += date.toISOString();
-            } else {
-              // Append the form value to the string
-              var value = formValues[item];
-              if (item === 'comments' || item === 'observer_orcid') {
-                // if item is not empty
-                if (value && value.includes(',')) {
-                  // Enclose the value in quotes if the item is 'comments', 'data_archive_link', or 'observer_orcid'
-                  value = '"' + value + '"';
-                }
-              }
-              csvString += value;
-            }
-
-            // Add a comma after each value except the last one
-            if (index < header.length - 1) {
-                csvString += ',';
-            }
-        });
-
-        //append that row to the output field
-        var outputField = document.getElementById('output');
-        outputField.value += csvString + '\n';
-        $(outputField).trigger('input');
-        $('#clear-output').prop('disabled', false);
-      }
-    )};
-  </script>
-
-  <script>
-    // Clear output text area
-    var clearOutputButton = document.getElementById('clear-output');
-    if (clearOutputButton) {
-      clearOutputButton.addEventListener('click', function () {
-        $('#output').val("");
-        $('#output').trigger('input');
-        //$('#download-csv').prop('disabled', true);
-        $('#clear-output').prop('disabled', true);
-      }
-    )};
-  </script>
+  <script src="{% static 'js/generate_csv_utils.js' %}"></script>
 
   {% block extra_js %}
   {% endblock %}
-
-
-
 </body>
 
 </html>

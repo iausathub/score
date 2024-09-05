@@ -62,7 +62,7 @@ class SearchForm(Form):
         required=False,
         label="Satellite Number",
         widget=forms.NumberInput(
-            attrs={"min": 0, "max": 99999, "class": "form-control no-arrows"}
+            attrs={"min": 0, "max": 999999, "class": "form-control no-arrows"}
         ),
     )
 
@@ -111,12 +111,12 @@ class GenerateCSVForm(Form):
         widget=forms.TextInput(attrs={"class": "form-control", "id": "sat_name"}),
     )
     sat_number = forms.IntegerField(
-        required=True,
+        required=False,
         label="Satellite Number",
         widget=forms.NumberInput(
             attrs={
                 "min": 0,
-                "max": 99999,
+                "max": 999999,
                 "class": "form-control no-arrows",
                 "id": "sat_number",
             }
@@ -124,12 +124,12 @@ class GenerateCSVForm(Form):
     )
     obs_mode = forms.ChoiceField(
         choices=Observation.OBS_MODE_CHOICES,
-        required=True,
+        required=False,
         label="Observation Mode",
         widget=forms.Select(attrs={"class": "form-select", "id": "obs_mode"}),
     )
     obs_date_year = forms.IntegerField(
-        required=True,
+        required=False,
         label="YYYY",
         widget=forms.NumberInput(
             attrs={
@@ -141,7 +141,7 @@ class GenerateCSVForm(Form):
         ),
     )
     obs_date_month = forms.IntegerField(
-        required=True,
+        required=False,
         label="MM",
         widget=forms.NumberInput(
             attrs={
@@ -153,7 +153,7 @@ class GenerateCSVForm(Form):
         ),
     )
     obs_date_day = forms.IntegerField(
-        required=True,
+        required=False,
         label="DD",
         widget=forms.NumberInput(
             attrs={
@@ -165,7 +165,7 @@ class GenerateCSVForm(Form):
         ),
     )
     obs_date_hour = forms.IntegerField(
-        required=True,
+        required=False,
         label="HH",
         widget=forms.NumberInput(
             attrs={
@@ -177,7 +177,7 @@ class GenerateCSVForm(Form):
         ),
     )
     obs_date_min = forms.IntegerField(
-        required=True,
+        required=False,
         label="MM",
         widget=forms.NumberInput(
             attrs={
@@ -189,7 +189,7 @@ class GenerateCSVForm(Form):
         ),
     )
     obs_date_sec = forms.DecimalField(
-        required=True,
+        required=False,
         label="SS.ssssss",
         widget=forms.NumberInput(
             attrs={
@@ -202,7 +202,7 @@ class GenerateCSVForm(Form):
     )
 
     obs_date_uncert = forms.FloatField(
-        required=True,
+        required=False,
         label="Uncertainty (sec)",
         widget=forms.NumberInput(
             attrs={"class": "form-control", "step": "any", "id": "obs_date_uncert"}
@@ -230,7 +230,7 @@ class GenerateCSVForm(Form):
         ),
     )
     limiting_magnitude = forms.FloatField(
-        required=True,
+        required=False,
         label="Limiting Magnitude",
         widget=forms.NumberInput(
             attrs={"class": "form-control", "step": "any", "id": "limiting_magnitude"}
@@ -238,12 +238,12 @@ class GenerateCSVForm(Form):
     )
     instrument = forms.CharField(
         max_length=200,
-        required=True,
+        required=False,
         label="Instrument",
         widget=forms.TextInput(attrs={"class": "form-control", "id": "instrument"}),
     )
     observer_latitude_deg = forms.FloatField(
-        required=True,
+        required=False,
         label="Observer Latitude (deg)",
         widget=forms.NumberInput(
             attrs={
@@ -256,7 +256,7 @@ class GenerateCSVForm(Form):
         ),
     )
     observer_longitude_deg = forms.FloatField(
-        required=True,
+        required=False,
         label="Observer Longitude (deg)",
         widget=forms.NumberInput(
             attrs={
@@ -269,7 +269,7 @@ class GenerateCSVForm(Form):
         ),
     )
     observer_altitude_m = forms.FloatField(
-        required=True,
+        required=False,
         label="Observer Altitude (m)",
         widget=forms.NumberInput(
             attrs={
@@ -282,20 +282,20 @@ class GenerateCSVForm(Form):
     )
     filter = forms.CharField(
         max_length=200,
-        required=True,
+        required=False,
         label="Observation Filter",
         help_text="Use 'CLEAR' if observing mode is visual",
         widget=forms.TextInput(attrs={"class": "form-control", "id": "filter"}),
     )
     observer_email = forms.CharField(
-        required=True,
+        required=False,
         label="Observer Email",
         widget=forms.EmailInput(
             attrs={"class": "form-control", "id": "observer_email"}
         ),
     )
     observer_orcid = forms.CharField(
-        required=True,
+        required=False,
         label="Observer ORCID",
         widget=forms.TextInput(attrs={"id": "observer_orcid", "class": "form-control"}),
         validators=[validate_orcid],
@@ -399,7 +399,7 @@ class GenerateCSVForm(Form):
         label="Output",
         widget=forms.Textarea(
             attrs={
-                "class": "form-control",
+                "class": "form-control form-control-output",
                 "rows": 10,
                 "readonly": "readonly",
                 "id": "output",
@@ -410,6 +410,7 @@ class GenerateCSVForm(Form):
     def clean(self):
         cleaned_data = super().clean()
         errors = {}
+
         # fmt: off
         if not cleaned_data.get("range_to_sat_km") and cleaned_data.get(
             "range_to_sat_uncert_km"
