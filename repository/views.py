@@ -558,7 +558,7 @@ def satellite_pos_lookup(request):
 
     response = None
     if norad_id:
-        url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
+        url = "https://satchecker.cps.iau.org/ephemeris/catalog-number/"
         params = {
             "catalog": norad_id,
             "latitude": observer_latitude,
@@ -572,7 +572,7 @@ def satellite_pos_lookup(request):
         except requests.exceptions.RequestException:
             return "Satellite position check failed - try again later."
     else:
-        url = "https://cps.iau.org/tools/satchecker/api/ephemeris/name/"
+        url = "https://satchecker.cps.iau.org/ephemeris/name/"
         params = {
             "name": satellite_name,
             "latitude": observer_latitude,

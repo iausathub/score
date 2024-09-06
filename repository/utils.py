@@ -31,6 +31,7 @@ SatCheckerData = namedtuple(
         "sat_dec_deg",
         "sat_ra_deg",
         "satellite_name",
+        "intl_designator",
     ],
 )
 
@@ -159,7 +160,7 @@ def add_additional_data(
             f"Missing or incorrect fields: {missing_fields_str}"
         )
     obs_time = Time(observation_time, format="isot", scale="utc")
-    url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
+    url = "https://satchecker.cps.iau.org/ephemeris/catalog-number/"
     params = {
         "catalog": sat_number,
         "latitude": latitude,
@@ -181,7 +182,7 @@ def add_additional_data(
     ):
         # Temporary fix for satellite name changes
 
-        url = "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/"
+        url = "https://satchecker.cps.iau.org/tools/names-from-norad-id/"
         params = {
             "id": sat_number,
         }
@@ -222,6 +223,7 @@ def add_additional_data(
                 None,
                 None,
                 satellite_name,
+                None,
             )
         return is_valid
 
@@ -243,6 +245,7 @@ def add_additional_data(
             sat_dec_deg=round(data_dict.get("declination_deg", 0), 7),
             sat_ra_deg=round(data_dict.get("right_ascension_deg", 0), 7),
             satellite_name=data_dict.get("name"),
+            intl_designator=data_dict.get("intl_designator"),
         )
         return satellite_data
 
@@ -456,6 +459,7 @@ def get_csv_header() -> list[str]:
         "alt_deg_satchecker",
         "az_deg_satchecker",
         "illuminated",
+        "international_designator",
     ]
     return header
 
@@ -539,6 +543,7 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
                 observation.alt_deg_satchecker,
                 observation.az_deg_satchecker,
                 observation.illuminated,
+                observation.satellite_id.intl_designator,
             ]
         )
 
@@ -581,7 +586,7 @@ def get_satellite_name(norad_id):
     str or None: The name of the satellite associated with the NORAD ID, or None if no
     satellite was found or an error occurred.
     """
-    url = "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/"
+    url = "https://satchecker.cps.iau.org/tools/names-from-norad-id/"
     params = {"id": norad_id}
     try:
         response = requests.get(url, params=params, timeout=10)
@@ -617,7 +622,7 @@ def get_norad_id(satellite_name):
     str or None: The NORAD ID of the satellite associated with the name, or None if no
     satellite was found or an error occurred.
     """
-    url = "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/"
+    url = "https://satchecker.cps.iau.org/tools/norad-ids-from-name/"
     params = {"name": satellite_name}
     try:
         response = requests.get(url, params=params, timeout=10)

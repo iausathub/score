@@ -43,4 +43,5 @@ $(document).on('click', '#obsTable tr, #showObsModal', function () {
     $('#alt_deg_satchecker').text(observation.alt_deg_satchecker);
     $('#az_deg_satchecker').text(observation.az_deg_satchecker);
     $('#illuminated').text(observation.illuminated);
+    $('#intl_designator').text(observation.satellite_id.intl_designator);
 });
