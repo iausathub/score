@@ -100,6 +100,7 @@ def process_upload(
                     ),
                     "sat_number": column[1],
                     "date_added": timezone.now(),
+                    "intl_designator": additional_data.intl_designator,
                 },
             )
             location, loc_created = Location.objects.get_or_create(

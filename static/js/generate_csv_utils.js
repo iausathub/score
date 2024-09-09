@@ -177,8 +177,13 @@ $('[data-toggle="tooltip"]').tooltip();
                 }
                 break;
             case 'sat_number':
+                if (value && (value < 0 || value > 999999)) {
+                    isValid = false;
+                    errorMessage = 'NORAD ID must be between 0 and 999999.';
+                }
+                break;
             case 'obs_date_year':
-                if (value && (value < 1900 || value > 99999)) {
+                if (value && (value < 1957 || value > 99999)) {
                     isValid = false;
                     errorMessage = 'Value must be between 1957 and 99999.';
                 }

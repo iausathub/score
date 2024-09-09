@@ -4,21 +4,20 @@
 
 <div class="container-fluid p-3">
     <div class="container-sm ">
-        <h2 class="text-center p-2 pb-2">Generate CSV File</h2>
-        <div class="">
-            <p>To generate a CSV file following SCORE's data format, please fill out the required fields marked with an asterisk (*).
-            </p>
+        <h2 class="text-center p-2 pb-2">Generate Observation File</h2>
+
+        <div class="p-3">
+            <h5 class="">Instructions</h5>
             <p>
-                Click <span class="fw-bold">Add data row</span> to add a new comma separated row with the data provided below.
-                The basic data common to multiple observations (such as observer information) will remain in the form after adding a new row, but fields such as
-                observation date and brightness will be cleared between rows.
+                Fill out the required fields marked with an asterisk (*) to generate a CSV file in SCORE's data format.
+                Use the <strong>Add observation row</strong> button to add new data rows for each individual observation. Basic observer information will be retained between rows,
+                while observation-specific details will be cleared. Click <strong>Download CSV</strong> when you're ready to get your file. The file can then be
+                <a href="{% url 'index' %}#upload_file">uploaded to SCORE</a>.
             </p>
-            <p>
-                Click <span class="fw-bold">Download CSV</span> to download the generated CSV file.
-            </p>
-            <p class="alert alert-primary">The advanced data section is optional but encouraged if data is available. Reference positional data from SatChecker will automatically
-            be added to the uploaded observation for comparison.
-            </p>
+        </div>
+
+        <div class="alert alert-secondary" role="alert">
+            <i class="fas fa-info-circle"></i> If you don't know the NORAD ID for the satellite number, use the <a href="{% url 'tools' %}" class="">Satellite Name/NORAD ID Lookup</a> tool.
         </div>
         <div class="text-end my-3">
             <span class="text-danger">*</span> denotes required field
@@ -119,7 +118,7 @@
                         <div class="form-text text-muted">
                             <p>Satellite name is optional, but if given, it must match the NORAD ID on the date of the
                                 observation.</p>
-                            <p>For non-detections, please check the box.</p>
+                            <p>For non-detections, please check the <strong>Not detected/seen</strong> box.</p>
                             <p>If you do not know the NORAD ID to use for the satellite number, you can find it using the
                                 <a href="{% url 'tools' %}">Satellite Name/NORAD ID Lookup</a> tool</p>
                             <p class="text-black bg-accent2 p-2">The fields in this section will be cleared between data rows - except
@@ -290,9 +289,8 @@
                         <div class="fw-bold fs-5">Advanced data</div>
                         <div class="form-text text-muted">
                             <p>This section is optional, but encouraged if data is available.</p>
-                            <p>Reference positional data from SatChecker will also be saved with the observation for
-                                comparison.</p>
-                                <p class="fw-bold">The fields in this section will be cleared between data rows.</p>
+
+                            <p class="fw-bold">The fields in this section will be cleared between data rows.</p>
                         </div>
                     </div>
                     <div class="col-sm-8">
@@ -413,15 +411,19 @@
                         </div>
                     </div>
                 </div>
-                <div class="row justify-content-end pb-2">
+                <div class="row justify-content-center py-4">
                     <div class="col-auto">
-                        <button class="btn btn-primary text-light" id="addDataRow" type="button" disabled>
-                        Add data row
+                        <button class="btn btn-primary btn-lg text-light" id="addDataRow" type="button" disabled>
+                        Add observation row
                         </button>
                     </div>
                 </div>
                 <div class="row">
                     <hr />
+                </div>
+                <div class="p-2 pb-4">
+                    Below is the observation data in comma-separated values (CSV) format that will be included in the downloaded file. After you download the file, you can make
+                    changes if needed, or <a href="{% url 'index' %}#upload_file">upload it directly to SCORE</a>.
                 </div>
                 <div class="pb-2">
                     {{ form.output.label_tag}}

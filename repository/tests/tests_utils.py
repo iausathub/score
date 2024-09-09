@@ -41,7 +41,7 @@ def setup_data():
 def test_validate_position(requests_mock, setup_data):
     # Mock the response from the API
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/",
+        "https://satchecker.cps.iau.org/ephemeris/catalog-number/",
         status_code=200,
         json={
             "data": [
@@ -61,7 +61,7 @@ def test_validate_position(requests_mock, setup_data):
         },
     )
     response = requests.get(
-        "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/", timeout=5
+        "https://satchecker.cps.iau.org/ephemeris/catalog-number/", timeout=5
     )
     result = validate_position(response, "TestSat", "2024-02-22T04:09:38.150")
     assert result
@@ -71,7 +71,7 @@ def test_validate_position(requests_mock, setup_data):
 def test_validate_position_invalid_sat_name(requests_mock, setup_data):
     # Mock the response from the API
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/",
+        "https://satchecker.cps.iau.org/ephemeris/catalog-number/",
         status_code=200,
         json={
             "data": [
@@ -91,7 +91,7 @@ def test_validate_position_invalid_sat_name(requests_mock, setup_data):
         },
     )
     response = requests.get(
-        "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/", timeout=5
+        "https://satchecker.cps.iau.org/ephemeris/catalog-number/", timeout=5
     )
     result = validate_position(response, "InvalidSat", "2024-05-22T04:09:38.150")
 
@@ -102,7 +102,7 @@ def test_validate_position_invalid_sat_name(requests_mock, setup_data):
 def test_validate_position_not_visible(requests_mock, setup_data):
     # Mock the response from the API
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/?catalog=1",
+        "https://satchecker.cps.iau.org/ephemeris/catalog-number/?catalog=1",
         status_code=200,
         json={
             "api_source": "IAU CPS SatChecker",
@@ -111,7 +111,7 @@ def test_validate_position_not_visible(requests_mock, setup_data):
         },
     )
     response = requests.get(
-        "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/?catalog=1",
+        "https://satchecker.cps.iau.org/ephemeris/catalog-number/?catalog=1",
         timeout=5,
     )
     result = validate_position(response, "TestSat", "2024-02-22T04:09:38.150")
@@ -122,7 +122,7 @@ def test_validate_position_not_visible(requests_mock, setup_data):
 def test_get_norad_id(requests_mock):
     # Mock the response from the API
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/",
+        "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         status_code=200,
         json=[
             {
@@ -141,7 +141,7 @@ def test_get_norad_id(requests_mock):
 def test_get_norad_id_invalid_sat_name(requests_mock):
     # Mock the response from the API
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/",
+        "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         status_code=200,
         json=[],
     )
@@ -154,7 +154,7 @@ def test_get_norad_id_invalid_sat_name(requests_mock):
 def test_get_norad_id_no_data(requests_mock):
     # Mock the response from the API
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/",
+        "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         status_code=200,
         json=[],
     )
@@ -167,7 +167,7 @@ def test_get_norad_id_no_data(requests_mock):
 def test_get_norad_id_request_exception(requests_mock):
     # Mock the response from the API to raise a RequestException
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/",
+        "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         exc=requests.exceptions.RequestException,
     )
 
@@ -179,7 +179,7 @@ def test_get_norad_id_request_exception(requests_mock):
 def test_get_satellite_name(requests_mock):
     # Mock the response from the API
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/",
+        "https://satchecker.cps.iau.org/tools/names-from-norad-id/",
         status_code=200,
         json=[
             {
@@ -197,7 +197,7 @@ def test_get_satellite_name(requests_mock):
 def test_get_satellite_name_invalid_norad_id(requests_mock):
     # Mock the response from the API
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/",
+        "https://satchecker.cps.iau.org/tools/names-from-norad-id/",
         status_code=200,
         json=[],
     )
@@ -210,7 +210,7 @@ def test_get_satellite_name_invalid_norad_id(requests_mock):
 def test_get_satellite_name_no_data(requests_mock):
     # Mock the response from the API
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/",
+        "https://satchecker.cps.iau.org/tools/names-from-norad-id/",
         status_code=200,
         json=[],
     )
@@ -223,7 +223,7 @@ def test_get_satellite_name_no_data(requests_mock):
 def test_get_satellite_name_request_exception(requests_mock):
     # Mock the response from the API to raise a RequestException
     requests_mock.get(
-        "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/",
+        "https://satchecker.cps.iau.org/tools/names-from-norad-id/",
         exc=requests.exceptions.RequestException,
     )
 

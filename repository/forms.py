@@ -210,7 +210,7 @@ class GenerateCSVForm(Form):
     )
     not_detected = forms.BooleanField(
         required=False,
-        label="Not Detected",
+        label="Not detected/seen",
         widget=forms.CheckboxInput(
             attrs={"class": "form-check-input", "id": "not_detected"}
         ),
