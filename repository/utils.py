@@ -245,7 +245,7 @@ def add_additional_data(
             sat_dec_deg=round(data_dict.get("declination_deg", 0), 7),
             sat_ra_deg=round(data_dict.get("right_ascension_deg", 0), 7),
             satellite_name=data_dict.get("name"),
-            intl_designator=data_dict.get("intl_designator"),
+            intl_designator=data_dict.get("international_designator"),
         )
         return satellite_data
 
