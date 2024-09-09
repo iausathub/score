@@ -545,14 +545,24 @@ def satellite_pos_lookup(request):
     year = int(year)
     hour = int(hour)
     minutes = int(minutes)
+    seconds = float(seconds)
 
     if norad_id and satellite_name:
         return JsonResponse(
             {"error": "Please provide either a NORAD ID or a satellite name."}
         )
 
+    # set satellite name to uppercase
+    satellite_name = satellite_name.upper()
+
     # combine date and time to make a julian date with astropy
-    date_time_str = f"{year}-{month:02d}-{day:02d}T{hour:02d}:{minutes:02d}:{seconds}"
+    # Create a datetime object
+    date_time = datetime.datetime(
+        year, month, day, hour, minutes, int(seconds), int((seconds % 1) * 1e6)
+    )
+
+    # Format the date_time as an ISO 8601 string
+    date_time_str = date_time.strftime("%Y-%m-%dT%H:%M:%S.%f")
 
     julian_date = Time(date_time_str, format="isot", scale="utc").jd
 

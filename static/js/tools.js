@@ -19,7 +19,21 @@ $('#name-id-lookup').on('submit', function (event) {
 
 // Lookup the satellite position based on the observer location, date/time, and satellite identifier
 $('#satellite_pos_lookup').on('submit', function (event) {
-	event.preventDefault(); // Prevent the form from being submitted normall
+	event.preventDefault(); // Prevent the form from being submitted normally
+
+	// make sure the results and error messages are hidden if they were visible
+	document.getElementById('results').hidden = true;
+	$('#sat_pos_lookup_error').text("");
+
+	// reset the results just in case
+	$('#pos_check_ra').text("");
+	$('#pos_check_dec').text("");
+	$('#pos_check_altitude').text("");
+	$('#pos_check_azimuth').text("");
+	$('#pos_check_date').text("");
+	$('#pos_check_name').text("");
+	$('#pos_check_id').text("");
+
 	var obs_lat = $('#obs_lat').val();
 	var obs_long = $('#obs_long').val();
 	var obs_alt = $('#obs_alt').val();
@@ -55,6 +69,7 @@ $('#satellite_pos_lookup').on('submit', function (event) {
 			$('#sat_pos_lookup_error').text("");
 			document.getElementById('results').hidden = false;
 		} else {
+			document.getElementById('results').hidden = true;
 			$('#sat_pos_lookup_error').text(data.error);
 		}
 	});
