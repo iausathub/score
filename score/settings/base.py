@@ -44,11 +44,9 @@ def get_secret_env(secret_name):
 
     if secret_name == "score-allowed-hosts":
         score_allowed_hosts = {
-            "score-prod-alb": os.environ.get("ALLOWED_HOSTS"),
             "score-prod-alb-csrf": os.environ.get("CSRF_TRUSTED_ORIGINS"),
+            "score-prod-alb": os.environ.get("ALLOWED_HOSTS"),
         }
-
-        return score_allowed_hosts
 
 
 def get_secret(secret_name):
@@ -83,7 +81,7 @@ def get_secret(secret_name):
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
+# Quick-start development settings - unsuitable for production.
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 DEBUG = False
