@@ -2,7 +2,7 @@
 Production Django settings for score project.
 """
 
-import ast
+import ast, os
 from socket import gethostbyname, gethostname
 
 from score.settings.base import get_secret  # noqa: F403
@@ -20,9 +20,7 @@ ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
-CSRF_TRUSTED_ORIGINS = ast.literal_eval(
-    get_secret("score-allowed-hosts")["score-prod-alb-csrf"]
-)  # noqa: F405
+CSRF_TRUSTED_ORIGINS = get_secret("score-allowed-hosts")["score-prod-alb-csrf"] # noqa: F405
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
@@ -37,6 +35,7 @@ DATABASES = {
         "PORT": get_secret("score_prod_db")["port"],  # noqa: F405
     },
 }
+
 
 EMAIL_HOST_USER = get_secret("score-settings")["server-email"]  # noqa: F405
 EMAIL_HOST_PASSWORD = get_secret("score-settings")["temp-gmail-pw"]  # noqa: F405

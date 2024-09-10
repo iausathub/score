@@ -2,14 +2,59 @@
 Base Django settings for score project.
 """
 
-import json
+import json, os
 from pathlib import Path
 
 import boto3
 from botocore.exceptions import ClientError
 
 
+def get_secret_env(secret_name):
+
+    if secret_name == "score_prod_db":
+        score_prod_db = {
+            "dbname": os.environ.get("DB_NAME"),
+            "username": os.environ.get("DB_USERNAME"),
+            "password": os.environ.get("DB_PASSWORD"),
+            "host": os.environ.get("DB_HOST"),
+            "port": os.environ.get("DB_PORT"),
+        }
+
+        return score_prod_db
+
+    if secret_name == "score-settings":
+        score_settings = {
+            "recaptcha-public": os.environ.get("RECAPTCHA_PUBLIC_KEY"),
+            "recaptcha-private": os.environ.get("RECAPTCHA_PRIVATE_KEY"),
+            "server-email": os.environ.get("EMAIL_HOST_USER"),
+            "temp-gmail-pw": os.environ.get("EMAIL_HOST_PASSWORD"),
+            "admins": os.environ.get("ADMINS"),
+        }
+
+        return score_settings
+
+    if secret_name == "score-secret-key":
+        score_secret_key = {
+            "secret-key": os.environ.get("SECRET_KEY"),
+            "health-check-token": os.environ.get("SECRET_HEALTH_CHECK_TOKEN"),
+            "admin-token": os.environ.get("SECRET_ADMIN_TOKEN"),
+        }
+
+        return score_secret_key
+
+    if secret_name == "score-allowed-hosts":
+        score_allowed_hosts = {
+            "score-prod-alb-csrf": os.environ.get("CSRF_TRUSTED_ORIGINS"),
+            "score-prod-alb": os.environ.get("ALLOWED_HOSTS"),
+        }
+
+
 def get_secret(secret_name):
+
+    # conditionally get secret from environment variables if they exist
+    if os.environ.get("SECRET_KEY") is not None:
+        return get_secret_env(secret_name)
+
     region_name = "us-east-1"
 
     # Create a Secrets Manager client
@@ -36,7 +81,7 @@ def get_secret(secret_name):
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
+# Quick-start development settings - unsuitable for production.
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 DEBUG = False
