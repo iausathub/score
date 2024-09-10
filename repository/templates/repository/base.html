@@ -23,7 +23,11 @@ crossorigin=""/>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
-    <script src="{% static 'js/theme_switcher.js' %}"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
+    integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
+    crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="{% static 'js/theme_switcher.js' %}"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
   <title>{% block title %}Satellite Constellation Observation Repository{% endblock %}</title>
 </head>
@@ -242,7 +246,7 @@ crossorigin=""/>
   {% endif %}
 
   <script src="{% static 'js/tools.js' %}"></script>
-
+  <script src="{% static 'js/satellite_charts.js' %}"></script>
   <script src="{% static 'js/generate_csv_utils.js' %}"></script>
 
   {% block extra_js %}

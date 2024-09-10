@@ -17,6 +17,7 @@
         <form action="{% url 'satellite-pos-lookup' %}" method="post" enctype="multipart/form-data" id="satellite-pos-lookup">
             {% csrf_token %}
             <p>
+                Use this tool to find the position of a satellite in the sky (azimuth, altitude, right ascension, and declination).
                 Enter the location of the observer, date/time, and satellite identifier to search for
                 the satellite's position. The observer location should be entered in decimal degrees for
                 latitude and longitude, and in meters for altitude.
@@ -34,14 +35,23 @@
                                 <div class="form-group pb-2">
                                     <label for="obs_lat">Latitude <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" name="obs_lat" id="obs_lat" >
+                                    <p id="latitude_help" class="form-text text-muted">
+                                        Decimal degrees - positive is north, negative is south.
+                                    </p>
                                 </div>
                                 <div class="form-group pb-2">
                                     <label for="obs_long">Longitude <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" name="obs_long" id="obs_long" >
+                                    <p id="longitude_help" class="form-text text-muted">
+                                        Decimal degrees - positive is east, negative is west.
+                                    </p>
                                 </div>
                                 <div class="form-group">
                                     <label for="obs_alt">Altitude <span class="text-danger">*</span></label>
                                     <input type="number" class="form-control" name="obs_alt" id="obs_alt" >
+                                    <p id="altitude_help" class="form-text text-muted">
+                                        Meters above sea level.
+                                    </p>
                                 </div>
                             </div>
                     </div>

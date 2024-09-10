@@ -9,6 +9,7 @@ import requests
 from astropy.time import Time
 from celery.result import AsyncResult
 from django.conf import settings
+from django.db.models import Avg
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.template import loader
@@ -29,7 +30,7 @@ from repository.utils import (
     send_data_change_email,
 )
 
-from .models import Observation
+from .models import Observation, Satellite
 from .serializers import ObservationSerializer
 
 logger = logging.getLogger(__name__)
@@ -37,6 +38,10 @@ logger = logging.getLogger(__name__)
 
 def temp_health_check(request):
     return HttpResponse("OK", status=200)
+
+
+def custom_404(request, exception):
+    return render(request, "404.html", status=404)
 
 
 def index(request):
@@ -435,6 +440,58 @@ def generate_csv(request):
         else:
             return render(request, "repository/generate-csv.html", {"form": form})
     return render(request, "repository/generate-csv.html", {"form": GenerateCSVForm})
+
+
+def satellite_data_view(request, satellite_number):
+    try:
+        satellite = Satellite.objects.get(sat_number=satellite_number)
+    except Satellite.DoesNotExist:
+        context = {
+            "error_title": "Satellite Not Found",
+            "error_message": "The satellite you're looking for doesn't exist "
+            "in our database.",
+        }
+        return render(request, "404.html", context, status=404)
+
+    observations = satellite.observations.all()
+    observation_list_json = [
+        (JSONRenderer().render(ObservationSerializer(observation).data))
+        for observation in observations
+    ]
+    observations_and_json = zip(observations, observation_list_json)
+
+    observations_data = [
+        {
+            "date": observation.obs_time_utc.strftime("%Y-%m-%d %H:%M:%S"),
+            "magnitude": observation.apparent_mag,
+            "phase_angle": observation.phase_angle,
+        }
+        for observation in observations
+    ]
+
+    # limit the decimal places to 6
+    average_magnitude = round(
+        observations.aggregate(Avg("apparent_mag"))["apparent_mag__avg"], 6
+    )
+    first_observation_date = observations.order_by("obs_time_utc").first().obs_time_utc
+    most_recent_observation_date = (
+        observations.order_by("-obs_time_utc").first().obs_time_utc
+    )
+
+    context = {
+        "satellite": satellite,
+        "observations_and_json": observations_and_json,
+        "num_observations": observations.count(),
+        "average_magnitude": average_magnitude,
+        "first_observation_date": (
+            first_observation_date.date() if first_observation_date else None
+        ),
+        "most_recent_observation_date": (
+            most_recent_observation_date.date() if first_observation_date else None
+        ),
+        "observations_data": observations_data,
+    }
+    return render(request, "repository/satellites/data_view.html", context)
 
 
 @csrf_exempt

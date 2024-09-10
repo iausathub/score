@@ -1,0 +1,107 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-3">
+  <div class="container-md">
+    <h2 class="text-center p-2">Satellite Details</h2>
+    <div class=" container">
+        <div class="card mb-4">
+            <div class="card-body">
+              <h3 class="card-title">{{ satellite.sat_name }}</h3>
+              <div class="row">
+                <div class="col-md-4">
+                  <p><strong>NORAD ID:</strong> <span id="norad_id">{{ satellite.sat_number }}</span></p>
+                  <p><strong>COSPAR ID:</strong> <span id="sat_intl_designator">{{ satellite.intl_designator|default:"N/A" }}</span></p>
+                </div>
+                <div class="col-md-4">
+                  <p><strong>RCS Size:</strong> <span id="rcs_size">{{ satellite.rcs_size|default:"N/A" }}</span></p>
+                  <p><strong>Object Type:</strong> <span id="object_type">{{ satellite.object_type|default:"N/A" }}</span></p>
+                </div>
+                <div class="col-md-4">
+                  <p><strong>Launch Date:</strong> <span id="launch_date">{{ satellite.launch_date|default:"N/A" }}</span></p>
+                  <p><strong>Decay Date:</strong> <span id="decay_date">{{ satellite.decay_date|default:"N/A" }}</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <div class="card mb-4">
+            <div class="card-body">
+              <h4 class="card-title">Observation Summary</h4>
+              <div class="row">
+                <div class="col-md-6">
+                  <p><strong>Number of Observations:</strong> <span id="num_observations">{{ num_observations }}</span></p>
+                  <p><strong>Average Magnitude:</strong> <span id="average_magnitude">{{ average_magnitude }}</span></p>
+                </div>
+                <div class="col-md-6">
+                  <p><strong>Most Recent Observation:</strong> <span id="last_observation_date">{{ most_recent_observation_date }}</span></p>
+                  <p><strong>First Observation:</strong> <span id="first_observation_date">{{ first_observation_date }}</span></p>
+                </div>
+              </div>
+            </div>
+          </div>
+
+        <div class="row p-2">
+            <table data-toggle="table" data-pagination="true"
+            data-page-size="5" data-sort-name="added" data-sort-order="desc" data-classes="table"
+            class="table table-hover fs-6" id="obsTable">
+            <thead>
+                <tr>
+                    <th scope="col" data-sortable="true" data-visible="true">Date added</th>
+                    <th data-field="added" scope="col" data-sortable="true" data-visible="false">Date_added_timestamp
+                    </th>
+                    <th scope="col" data-sortable="true">Name</th>
+                    <th scope="col" data-sortable="true">NORAD ID</th>
+                    <th scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed</th>
+                    <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
+                    </th>
+                    <th scope="col" data-sortable="true">Mag</th>
+                    <th scope="col" data-sortable="true">Latitude</th>
+                    <th scope="col" data-sortable="true">Longitude</th>
+                    <th scope="col" data-sortable="true">Altitude</th>
+                    <th scope="col" data-sortable="true">Obs. mode</th>
+                    <th scope="col" data-sortable="true">Observer ORCID</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for observation, observation_json in observations_and_json %}
+                <tr data-bs-toggle="modal" data-bs-target="#obsModal" data-content="{{observation_json|escapejs|safe}}"
+                    class="clickable">
+                    <td scope="row">{{ observation.date_added|date:"M. d, Y h:i A" }}</td>
+                    <td scope="row">{{ observation.date_added.timestamp }}</td>
+                    <td scope="row">{{ observation.satellite_id.sat_name }}</td>
+                    <td scope="row">{{ observation.satellite_id.sat_number }}</td>
+                    <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
+                    <td scope="row">{{ observation.obs_time_utc.timestamp }}</td>
+                    <td scope="row" class="text-end">{{ observation.apparent_mag|floatformat:"-4" }}</td>
+                    <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg|floatformat:"-4" }}</td>
+                    <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg|floatformat:"-4" }}</td>
+                    <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m|floatformat:"-4" }}</td>
+                    <td scope="row">{{ observation.obs_mode }}</td>
+                    <td scope="row">{{ observation.obs_orc_id|first }}</td>
+                </tr>
+                {% endfor %}
+
+            </tbody>
+        </table>
+        {% include "repository/satellites/modal.html" %}
+        {{ observations_data|json_script:"observations-data" }}
+
+        <div class="row pt-4">
+            <div class="col-md-6">
+            <div class="chart-container" style="position: relative; height:40vh; width:100%">
+                <canvas id="brightness_chart"></canvas>
+            </div>
+            </div>
+            <div class="col-md-6">
+            <div class="chart-container" style="position: relative; height:40vh; width:100%">
+                <canvas id="phase_angle_chart"></canvas>
+            </div>
+            </div>
+        </div>
+        </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
