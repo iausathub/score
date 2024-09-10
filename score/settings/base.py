@@ -2,7 +2,8 @@
 Base Django settings for score project.
 """
 
-import json, os
+import json
+import os
 from pathlib import Path
 
 import boto3
@@ -11,7 +12,7 @@ from botocore.exceptions import ClientError
 
 def get_secret_env(secret_name):
 
-    if secret_name == "score_prod_db":
+    if secret_name == "score_prod_db":  # noqa: S105
         score_prod_db = {
             "dbname": os.environ.get("DB_NAME"),
             "username": os.environ.get("DB_USERNAME"),
@@ -22,7 +23,7 @@ def get_secret_env(secret_name):
 
         return score_prod_db
 
-    if secret_name == "score-settings":
+    if secret_name == "score-settings":  # noqa: S105
         score_settings = {
             "recaptcha-public": os.environ.get("RECAPTCHA_PUBLIC_KEY"),
             "recaptcha-private": os.environ.get("RECAPTCHA_PRIVATE_KEY"),
@@ -33,7 +34,7 @@ def get_secret_env(secret_name):
 
         return score_settings
 
-    if secret_name == "score-secret-key":
+    if secret_name == "score-secret-key":  # noqa: S105
         score_secret_key = {
             "secret-key": os.environ.get("SECRET_KEY"),
             "health-check-token": os.environ.get("SECRET_HEALTH_CHECK_TOKEN"),
@@ -42,8 +43,8 @@ def get_secret_env(secret_name):
 
         return score_secret_key
 
-    if secret_name == "score-allowed-hosts":
-        score_allowed_hosts = {
+    if secret_name == "score-allowed-hosts":  # noqa: S105
+        score_allowed_hosts = {  # noqa: F841
             "score-prod-alb-csrf": os.environ.get("CSRF_TRUSTED_ORIGINS"),
             "score-prod-alb": os.environ.get("ALLOWED_HOSTS"),
         }
