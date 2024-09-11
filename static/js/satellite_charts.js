@@ -1,6 +1,7 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Parse the dates and sort the data
   const observationData = JSON.parse(document.getElementById('observations-data').textContent);
+
+  // Set up data for the brightness chart
   const brightness_data = observationData
     .filter(item => item.magnitude !== null)
     .map(item => ({
@@ -9,14 +10,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }))
     .sort((a, b) => a.date - b.date);
 
+  // Set up data for the phase angle chart
   const phase_angle_data = observationData
     .filter(item => item.magnitude !== null && item.phase_angle !== null)
     .map(item => ({
       x: item.phase_angle,
       y: item.magnitude,
-      label: item.date
+      date: new Date(item.date)  // Store the date for tooltip
     }))
-    .sort((a, b) => a.x - b.x);
+    .sort((a, b) => a.x - b.x); // Sort by phase angle smallest to largest
 
   // Brightness chart
   new Chart(
@@ -48,7 +50,7 @@ document.addEventListener('DOMContentLoaded', function() {
             }
           },
           y: {
-            reverse: true,
+            reverse: true, // Reverse y-axis (lower magnitude = brighter)
             title: {
               display: true,
               text: 'Magnitude'
@@ -65,11 +67,20 @@ document.addEventListener('DOMContentLoaded', function() {
           },
           tooltip: {
             callbacks: {
+              title: function(tooltipItems) {
+                return `Magnitude: ${tooltipItems[0].parsed.y.toFixed(2)}`;
+              },
+              afterTitle: function(tooltipItems) {
+                const date = new Date(tooltipItems[0].parsed.x).toLocaleDateString();
+                return [`Date: ${date}`, `Number of points: ${tooltipItems.length}`];
+              },
               label: function(context) {
-                return [
-                  `Magnitude: ${context.parsed.y.toFixed(2)}`,
-                ];
-              }
+                return null; // This removes individual point labels
+              },
+            },
+            displayColors: false, // This removes the color boxes for individual points
+            titleFont: {
+                weight: "normal"
             }
           }
         }
@@ -77,7 +88,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
   );
 
-  // phase angle vs brightness
+  // Phase Angle vs Brightness chart
   new Chart(
     document.getElementById('phase_angle_chart'),
     {
@@ -86,9 +97,9 @@ document.addEventListener('DOMContentLoaded', function() {
         datasets: [{
           label: 'Satellite Brightness vs Phase Angle',
           data: phase_angle_data,
+          backgroundColor: 'rgba(20, 41, 67, 1)',
           borderColor: 'rgba(20, 41, 67, 1)',
-          backgroundColor: 'rgba(20, 41, 67, 0.1)',
-          tension: 0.1
+          pointRadius: 3,  // Adjust point size as needed
         }]
       },
       options: {
@@ -119,13 +130,24 @@ document.addEventListener('DOMContentLoaded', function() {
           },
           tooltip: {
             callbacks: {
-              label: function(context) {
+              title: function(tooltipItems) {
+                return `Magnitude: ${tooltipItems[0].parsed.y.toFixed(2)}`;
+              },
+              afterTitle: function(tooltipItems) {
+                const date = tooltipItems[0].raw.date.toLocaleDateString();
                 return [
-                  `Magnitude: ${context.parsed.y.toFixed(2)}`,
-                  `Phase Angle: ${context.parsed.x.toFixed(2)}`,
-                  `Date: ${context.raw.label}`
+                  `Phase Angle: ${tooltipItems[0].parsed.x.toFixed(2)}`,
+                  `Date: ${date}`,
+                  `Number of points: ${tooltipItems.length}`
                 ];
-              }
+              },
+              label: function(context) {
+                return null;  // This removes individual point labels
+              },
+            },
+            displayColors: false,
+            titleFont: {
+                weight: "normal"
             }
           }
         }

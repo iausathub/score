@@ -442,7 +442,44 @@ def generate_csv(request):
     return render(request, "repository/generate-csv.html", {"form": GenerateCSVForm})
 
 
+def satellites(request):
+    """
+    View function to display a list of all satellites.
+
+    This function retrieves/displays all Satellite objects from the database.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered HTML page displaying the list of satellites.
+    """
+    satellites = Satellite.objects.all()
+
+    return render(
+        request,
+        "repository/satellites.html",
+        {"satellites": satellites},
+    )
+
+
 def satellite_data_view(request, satellite_number):
+    """
+    View function to display data for a specific satellite.
+
+    This function retrieves a Satellite object based on the provided satellite number.
+    If the satellite or its observations do not exist, it renders a 404 error page.
+    Otherwise, it gathers observation data, calculates statistics, and renders them
+    in the 'repository/satellites/data_view.html' template.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        satellite_number (int): The unique number identifying the satellite.
+
+    Returns:
+        HttpResponse: The rendered HTML page displaying the satellite data or a 404
+        error page.
+    """
     try:
         satellite = Satellite.objects.get(sat_number=satellite_number)
     except Satellite.DoesNotExist:
@@ -454,11 +491,18 @@ def satellite_data_view(request, satellite_number):
         return render(request, "404.html", context, status=404)
 
     observations = satellite.observations.all()
-    observation_list_json = [
-        (JSONRenderer().render(ObservationSerializer(observation).data))
+    if not observations:
+        context = {
+            "error_title": "No Observations Found",
+            "error_message": "There are no observations for this satellite in "
+            "our database.",
+        }
+        return render(request, "404.html", context, status=404)
+
+    observations_and_json = [
+        (observation, JSONRenderer().render(ObservationSerializer(observation).data))
         for observation in observations
     ]
-    observations_and_json = zip(observations, observation_list_json)
 
     observations_data = [
         {

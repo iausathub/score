@@ -36,4 +36,5 @@ urlpatterns = [
         views.satellite_data_view,
         name="satellite-data-view",
     ),
+    path("satellites", views.satellites, name="satellites"),
 ]
