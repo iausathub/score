@@ -31,6 +31,8 @@ ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 # CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 
+STATIC_ROOT = "static"
+
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 

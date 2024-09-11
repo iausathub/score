@@ -182,7 +182,10 @@ STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
     os.path.join(BASE_DIR, "score/static"),
 ]
-STATIC_ROOT = "static"
+STATIC_ROOT = "score/static"
+print(f"static root: {STATIC_ROOT}")
+print(f"static url: {STATIC_URL}")
+print(f"static dirs: {STATICFILES_DIRS}")
 
 
 STATICFILES_FINDERS = [
