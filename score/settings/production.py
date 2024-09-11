@@ -23,6 +23,8 @@ CSRF_TRUSTED_ORIGINS = get_secret("score-allowed-hosts")[
     "score-prod-alb-csrf"
 ]  # noqa: F405
 
+STATIC_ROOT = "score/static"
+
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
