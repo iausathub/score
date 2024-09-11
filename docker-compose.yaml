@@ -28,25 +28,25 @@ services:
       - ADMINS=admins
       - SETTINGS_CONFIG=${SETTINGS}
       - DJANGO_SETTINGS_MODULE=${SETTINGS}
-  #   depends_on:
-  #     - redis
-  #     - celery
-  #
-  # redis:
-  #   image: redis:latest
-  #   platform: linux/amd64
-  #   ports:
-  #     - "6379:6379"
-  #   expose:
-  #     - "6379"
-  #
-  # celery:
-  #   build:
-  #     context: .
-  #     dockerfile: Dockerfile.celery
-  #     args:
-  #       SETTINGS: ${SETTINGS}
-  #   image: score-celery:latest
-  #   platform: linux/amd64
-  #   depends_on:
-  #     - redis
+    depends_on:
+      - redis
+      - celery
+
+  redis:
+    image: redis:latest
+    platform: linux/amd64
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+      args:
+        SETTINGS: ${SETTINGS}
+    image: score-celery:latest
+    platform: linux/amd64
+    depends_on:
+      - redis
