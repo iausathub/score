@@ -113,13 +113,13 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "whitenoise.middleware.WhiteNoiseMiddleware",
 ]
 
 ROOT_URLCONF = "score.urls"
@@ -178,12 +178,18 @@ USE_I18N = True
 
 USE_TZ = True
 
-STATIC_URL = os.path.join(BASE_DIR, "static/")
+STATIC_URL = "static/"
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
+    "static",
 ]
 STATIC_ROOT = "score/static"
 COMPRESS_ROOT = "static"
+
+print(f"STATIC_ROOT: {STATIC_ROOT}")
+print(f"COMPRESS_ROOT: {COMPRESS_ROOT}")
+print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
+print(f"BASE_DIR: {BASE_DIR}")
+print(f"STATIC_URL: {STATIC_URL}")
 
 STATICFILES_FINDERS = [
     "compressor.finders.CompressorFinder",
