@@ -21,7 +21,7 @@ SECRET_KEY = "score-secret-key"  # noqa: S105
 SECRET_HEALTH_CHECK_TOKEN = "health-check-token"  # noqa: S105
 SECRET_ADMIN_TOKEN = "test"  # noqa: S105
 
-DEBUG = True
+DEBUG = False
 DEBUG_PROPAGATE_EXCEPTIONS = True
 ALLOWED_HOSTS = ["127.0.0.1"]
 ALLOWED_HOSTS.append(gethostbyname(gethostname()))
@@ -32,6 +32,7 @@ ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 SECURE_BROWSER_XSS_FILTER = True
 
 STATIC_ROOT = "static"
+STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
