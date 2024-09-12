@@ -185,7 +185,6 @@ STATICFILES_DIRS = [
 STATIC_ROOT = "/static"
 COMPRESS_ROOT = "static"
 
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 
 print(f"STATIC_ROOT: {STATIC_ROOT}")
 print(f"COMPRESS_ROOT: {COMPRESS_ROOT}")

@@ -32,7 +32,6 @@ ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 SECURE_BROWSER_XSS_FILTER = True
 
 STATIC_ROOT = "static"
-STATICFILES_STORAGE = "django.contrib.staticfiles.storage.StaticFilesStorage"
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
