@@ -180,9 +180,9 @@ USE_TZ = True
 
 STATIC_URL = "static/"
 STATICFILES_DIRS = [
-    "static",
+    "/usr/src/app/static",
 ]
-STATIC_ROOT = "score/static"
+STATIC_ROOT = "/static"
 COMPRESS_ROOT = "static"
 
 print(f"STATIC_ROOT: {STATIC_ROOT}")
