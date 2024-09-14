@@ -9,7 +9,7 @@ python manage.py collectstatic --noinput
 # Kubernetes specific:
 # Copy Django generated static files to `/shared-files` if it exists.
 # An adjacent container running NGINX will serve these files as it also
-# mounts the shared files directory
+# mounts the shared files directory.
 if [ -d "/shared-files" ]; then
 	cp -r /usr/src/app/static /shared-files/
 fi
