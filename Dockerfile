@@ -18,5 +18,4 @@ ARG SETTINGS
 ENV SETTINGS_CONFIG=${SETTINGS}
 ENV DJANGO_SETTINGS_MODULE=${SETTINGS}
 RUN chmod +x /usr/src/app/start.sh
-RUN chmod +x /usr/src/app/dev/kubernetes.sh
 CMD /bin/bash -c "/usr/src/app/start.sh" ${SETTINGS_CONFIG}
