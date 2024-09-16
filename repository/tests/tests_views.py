@@ -84,6 +84,19 @@ class TestViews(TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/generate-csv.html")
 
+    def test_satellites_page(self):
+        response = self.client.get(reverse("satellites"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "repository/satellites.html")
+        self.assertContains(response, self.satellite.sat_name)
+
+    def test_satellite_detail_view(self):
+        response = self.client.get(reverse("satellite-data-view", args=[12345]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "repository/satellites/data_view.html")
+        self.assertContains(response, self.satellite.sat_name)
+        self.assertContains(response, self.satellite.sat_number)
+
     def test_last_observer_location_with_observations(self):
         response = self.client.post(
             reverse("last_observer_location"),

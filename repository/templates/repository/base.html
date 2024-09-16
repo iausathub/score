@@ -85,9 +85,10 @@ crossorigin=""/>
                 Data access
               </a>
               <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% url 'search' %}">Search all observations</a></li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'view-data' %}">Recent observations</a>
                 </li>
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'satellites' %}">Search by satellite</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'satellites' %}">List of observed satellites</a></li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'download-data' %}">Download all
                     observations</a></li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'data-change' %}">Data change
@@ -96,9 +97,6 @@ crossorigin=""/>
             </li>
             <li class="nav-item">
               <a class="nav-link" href="{% url 'tools' %}">Tools</a>
-            </li>
-            <li class="nav-item">
-              <a class="nav-link" href="{% url 'search' %}">Search</a>
             </li>
             <li class="nav-item dropdown d-flex align-items-center ms-3">
               <button class="btn btn-link nav-link px-0 dropdown-toggle d-flex align-items-center" id="bd-theme" type="button" aria-expanded="false" data-bs-toggle="dropdown" data-bs-display="static" aria-label="Toggle theme (auto)">

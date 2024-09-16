@@ -27,8 +27,26 @@
                   <p><strong>COSPAR ID:</strong> <span id="sat_intl_designator">{{ satellite.intl_designator|default:"N/A" }}</span></p>
                 </div>
                 <div class="col-md-4">
-                  <p><strong>RCS Size:</strong> <span id="rcs_size">{{ satellite.rcs_size|default:"N/A" }}</span></p>
-                  <p><strong>Object Type:</strong> <span id="object_type">{{ satellite.object_type|default:"N/A" }}</span></p>
+                  <p>
+                    <strong>RCS Size:</strong>
+                    <span id="rcs_size">{{ satellite.rcs_size|default:"N/A" }}</span>
+                    <span class="ms-1 text-muted info-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                          title="Radar Cross Section (RCS) is a measure of how detectable an object is by radar.
+                          It helps estimate the satellite's size and reflectivity.<br><br>
+                          SMALL:  &lt; 0.1 m&sup2;<br>
+                          MEDIUM:  0.1 to 1.0 m&sup2<br>
+                          LARGE:  &gt; 1.0 m&sup2;">
+                      <i class="fas fa-info-circle"></i>
+                    </span>
+                  </p>
+                  <p><strong>Object Type:</strong>
+                     <span id="object_type">{{ satellite.object_type|default:"N/A" }}</span>
+                     <span class="ms-1 text-muted info-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
+                          title="Object type as defined by the NORAD satellite catalog.<br><br>
+                          PAYLOAD, ROCKET BODY, DEBRIS, and UNKNOWN">
+                      <i class="fas fa-info-circle"></i>
+                    </span>
+                    </p>
                 </div>
                 <div class="col-md-4">
                   <p><strong>Launch Date:</strong> <span id="launch_date">{{ satellite.launch_date|default:"N/A" }}</span></p>
@@ -116,4 +134,13 @@
     </div>
   </div>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+        return new bootstrap.Tooltip(tooltipTriggerEl)
+    })
+});
+</script>
 {% endblock %}
