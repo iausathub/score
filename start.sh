@@ -6,6 +6,8 @@ python manage.py migrate
 echo "${0}: collecting static files."
 python manage.py collectstatic --noinput
 
+python manage.py compress --force
+
 # Kubernetes specific:
 # Copy Django generated static files to `/shared-files` if it exists.
 # An adjacent container running NGINX will serve these files as it also
