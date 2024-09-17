@@ -1,9 +1,10 @@
 import csv
 import io
 import json
+import logging
 import zipfile
 from collections import namedtuple
-from typing import Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 import requests
 from astropy.time import Time
@@ -16,6 +17,7 @@ from rest_framework.renderers import JSONRenderer
 from repository.models import Observation, Satellite
 from repository.serializers import ObservationSerializer
 
+logger = logging.getLogger(__name__)
 # Named tuple to represent additional data from SatChecker for each observation
 SatCheckerData = namedtuple(
     "SatCheckerData",
@@ -464,14 +466,16 @@ def get_csv_header() -> list[str]:
     return header
 
 
-def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
+def create_csv(
+    observation_list: list[Observation], satellite_name: str
+) -> Tuple[io.BytesIO, str]:
     """
     Creates a CSV file from a list of observations and compresses it into a zip file.
 
     This function takes a list of Observation objects, generates a CSV file with the
     details of each observation, and compresses the CSV file into a zip file. If the
-    observation list is empty, it retrieves all observations from the database. The
-    CSV file includes a header row with the names of all the fields.
+    observation list is empty, it retrieves all observations from the database.
+    The CSV file includes a header row with the names of all the fields.
 
     Args:
         observation_list (list[Observation]): A list of Observation objects.
@@ -552,11 +556,15 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
     writer.writerow(header)
     writer.writerows(csv_lines)
 
-    zipfile_name = (
-        "satellite_observations_all.zip"
-        if all_observations
-        else "satellite_observations_search_results.zip"
-    )
+    if satellite_name:
+        zipfile_name = f"{satellite_name}_observations.zip"
+    else:
+        zipfile_name = (
+            "satellite_observations_all.zip"
+            if all_observations
+            else "satellite_observations_search_results.zip"
+        )
+
     zipped_file = io.BytesIO()
 
     with zipfile.ZipFile(zipped_file, "w") as zip:
@@ -637,3 +645,43 @@ def get_norad_id(satellite_name):
 
     except requests.exceptions.RequestException:
         return None
+
+
+# Query SatChecker API for satellite metadata
+def get_satellite_metadata(satellite_number: str) -> Optional[Dict[str, Optional[str]]]:
+    """
+    Query SatChecker API for satellite metadata.
+
+    Parameters:
+        satellite_number (str): The satellite catalog number.
+
+    Returns:
+        Optional[Dict[str, Optional[str]]]: A dictionary containing satellite metadata,
+        or None if the request fails or no data is found.
+    """
+    satchecker_url = f"https://satchecker.cps.iau.org/tools/get-satellite-data/?id={satellite_number}&id_type=catalog"
+
+    try:
+        response = requests.get(satchecker_url, timeout=10)
+        response.raise_for_status()
+        satellite_data = response.json()
+
+        if satellite_data:
+            metadata = satellite_data[0]
+            return {
+                "rcs_size": metadata.get("rcs_size"),
+                "object_type": metadata.get("object_type"),
+                "launch_date": metadata.get("launch_date"),
+                "decay_date": metadata.get("decay_date"),
+                "name": metadata.get("name"),
+                "norad_id": metadata.get("norad_id"),
+                "international_designator": metadata.get("international_designator"),
+            }
+        else:
+            logger.warning(f"No metadata found for satellite {satellite_number}")
+    except requests.RequestException as e:
+        logger.error(
+            f"Error fetching metadata for satellite {satellite_number}: {str(e)}"
+        )
+
+    return None

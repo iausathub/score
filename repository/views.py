@@ -25,6 +25,7 @@ from repository.tasks import process_upload
 from repository.utils import (
     create_csv,
     get_norad_id,
+    get_satellite_metadata,
     get_satellite_name,
     get_stats,
     send_data_change_email,
@@ -186,30 +187,45 @@ def download_all(request) -> HttpResponse:
 
         # If the reCAPTCHA was valid, proceed with the download
         if result["score"] > 0.7:
-            return create_and_return_csv(False)
+            return create_and_return_csv(False, None)
         else:
             # If the reCAPTCHA was not valid, return an error message
             return JsonResponse({"error": "Invalid reCAPTCHA. Please try again."})
     # If reCAPTCHA is not enabled (development mode), proceed with the download
     else:
-        return create_and_return_csv(False)
+        return create_and_return_csv(False, None)
 
 
-def create_and_return_csv(observations: Union[list[Observation], bool]) -> HttpResponse:
+def create_and_return_csv(
+    observations: Union[list[Observation], bool], satellite_name: str
+) -> HttpResponse:
     """
     Create a CSV file from the provided observations and return it as a zipped file
     in an HTTP response.
 
+    This function generates a CSV file containing the provided observations. If the
+    observations parameter is False, the function will include all available
+    observations in the CSV file. The CSV file is then zipped and returned as an HTTP
+    response with the appropriate headers to prompt a file download.
+
     Args:
         observations (Union[List[Observation], bool]): A list of Observation objects
-        or False. If false, all observations will be included in the CSV file.
+            or False. If False, all observations will be included in the CSV file.
+        satellite_name (str): The name of the satellite for which the observations
+            are being exported. This name is used to generate the filename for the
+            CSV file.
 
     Returns:
         HttpResponse: An HTTP response containing the zipped CSV file. The Content-Type
         of the response is set to "application/zip", and the Content-Disposition is set
         to make the file a download with the appropriate filename.
+
+    Raises:
+        ValueError: If the observations parameter is not a list of Observation objects
+            or False.
     """
-    zipped_file, zipfile_name = create_csv(observations)
+    zipped_file, zipfile_name = create_csv(observations, satellite_name)
+
     response = HttpResponse(zipped_file, content_type="application/zip")
     response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
     return response
@@ -316,11 +332,17 @@ def download_results(request):
     # Download the search results as a CSV file
     if request.method == "POST":
         observation_ids = request.POST.get("obs_ids").split(", ")
-        observation_ids = [int(i.strip("[]")) for i in observation_ids]
+        observation_ids = [int(i.strip("[]")) for i in observation_ids if i.strip("[]")]
+
+        satellite_name = (
+            request.POST.get("satellite_name")
+            if request.POST.get("satellite_name")
+            else None
+        )
 
         observations = Observation.objects.filter(id__in=observation_ids)
 
-        return create_and_return_csv(observations)
+        return create_and_return_csv(observations, satellite_name=satellite_name)
 
     return HttpResponse()
 
@@ -504,6 +526,9 @@ def satellite_data_view(request, satellite_number):
         for observation in observations
     ]
 
+    # get satellite metadata from SatChecker
+    metadata = get_satellite_metadata(satellite_number)
+
     observations_data = [
         {
             "date": observation.obs_time_utc.strftime("%Y-%m-%d %H:%M:%S"),
@@ -534,6 +559,14 @@ def satellite_data_view(request, satellite_number):
             most_recent_observation_date.date() if first_observation_date else None
         ),
         "observations_data": observations_data,
+        "rcs_size": metadata.get("rcs_size") if metadata else None,
+        "object_type": metadata.get("object_type") if metadata else None,
+        "launch_date": metadata.get("launch_date") if metadata else None,
+        "decay_date": metadata.get("decay_date") if metadata else None,
+        "intl_designator": (
+            metadata.get("international_designator") if metadata else None
+        ),
+        "obs_ids": [observation.id for observation in observations],
     }
     return render(request, "repository/satellites/data_view.html", context)
 
