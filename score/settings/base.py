@@ -182,7 +182,7 @@ STATIC_URL = "static/"
 STATICFILES_DIRS = [
     "/usr/src/app/static",
 ]
-STATIC_ROOT = "/static"
+STATIC_ROOT = "/usr/src/app/static"
 COMPRESS_ROOT = "static"
 
 
