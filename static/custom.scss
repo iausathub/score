@@ -69,6 +69,20 @@ $font-size-base: .9rem;
   background-color: map-get($theme-colors, "light"); /* Change to your desired color */
 }
 
+.info-icon {
+  font-size: 0.8em;
+  vertical-align: super;
+  cursor: help;
+}
+
+.info-icon i {
+  opacity: 0.6;
+}
+
+.info-icon:hover i {
+  opacity: 1;
+}
+
 //
 $form-file-button-color:         #000000;
 $form-file-button-bg:            map-get($theme-colors, "tertiary");

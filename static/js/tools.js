@@ -86,22 +86,3 @@ $('#satellite_pos_lookup').on('reset', function (event) {
 	$('#pos_check_id').text("");
 	$('#sat_pos_lookup_error').text("");
 });
-
-// Execute reCAPTCHA v3 when the download button is clicked
-var downloadButton = document.getElementById('download-button');
-if (downloadButton) {
-	downloadButton.addEventListener('click', function () {
-		// When in development mode the reCAPTCHA public key is an empty string
-		if ('{{ recaptcha_public_key }}' === '') {
-			document.getElementById('download-form').submit();
-		} else {
-			// Execute reCAPTCHA v3
-			grecaptcha.execute('{{ recaptcha_public_key }}', { action: 'download' }).then(function (token) {
-				// Set the value of the 'g-recaptcha-response' input
-				document.getElementById('g-recaptcha-response').value = token;
-				// Submit the form
-				document.getElementById('download-form').submit();
-			});
-		}
-	});
-}

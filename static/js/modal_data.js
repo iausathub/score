@@ -32,6 +32,9 @@ $(document).on('click', '#obsTable tr, #showObsModal', function () {
     if (observation.data_archive_link != "") {
         $('#data_archive_link').html('<a href="' + observation.data_archive_link + '">Data link</a>');
     }
+    else {
+        $('#data_archive_link').text("");
+    }
     $('#limiting_magnitude').text(observation.limiting_magnitude);
     $('#phase_angle').text(observation.phase_angle);
     $('#range_to_sat_km_satchecker').text(observation.range_to_sat_km_satchecker);

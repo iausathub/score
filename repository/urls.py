@@ -4,6 +4,8 @@ from django.views.generic.base import RedirectView
 
 from . import views
 
+handler404 = views.custom_404
+
 urlpatterns = [
     path("", views.index, name="root"),
     path("index/", RedirectView.as_view(url="/"), name="index"),
@@ -29,4 +31,10 @@ urlpatterns = [
         "satellite-pos-lookup", views.satellite_pos_lookup, name="satellite-pos-lookup"
     ),
     path("generate-csv", views.generate_csv, name="generate-csv"),
+    path(
+        "satellite/<int:satellite_number>/",
+        views.satellite_data_view,
+        name="satellite-data-view",
+    ),
+    path("satellites", views.satellites, name="satellites"),
 ]
