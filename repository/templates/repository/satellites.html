@@ -9,36 +9,30 @@
             You can search, sort, and view detailed information about each satellite.
             Click on a row to see more details about a specific satellite.
         </p>
-        <table data-toggle="table" data-pagination="true" data-search="true" data-page-list="[25, 50, 100, 200, All]"
-            data-page-size="25" data-sort-name="added" data-sort-order="desc" data-classes="table"
-            class="table table-hover fs-6" id="satTable">
-            <thead>
-                <tr>
-                    <th scope="col" data-sortable="true">Name</th>
-                    <th scope="col" data-sortable="true">NORAD ID</th>
-                    <th scope="col" data-sortable="true">International Designator</th>
-                    <th scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Launch date</th>
-                    <th data-field="observed" scope="col" data-sortable="true" data-visible="false">launch_date_timestamp
-                    </th>
-                    <th scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Decay date</th>
-                    <th data-field="observed" scope="col" data-sortable="true" data-visible="false">decay_date_timestamp
-                    </th>
-                </tr>
-            </thead>
-            <tbody class="table-group-divider">
-                {% for satellite in satellites %}
-                <tr class="clickable-row" data-href="{% url 'satellite-data-view' satellite.sat_number %}">
-                    <td scope="row">{{ satellite.sat_name }}</td>
-                    <td scope="row">{{ satellite.sat_number }}</td>
-                    <td scope="row">{{ satellite.intl_designator|default:"N/A" }}</td>
-                    <td scope="row">{{ satellite.launch_date|date:"M. d, Y h:i A"|default:"N/A" }}</td>
-                    <td scope="row">{{ satellite.launch_date.timestamp }}</td>
-                    <td scope="row">{{ satellite.decay_date|date:"M. d, Y h:i A"|default:"N/A" }}</td>
-                    <td scope="row">{{ satellite.decay_date.timestamp }}</td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+        <div class="row justify-content-center">
+            <div class="col-12 col-lg-10 col-xl-8">
+                <table data-toggle="table" data-pagination="true" data-search="true" data-page-list="[25, 50, 100, 200, All]"
+                    data-page-size="25" data-sort-name="added" data-sort-order="desc" data-classes="table"
+                    class="table table-hover fs-6" id="satTable">
+                    <thead>
+                        <tr>
+                            <th scope="col" data-sortable="true" class="col-3">Name</th>
+                            <th scope="col" data-sortable="true" class="col-3">NORAD ID</th>
+                            <th scope="col" data-sortable="true" class="col-3">International Designator/COSPAR ID</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider">
+                        {% for satellite in satellites %}
+                        <tr class="clickable-row" data-href="{% url 'satellite-data-view' satellite.sat_number %}">
+                            <td scope="row">{{ satellite.sat_name }}</td>
+                            <td scope="row">{{ satellite.sat_number }}</td>
+                            <td scope="row">{{ satellite.intl_designator|default:"N/A" }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
 </div>
 
