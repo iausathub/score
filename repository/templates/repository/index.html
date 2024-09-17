@@ -193,13 +193,17 @@
           [-90, -180], // South west
           [90, 180]  // North east
         ],
-        maxBoundsViscosity: 1.0
+        maxBoundsViscosity: 1.0,
+        attributionControl: false
       });
 
-      var cartodbAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attribution">CARTO</a>';
+      // Add custom attribution without the flag
+      L.control.attribution({
+          prefix: '<a href="https://leafletjs.com/reference.html">Leaflet</a> | © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attribution">CARTO</a>'
+      }).addTo(map);
 
       var positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-          attribution: cartodbAttribution
+          attribution: ''
       }).addTo(map);
 
       map.setView([0, 0], 0);

@@ -1,5 +1,18 @@
 document.addEventListener('DOMContentLoaded', function() {
-  const observationData = JSON.parse(document.getElementById('observations-data').textContent);
+  const observationsDataElement = document.getElementById('observations-data');
+
+  if (!observationsDataElement) {
+    console.log('Observations data element not found. Charts will not be rendered.');
+    return;
+  }
+
+  let observationData;
+  try {
+    observationData = JSON.parse(observationsDataElement.textContent);
+  } catch (error) {
+    console.error('Error parsing observations data:', error);
+    return;
+  }
 
   // Set up data for the brightness chart
   const brightness_data = observationData
@@ -136,7 +149,8 @@ document.addEventListener('DOMContentLoaded', function() {
             data: phase_angle_data,
             backgroundColor: colors.backgroundColor,
             borderColor: colors.borderColor,
-            pointRadius: 3,  // Adjust point size as needed
+            pointRadius: 3,
+            borderWidth: 1
           }]
         },
         options: {
