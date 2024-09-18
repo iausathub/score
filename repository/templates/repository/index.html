@@ -3,32 +3,30 @@
 
 {% block content %}
 <div class="container-fluid p-3">
-  <div class="bg-danger text-white text-center p-2">
-    <p class="fs-2">Alpha version</p>
-    <p class="fs-6">This is a test version of the database. Please do not upload data for long term storage
-      - this version will be deleted after the alpha.</p>
-  </div>
   <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr 380px;">
     <div>
       <div class="container p-3">
-        The Satellite Constellation Observation Repository (SCORE) is a project developed and maintained
+        <p>The Satellite Constellation Observation Repository (SCORE) is a project developed and maintained
         by the International Astronomical Union Centre for the Protection of the Dark and Quiet Sky
         from Satellite Constellation Interference (IAU CPS). SCORE serves as a centralized repository for
         satellite brightness observations. Its primary function is to provide a comprehensive and organized
         platform for researchers to contribute, store, and access observational data of artificial space objects.
         Datasets curated in SCORE are free and open for download. If you make use of SCORE data in your
-        research, kindly add the following paragraph to your acknowledgments section:
-        <p class="fst-italic p-3">"This research made use of data and/or services provided by the
+        research, kindly add the following paragraph to your acknowledgments section:</p>
+
+        <blockquote class="text-center fst-italic border border-secondary rounded p-3">"This research made use of data and/or services provided by the
           International Astronomical Union's Centre for the Protection of the Dark and Quiet Sky from
-          Satellite Constellation Interference (IAU CPS)."</p>
+          Satellite Constellation Interference (IAU CPS)."</blockquote>
       </div>
-      <div class="bg-light border rounded-3 p-3">
+
+      <div class="p-3">
+      <div class="bg-light border rounded-3 p-3 ms-2">
         <div class="container">
-          <h3 class="text-center">Upload Observation File</h3>
+          <h3 class="text-center" id="upload_file">Upload Observation File</h3>
           <p class="p-3 mt-3">
-            Upload observations of artificial satellites in a <a class="link-info" href="https://www.freecodecamp.org/news/what-is-a-csv-file-and-how-to-open-the-csv-file-format/">
+            Upload observations of artificial satellites in a <a href="https://www.freecodecamp.org/news/what-is-a-csv-file-and-how-to-open-the-csv-file-format/">
               CSV file format</a> - follow the SCORE specific columns outlined in the
-              <a class="link-info" href="{% static 'observation_format_example.csv' %}" download>example observation file</a>.<br /><br />
+              <a href="{% static 'observation_format_example.csv' %}" download>example observation file</a>.<br /><br />
               Incorrectly formatted observations will result in an error message. However,
             correctly formatted observations processed before an error occurs will be saved in the database and won't
             need to be resubmitted. SCORE will identify duplicate observations and provide the corresponding IDs of the original ones.
@@ -46,16 +44,16 @@
             </div>
           </div>
           <p>
-            <a class="link-info" href="{% url 'data-format' %}">Full data format information</a>
+            <a href="{% url 'data-format' %}">Full data format information</a>
           </p>
           <p>
-            <a class="link-info" href="{% static 'observation_format_example.csv' %}">Sample observation CSV file with examples of both required and optional fields (download)</a>
+            <a href="{% static 'observation_format_example.csv' %}">Sample observation CSV file with examples of both required and optional fields (download)</a>
           </p>
           <p>
-            <a class="link-info" href="{% static 'visual_observation_format_example.csv' %}">Sample observation CSV file for visual observers (download)</a>
+            <a href="{% static 'visual_observation_format_example.csv' %}">Sample observation CSV file for visual observers (download)</a>
           </p>
           <p>
-            <a class="link-info" href="{% url 'generate-csv' %}">Form to generate CSV file from individual observations</a>
+            <a href="{% url 'generate-csv' %}">Form to generate CSV file from individual observations</a>
           </p>
 
           <form method="post" enctype="multipart/form-data">
@@ -89,7 +87,7 @@
             </div>
           </div>
           <div class='progress-wrapper'>
-            <div id='progress-bar' class='progress-bar progress-bar-striped' role='progressbar' aria-label="Progress bar">&nbsp;</div>
+            <div id='progress-bar' class='progress-bar progress-bar-striped' role='progressbar' aria-label="Progress bar" hidden>&nbsp;</div>
           </div>
           <div id="celery-result"></div>
 
@@ -119,6 +117,7 @@
         </div>
       </div>
     </div>
+    </div>
     <div class="container">
       <div class="shadow rounded-2 mb-3" style="min-height:50px;">
         <h5 class="card-title text-center bg-accent1 p-3 rounded-top-2 ">Recent observations</h5>
@@ -135,7 +134,7 @@
           <p>No observations are available.</p>
           {% endif %}
         </div>
-        {% include "repository/modal.html" %}
+        {% include "repository/satellites/modal.html" %}
       </div>
 
       <div class="shadow bg-body rounded-2 mb-3" style="min-height: 50px;">
@@ -194,13 +193,17 @@
           [-90, -180], // South west
           [90, 180]  // North east
         ],
-        maxBoundsViscosity: 1.0
+        maxBoundsViscosity: 1.0,
+        attributionControl: false
       });
 
-      var cartodbAttribution = '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attribution">CARTO</a>';
+      // Add custom attribution without the flag
+      L.control.attribution({
+          prefix: '<a href="https://leafletjs.com/reference.html">Leaflet</a> | © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attribution">CARTO</a>'
+      }).addTo(map);
 
       var positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
-          attribution: cartodbAttribution
+          attribution: ''
       }).addTo(map);
 
       map.setView([0, 0], 0);

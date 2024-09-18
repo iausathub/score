@@ -51,3 +51,5 @@ next-env.d.ts
 *.tfstate           # a plaintext Terraform state file
 *.tfstate.backup
 *.tfstate.lock.*
+
+.gitlab-ci-local

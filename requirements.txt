@@ -1,5 +1,5 @@
 amqp==5.2.0
-asgiref==3.7.2
+asgiref==3.8.1
 astropy==6.0.0
 astropy-iers-data==0.2024.2.19.0.28.47
 beautifulsoup4==4.12.2
@@ -20,10 +20,9 @@ click-repl==0.3.0
 coverage==7.4.0
 cryptography==42.0.5
 distlib==0.3.8
-Django==4.0.10
+Django==4.2.16
 django-anymail==10.2
 django-appconf==1.0.6
-django-bootstrap-ui==3.0.0
 django-bootstrap-v5==1.0.11
 django-composer==0.0.5
 django-compressor==4.4
@@ -33,6 +32,7 @@ django-leaflet==0.30.0
 django-libsass==0.9
 django-recaptcha==4.0.0
 django-storages==1.14.3
+django-upgrade==1.20.0
 djangorestframework==3.14.0
 filelock==3.13.1
 gunicorn==21.2.0
@@ -75,6 +75,7 @@ setuptools==69.5.1
 six==1.16.0
 soupsieve==2.5
 sqlparse==0.4.4
+tokenize-rt==6.0.0
 types-jmespath==1.0.2.20240106
 types-requests==2.31.0.20240311
 typing_extensions==4.10.0
@@ -83,3 +84,4 @@ urllib3==2.0.7
 vine==5.1.0
 virtualenv==20.25.0
 wcwidth==0.2.13
+whitenoise==6.7.0

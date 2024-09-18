@@ -31,6 +31,8 @@ ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 # CSRF_COOKIE_SECURE = True
 SECURE_BROWSER_XSS_FILTER = True
 
+STATIC_ROOT = "static"
+
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
@@ -45,15 +47,6 @@ DATABASES = {
     },
 }
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-STATIC_URL = "/static/"
-STATICFILES_DIRS = [
-    BASE_DIR / "static",  # noqa: F405
-]
-STATIC_ROOT = "static"
 
 LOGGING = {
     "version": 1,
@@ -80,5 +73,5 @@ LOGGING = {
     },
 }
 
-RECAPTCHA_PUBLIC_KEY = "test"
+RECAPTCHA_PUBLIC_KEY = ""
 RECAPTCHA_PRIVATE_KEY = ""

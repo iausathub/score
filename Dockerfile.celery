@@ -12,6 +12,7 @@ RUN pip install -r requirements.txt
 
 COPY . .
 ARG SETTINGS
+ENV SETTINGS_CONFIG=${SETTINGS}
 ENV DJANGO_SETTINGS_MODULE=${SETTINGS}
 RUN celery --version
 CMD ["celery", "-A", "score", "worker", "--loglevel=info"]

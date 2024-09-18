@@ -30,7 +30,7 @@ CSRF_TRUSTED_ORIGINS = ast.literal_eval(
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": get_secret("score_prod_db")["dbname"],  # noqa: F405
         "USER": get_secret("score_prod_db")["username"],  # noqa: F405
         "PASSWORD": get_secret("score_prod_db")["password"],  # noqa: F405

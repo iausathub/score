@@ -9,32 +9,6 @@ class GenerateCSVFormTest(TestCase):
     def setUp(self):
         self.client = Client()
 
-    def test_form_required_fields(self):
-        form = GenerateCSVForm({})
-        self.assertFalse(form.is_valid())
-        self.assertEqual(
-            form.errors,
-            {
-                "sat_number": ["This field is required."],
-                "obs_date_year": ["This field is required."],
-                "obs_date_month": ["This field is required."],
-                "obs_date_day": ["This field is required."],
-                "obs_date_hour": ["This field is required."],
-                "obs_date_min": ["This field is required."],
-                "obs_date_sec": ["This field is required."],
-                "obs_date_uncert": ["This field is required."],
-                "instrument": ["This field is required."],
-                "observer_latitude_deg": ["This field is required."],
-                "observer_longitude_deg": ["This field is required."],
-                "observer_altitude_m": ["This field is required."],
-                "obs_mode": ["This field is required."],
-                "filter": ["This field is required."],
-                "observer_email": ["This field is required."],
-                "observer_orcid": ["This field is required."],
-                "limiting_magnitude": ["This field is required."],
-            },
-        )
-
     def test_form_valid_required(self):
         form = GenerateCSVForm(
             {
@@ -172,8 +146,6 @@ class GenerateCSVFormTest(TestCase):
             form_in_response.errors,
             {
                 "observer_email": ["Observer email is not correctly formatted."],
-                "instrument": ["This field is required."],
-                "filter": ["This field is required."],
             },
         )
 

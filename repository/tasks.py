@@ -92,7 +92,7 @@ def process_upload(
                 ) from e
 
             satellite, sat_created = Satellite.objects.get_or_create(
-                sat_name=column[0],
+                sat_name=column[0] if column[0] else additional_data.satellite_name,
                 sat_number=column[1],
                 defaults={
                     "sat_name": (
@@ -100,6 +100,7 @@ def process_upload(
                     ),
                     "sat_number": column[1],
                     "date_added": timezone.now(),
+                    "intl_designator": additional_data.intl_designator,
                 },
             )
             location, loc_created = Location.objects.get_or_create(
@@ -213,6 +214,8 @@ def process_upload(
     except ValidationError as e:
         if hasattr(e, "message_dict"):
             error_message = ""
+            if obs_error_reference:
+                error_message += obs_error_reference + " - "
             for field, messages in e.message_dict.items():
                 if field == "__all__":
                     error_message += "Notes: "
@@ -225,6 +228,8 @@ def process_upload(
         else:
             if len(e.messages) > 1:
                 error_message = ""
+                if obs_error_reference:
+                    error_message += obs_error_reference + " - "
                 for message in e.messages:
                     error_message += message + "\n"
                 raise UploadError(error_message) from e
@@ -232,7 +237,10 @@ def process_upload(
                 raise UploadError(e.messages[0]) from e
 
     except Exception as e:
-        raise UploadError(e) from e
+        if obs_error_reference:
+            raise UploadError(str(e) + " - " + obs_error_reference) from e
+        else:
+            raise UploadError(e) from e
 
     send_confirmation_email(obs_ids, confirmation_email)
 
