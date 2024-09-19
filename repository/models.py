@@ -1,13 +1,10 @@
 import re
 from math import atan2, cos, radians, sin, sqrt
 
-from django.contrib.gis.geos import Point
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
-from django.db.models.signals import post_init
-from django.dispatch import receiver
 from django.utils import timezone
 
 
@@ -85,26 +82,9 @@ class Location(models.Model):
 
         return earth_radius * c
 
-    def _set_location(self):
-        if (
-            self.obs_lat_deg is not None
-            and self.obs_lat_deg != ""
-            and self.obs_long_deg is not None
-            and self.obs_long_deg != ""
-        ):
-            self.obs_location = Point(self.obs_long_deg, self.obs_lat_deg, srid=4326)
-        else:
-            self.obs_location = None
-
     def save(self, *args, **kwargs):
         self.full_clean()  # Ensure validation is called
-        self._set_location()
         super().save(*args, **kwargs)
-
-
-@receiver(post_init, sender=Location)
-def location_post_init(sender, instance, **kwargs):
-    instance._set_location()
 
 
 class Observation(models.Model):

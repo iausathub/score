@@ -99,7 +99,6 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
-    "django.contrib.gis",
     "compressor",
     "rest_framework",
     "health_check",
