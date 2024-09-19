@@ -515,6 +515,7 @@ def satellite_data_view(request, satellite_number):
             "date": observation.obs_time_utc.strftime("%Y-%m-%d %H:%M:%S"),
             "magnitude": observation.apparent_mag,
             "phase_angle": observation.phase_angle,
+            "magnitude_uncertainty": observation.apparent_mag_uncert,
         }
         for observation in observations
     ]
