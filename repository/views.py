@@ -21,18 +21,18 @@ from repository.forms import (
     GenerateCSVForm,
     SearchForm,
 )
+from repository.models import Observation, Satellite
+from repository.serializers import ObservationSerializer
 from repository.tasks import process_upload
-from repository.utils import (
-    create_csv,
+from repository.utils.csv_utils import create_csv
+from repository.utils.email_utils import send_data_change_email
+from repository.utils.general_utils import (
     get_norad_id,
     get_satellite_metadata,
     get_satellite_name,
     get_stats,
-    send_data_change_email,
 )
-
-from .models import Observation, Satellite
-from .serializers import ObservationSerializer
+from repository.utils.search_utils import filter_observations
 
 logger = logging.getLogger(__name__)
 
@@ -279,26 +279,8 @@ def search(request):
     if request.method == "POST":
         form = SearchForm(request.POST)
         if form.is_valid():
-            # Define a dictionary mapping form fields to filter conditions
-            filters = {
-                "sat_name": "satellite_id__sat_name__icontains",
-                "sat_number": "satellite_id__sat_number",
-                "obs_mode": "obs_mode__icontains",
-                "start_date_range": "obs_time_utc__gte",
-                "end_date_range": "obs_time_utc__lte",
-                "observation_id": "id",
-                "observer_orcid": "obs_orc_id__icontains",
-                "mpc_code": "mpc_code",
-            }
+            observations = filter_observations(form.cleaned_data)
 
-            # Filter observations based on search criteria
-            observations = Observation.objects.all()
-            for field, condition in filters.items():
-                value = form.cleaned_data[field]
-                if value:
-                    observations = observations.filter(**{condition: value})
-
-            # JSON is also needed for the modal view to show the observation details
             observation_list_json = [
                 (JSONRenderer().render(ObservationSerializer(observation).data))
                 for observation in observations
@@ -306,26 +288,25 @@ def search(request):
             observations_and_json = zip(observations, observation_list_json)
             observation_ids = [observation.id for observation in observations]
 
-            if observations.count() == 0:
+            if len(observations) == 0:
                 return render(
                     request,
                     "repository/search.html",
-                    {"error": "No observations found.", "form": SearchForm},
+                    {"error": "No observations found.", "form": form},
                 )
-            # return search results
             return render(
                 request,
                 "repository/search.html",
                 {
                     "observations": observations_and_json,
                     "obs_ids": observation_ids,
-                    "form": SearchForm,
+                    "form": form,
                 },
             )
         else:
             return render(request, "repository/search.html", {"form": form})
 
-    return render(request, "repository/search.html", {"form": SearchForm})
+    return render(request, "repository/search.html", {"form": SearchForm()})
 
 
 def download_results(request):

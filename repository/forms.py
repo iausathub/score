@@ -65,6 +65,12 @@ class SearchForm(Form):
             attrs={"min": 0, "max": 999999, "class": "form-control no-arrows"}
         ),
     )
+    intl_designator = forms.CharField(
+        max_length=200,
+        required=False,
+        label="International Designator/COSPAR ID",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
 
     OBS_MODE_CHOICES_FORM = [("", "Any")] + Observation.OBS_MODE_CHOICES
     obs_mode = forms.ChoiceField(
@@ -101,6 +107,40 @@ class SearchForm(Form):
         label="MPC Observatory Code",
         widget=forms.TextInput(attrs={"class": "form-control"}),
     )
+
+    observer_latitude = forms.FloatField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={"class": "form-control no-arrows", "placeholder": "Latitude"}
+        ),
+    )
+    observer_longitude = forms.FloatField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={"class": "form-control no-arrows", "placeholder": "Longitude"}
+        ),
+    )
+    observer_radius = forms.FloatField(
+        required=False,
+        widget=forms.NumberInput(
+            attrs={"class": "form-control no-arrows", "placeholder": "Search Radius"}
+        ),
+    )
+
+    def clean(self):
+        cleaned_data = super().clean()
+        latitude = cleaned_data.get("observer_latitude")
+        longitude = cleaned_data.get("observer_longitude")
+        radius = cleaned_data.get("observer_radius")
+
+        if any([latitude, longitude, radius]):
+            if not all([latitude, longitude, radius]):
+                raise forms.ValidationError(
+                    "If any of latitude, longitude, or radius "
+                    "is provided, all three must be specified for observer location."
+                )
+
+        return cleaned_data
 
 
 class GenerateCSVForm(Form):

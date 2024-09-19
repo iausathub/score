@@ -1,9 +1,13 @@
 import re
+from math import atan2, cos, radians, sin, sqrt
 
+from django.contrib.gis.geos import Point
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
+from django.db.models.signals import post_init
+from django.dispatch import receiver
 from django.utils import timezone
 
 
@@ -55,6 +59,9 @@ class Location(models.Model):
     obs_alt_m = models.FloatField(default=0)
     date_added = models.DateTimeField("date added", default=timezone.now)
 
+    class Meta:
+        db_table = "location"
+
     def __str__(self):
         return (
             str(self.obs_lat_deg)
@@ -64,12 +71,40 @@ class Location(models.Model):
             + str(self.obs_alt_m)
         )
 
-    class Meta:
-        db_table = "location"
+    def distance_to(self, lat, lon):
+        earth_radius = 6371  # Earth's radius in kilometers
+
+        lat1, lon1 = radians(self.obs_lat_deg), radians(self.obs_long_deg)
+        lat2, lon2 = radians(lat), radians(lon)
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return earth_radius * c
+
+    def _set_location(self):
+        if (
+            self.obs_lat_deg is not None
+            and self.obs_lat_deg != ""
+            and self.obs_long_deg is not None
+            and self.obs_long_deg != ""
+        ):
+            self.obs_location = Point(self.obs_long_deg, self.obs_lat_deg, srid=4326)
+        else:
+            self.obs_location = None
 
     def save(self, *args, **kwargs):
-        self.full_clean()
+        self.full_clean()  # Ensure validation is called
+        self._set_location()
         super().save(*args, **kwargs)
+
+
+@receiver(post_init, sender=Location)
+def location_post_init(sender, instance, **kwargs):
+    instance._set_location()
 
 
 class Observation(models.Model):

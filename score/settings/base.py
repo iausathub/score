@@ -99,6 +99,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.gis",
     "compressor",
     "rest_framework",
     "health_check",
@@ -184,13 +185,6 @@ STATICFILES_DIRS = [
 ]
 STATIC_ROOT = "/usr/src/app/static"
 COMPRESS_ROOT = "static"
-
-
-print(f"STATIC_ROOT: {STATIC_ROOT}")
-print(f"COMPRESS_ROOT: {COMPRESS_ROOT}")
-print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
-print(f"BASE_DIR: {BASE_DIR}")
-print(f"STATIC_URL: {STATIC_URL}")
 
 STATICFILES_FINDERS = [
     "compressor.finders.CompressorFinder",

@@ -3,7 +3,12 @@ import requests
 from django.utils import timezone
 
 from repository.models import Location, Observation, Satellite
-from repository.utils import get_norad_id, get_satellite_name, validate_position
+from repository.utils.general_utils import (
+    get_norad_id,
+    get_satellite_name,
+    validate_position,
+)
+from repository.utils.search_utils import filter_observations
 
 
 @pytest.fixture
@@ -229,3 +234,39 @@ def test_get_satellite_name_request_exception(requests_mock):
 
     result = get_satellite_name("12345")
     assert result is None, "Expected None when a RequestException is raised"
+
+
+@pytest.mark.django_db
+def test_filter_observations_location(setup_data):
+    location, satellite, observation = setup_data
+
+    # Observation within radius
+    form_data = {
+        "observer_latitude": 33,
+        "observer_longitude": -117,
+        "observer_radius": 10,
+    }
+    results = filter_observations(form_data)
+    assert len(results) == 1
+    assert results[0] == observation
+
+    # Observation outside radius
+    form_data = {
+        "observer_latitude": 34,
+        "observer_longitude": -118,
+        "observer_radius": 50,
+    }
+    results = filter_observations(form_data)
+    assert len(results) == 0
+
+    # No location filter
+    form_data = {}
+    results = filter_observations(form_data)
+    assert len(results) == 1
+    assert results[0] == observation
+
+    # Partial location data (should not filter - error on form validation)
+    form_data = {"observer_latitude": 33, "observer_longitude": -117}
+    results = filter_observations(form_data)
+    assert len(results) == 1
+    assert results[0] == observation

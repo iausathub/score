@@ -6,7 +6,8 @@ from django.forms import ValidationError
 from django.utils import timezone
 
 from repository.models import Location, Observation, Satellite
-from repository.utils import add_additional_data, send_confirmation_email
+from repository.utils.email_utils import send_confirmation_email
+from repository.utils.general_utils import add_additional_data
 
 
 class UploadError(Exception):
