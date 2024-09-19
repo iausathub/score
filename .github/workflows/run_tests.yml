@@ -25,6 +25,8 @@ jobs:
           python-version: "3.11"
       - name: Install dependencies
         run: |
+          sudo apt-get update
+          sudo apt-get install libgdal-dev
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
@@ -51,6 +53,8 @@ jobs:
         python-version: "3.11"
     - name: Install requirements
       run: |
+        sudo apt-get update
+        sudo apt-get install libgdal-dev
         python -m pip install --upgrade pip
         pip install -r requirements.txt
     - name: Install dependencies
