@@ -93,11 +93,13 @@ def process_upload(
                 ) from e
 
             satellite, sat_created = Satellite.objects.get_or_create(
-                sat_name=column[0] if column[0] else additional_data.satellite_name,
+                sat_name=(
+                    column[0] if column[0] != "" else additional_data.satellite_name
+                ),
                 sat_number=column[1],
                 defaults={
                     "sat_name": (
-                        column[0] if column[0] else additional_data.satellite_name
+                        column[0] if column[0] != "" else additional_data.satellite_name
                     ),
                     "sat_number": column[1],
                     "date_added": timezone.now(),

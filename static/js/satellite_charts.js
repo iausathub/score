@@ -168,6 +168,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Phase Angle vs Brightness chart
   let phaseAngleChart;
+  let phaseAngleDataMin = null; // To store the minimum value of phase angle data
+  let phaseAngleDataMax = null; // To store the maximum value of phase angle data
 
   function createPhaseAngleChart() {
     const theme = getCurrentTheme();
@@ -178,6 +180,10 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     console.log('Creating phase angle chart with data:', phase_angle_data);
+
+    // Calculate the min and max values from the data
+    phaseAngleDataMin = Math.floor(Math.min(...phase_angle_data.map(item => item.x))) - 5;
+    phaseAngleDataMax = Math.floor(Math.max(...phase_angle_data.map(item => item.x))) + 5;
 
     phaseAngleChart = new Chart(
       document.getElementById('phase_angle_chart'),
@@ -196,7 +202,7 @@ document.addEventListener('DOMContentLoaded', function() {
             })),
             backgroundColor: colors.backgroundColor,
             borderColor: colors.borderColor,
-            borderDash: [1,1],
+            borderDash: [1, 1],
             pointRadius: 3,
             borderWidth: 1,
             errorBarColor: colors.errorBarColor,
@@ -222,7 +228,7 @@ document.addEventListener('DOMContentLoaded', function() {
               },
               ticks: {
                 color: colors.textColor,
-                stepSize: 30
+                stepSize: 15
               }
             },
             y: {
@@ -289,13 +295,7 @@ document.addEventListener('DOMContentLoaded', function() {
               },
             }
           },
-          scales: {
-            x: {
-              type: 'linear',
-            },
-            y: {
-            }
-          }
+
         }
       }
     );
@@ -331,6 +331,22 @@ document.addEventListener('DOMContentLoaded', function() {
         updateCharts();
       }, 100);
     });
+  });
+
+  document.getElementById('toggle_data_range').addEventListener('change', function() {
+    const useDataRange = this.checked;
+
+    if (useDataRange) {
+      // Set min/max to data range
+      phaseAngleChart.options.scales.x.min = phaseAngleDataMin;
+      phaseAngleChart.options.scales.x.max = phaseAngleDataMax;
+    } else {
+      // default
+      phaseAngleChart.options.scales.x.min = 0;
+      phaseAngleChart.options.scales.x.max = 180;
+    }
+
+    phaseAngleChart.update();
   });
 });
 
