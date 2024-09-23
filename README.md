@@ -8,7 +8,6 @@ SCORE is a centralized repository for satellite brightness and position observat
    * [Setup](#setup)
 - [Tools](#tools)
 - [Deployment & Infrastructure](#deployment-infrastructure)
-- [Sample Data](#sample-data)
 - [License](#license)
 
 <a name="installation"></a>
@@ -59,7 +58,13 @@ celery -A score worker --loglevel=info
 ```bash
 python manage.py runserver
 ```
-10. Navigate to http://127.0.0.1:8000/.
+10. Navigate to http://127.0.0.1:8000/ and try to upload the ```test_data.csv``` file from ```score/dev```.
+
+11. Testing upload - if Python crashes and you get this error during observation file upload: ```Worker exited prematurely: signal 6 (SIGABRT) Job: 0.```, then you need to quit the Celery worker, run the command below, restart Terminal, then restart the Celery worker.
+```bash
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+To keep this from happening every time the machine restarts, add that line to your ~/.zshrc or ~/.bashrc file too.
 
 <a name="tools"></a>
 ## Tools
@@ -77,28 +82,9 @@ Ruff and Black can be set up to run as pre-commit hooks, but they are also run o
 
 <a name="deployment-infrastructure"></a>
 ## Deployment & Infrastructure
-
-[AWS Services](dev/score_AWS_services.drawio.png)
-
-<a name="sample-data"></a>
-## Sample Data
-1. To generate sample data for testing upload, run the following from the main "score" directory:
-```bash
-python generate_test_csv.py
-```
-2. This will create a file called "test_observations.csv" in the main "score" directory. You can then upload this file on the main page of the app.
-3. You will also need to disable the `validate_position` check in `utils.py`. If not, SCORE will attempt
-to use SatChecker to validate the data (which will fail).
+Code pushed to SCORE's GitHub repository is mirrored to NOIRLab's GitLab repo, and deployed using the Dockerfiles in this repo using Kubernetes and AWS. 
+Testing and linting are run as part of the GitHub actions on every commit, and a code coverage report is generated as part of a pull request. The main and develop branches are restricted so that only approved changes can kick off a deployment pipeline job.
 
 <a name="license"></a>
 ## License
-[![CC BY 4.0][cc-by-shield]][cc-by]
-
-This work is licensed under a
-[Creative Commons Attribution 4.0 International License][cc-by].
-
-[![CC BY 4.0][cc-by-image]][cc-by]
-
-[cc-by]: http://creativecommons.org/licenses/by/4.0/
-[cc-by-image]: https://i.creativecommons.org/l/by/4.0/88x31.png
-[cc-by-shield]: https://img.shields.io/badge/License-CC%20BY%204.0-lightgrey.svg
+This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
