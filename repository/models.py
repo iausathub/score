@@ -1,4 +1,5 @@
 import re
+from math import atan2, cos, radians, sin, sqrt
 
 from django.contrib.postgres.fields import ArrayField
 from django.core.exceptions import ValidationError
@@ -55,6 +56,9 @@ class Location(models.Model):
     obs_alt_m = models.FloatField(default=0)
     date_added = models.DateTimeField("date added", default=timezone.now)
 
+    class Meta:
+        db_table = "location"
+
     def __str__(self):
         return (
             str(self.obs_lat_deg)
@@ -64,11 +68,22 @@ class Location(models.Model):
             + str(self.obs_alt_m)
         )
 
-    class Meta:
-        db_table = "location"
+    def distance_to(self, lat, lon):
+        earth_radius = 6371  # Earth's radius in kilometers
+
+        lat1, lon1 = radians(self.obs_lat_deg), radians(self.obs_long_deg)
+        lat2, lon2 = radians(lat), radians(lon)
+
+        dlat = lat2 - lat1
+        dlon = lon2 - lon1
+
+        a = sin(dlat / 2) ** 2 + cos(lat1) * cos(lat2) * sin(dlon / 2) ** 2
+        c = 2 * atan2(sqrt(a), sqrt(1 - a))
+
+        return earth_radius * c
 
     def save(self, *args, **kwargs):
-        self.full_clean()
+        self.full_clean()  # Ensure validation is called
         super().save(*args, **kwargs)
 
 

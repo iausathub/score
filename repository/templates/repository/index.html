@@ -188,7 +188,7 @@
     if ($('#map').length) {
       var map = L.map('map', {
         minZoom: 0,
-        maxZoom: 2,
+        maxZoom: 5,
         maxBounds: [ // keeps map from wrapping around
           [-90, -180], // South west
           [90, 180]  // North east
@@ -219,8 +219,8 @@
               fillColor: '#f03',
               fillOpacity: 0.5,
               // this number is in meters, so as the number of observations
-              // increases, the size might need to be revisited
-              radius: location.count * 3000
+              // increases, the size might need to be revisited/scaled/limited
+              radius: location.count * 200
           }).addTo(group);
 
           // add popup on click with observer location details (exact location and number of observations)
