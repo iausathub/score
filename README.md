@@ -82,7 +82,8 @@ Ruff and Black can be set up to run as pre-commit hooks, but they are also run o
 
 <a name="deployment-infrastructure"></a>
 ## Deployment & Infrastructure
-Code pushed to SCORE's GitHub repository is mirrored to NOIRLab's GitLab repo, and deployed using the Dockerfiles in this repo using Kubernetes and AWS. 
+Code pushed to SCORE's GitHub repository is mirrored to NOIRLab's GitLab repo, and deployed using the Dockerfiles in this repo using Kubernetes and AWS.
+
 Testing and linting are run as part of the GitHub actions on every commit, and a code coverage report is generated as part of a pull request. The main and develop branches are restricted so that only approved changes can kick off a deployment pipeline job.
 
 <a name="license"></a>
