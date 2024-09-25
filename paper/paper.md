@@ -25,13 +25,13 @@ authors:
   - name: Connie Walker
     affiliation: "1, 2"
 affiliations:
- - name: NSF NOIRLab, USA
-   index: 1
-   ror: 03zmsge54
- - name: IAU Centre for the Protection of the Dark and Quiet Sky from Satellite Constellation Interference (CPS)
-   index: 2
- - name: University of Illinois at Urbana-Champaign, USA
-   index: 3
+  - name: NSF NOIRLab, USA
+    index: 1
+    ror: 03zmsge54
+  - name: IAU Centre for the Protection of the Dark and Quiet Sky from Satellite Constellation Interference (CPS)
+    index: 2
+  - name: University of Illinois at Urbana-Champaign, USA
+    index: 3
   - name: University of Washington, USA
     index: 4
   - name: Imperial College London, UK
