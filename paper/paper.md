@@ -67,6 +67,7 @@ SCORE is a Django/Bootstrap web application with PostgreSQL as the database back
 The number of satellites in low Earth orbit has been rapidly increasing, and this trend is expected to continue.  These satellites are bright enough to interfere with astronomical observations (both optical and radio), but the full extent of their impact needs to be quantified through actual observations at different times and altitudes in the sky. Researchers have already been collecting satellite observations and conducting `photometric surveys` [@steward_LEO_survey], but each data set has been self-contained , and not easily comparable to others. Observation campaigns organized by SatHub (part of the IAU CPS) such as the one for `BlueWalker 3` [@bluewalker3] have been collecting data on satellite brightness (and position when available) to support the publication of analysis results. However, until now, there has not been a central, public location where this data could be easily accessed for analysis. While `Trailblazer` [@trailblazer] serves as a repository for images affected by satellite trails, it currently only accepts images and is limited to specific telescopes and instruments.
 
 As the number of satellites and satellite observations continue to grow, it is essential to have a resource that can provide an extensive dataset to support:
+
 * Analyzing trends - providing valuable insights into the evolving impact of satellite constellations on the night sky
 * Comparing observed satellite brightness and positions to predicted values and models - helping refine and validate satellite tracking and brightness prediction algorithms
 * Simulating satellite constellation interference on different scientific programs, such as the Rubin Observatory's Legacy Survey of Space and Time (LSST) and observations of near-Earth objects (NEOs)
@@ -80,9 +81,10 @@ By serving as a central repository for satellite observations, similar to how th
 
 # Figures
 
+![Single observation details. \label{fig:observation_info}](observation_details.png)
+
 ![Satellite page with multiple observations.\label{fig:satellite_info}](satellite_page.png)
 
-![Single observation details. \label{fig:observation_info}](observation_details.png){ width=75% }
 
 # Acknowledgements
 This project is supported by the IAU Centre for the Protection of the Dark and Quiet Sky from Satellite Constellation Interference (CPS) and NSF NOIRLab.
