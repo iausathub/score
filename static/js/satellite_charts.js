@@ -150,14 +150,6 @@ document.addEventListener('DOMContentLoaded', function() {
               }
             }
           },
-          scales: {
-            x: {
-              type: 'time',
-            },
-            y: {
-
-            }
-          }
         }
       }
     );
