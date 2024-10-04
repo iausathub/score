@@ -1,0 +1,99 @@
+stages:
+  - test
+  - build
+  - push
+
+include:
+  - project: "noirlab/ci-cd-common"
+    file:
+      - "jobs/build-container-image.tpl.yml"
+      - "jobs/k8s-update-tag.tpl.yml"
+
+###### Development Web Image ######
+Development, build web image:
+  extends: .build_image
+  stage: build
+  variables:
+    REGISTRY_SUBPATH: "web-dev"
+    CONTAINERFILE: "Dockerfile"
+    ENVIRONMENT: "dev"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+Development, push web image tag to EKS Workloads:
+  extends: .push_tag
+  stage: push
+  variables:
+    APP_NAME: "itops-cps-score-dev"
+  dependencies:
+    - Development, build web image
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+###### Development Celery Image ######
+Development, build celery image:
+  extends: .build_image
+  stage: build
+  variables:
+    REGISTRY_SUBPATH: "celery-dev"
+    CONTAINERFILE: "Dockerfile.celery"
+    ENVIRONMENT: "dev"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+
+Development, push celery image tag to EKS Workloads:
+  extends: .push_tag
+  stage: push
+  variables:
+    APP_NAME: "itops-cps-score-dev"
+  dependencies:
+    - Development, build celery image
+  rules:
+    - if: $CI_COMMIT_BRANCH == "develop"
+      
+###### Production Web Image ######
+Production, build web image:
+  extends: .build_image
+  stage: build
+  variables:
+    REGISTRY_SUBPATH: "web-prod"
+    CONTAINERFILE: "Dockerfile"
+    ENVIRONMENT: "prod"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+Production, push web image tag to EKS Workloads:
+  extends: .push_tag
+  stage: push
+  variables:
+    APP_NAME: "itops-cps-score-prod"
+  dependencies:
+    - Production, build web image
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+###### Production Celery Image ######
+Production, build celery image:
+  extends: .build_image
+  stage: build
+  variables:
+    REGISTRY_SUBPATH: "celery-prod"
+    CONTAINERFILE: "Dockerfile.celery"
+    ENVIRONMENT: "prod"
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+
+
+Production, push celery image tag to EKS Workloads:
+  extends: .push_tag
+  stage: push
+  variables:
+    APP_NAME: "itops-cps-score-prod"
+  dependencies:
+    - Production, build celery image
+  rules:
+    - if: $CI_COMMIT_BRANCH == $CI_DEFAULT_BRANCH
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
