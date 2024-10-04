@@ -4,6 +4,8 @@ Production Django settings for score project.
 
 from socket import gethostbyname, gethostname
 
+from score.settings.base import get_secret  # noqa: F403
+
 from .base import *  # noqa: F403
 
 SECRET_KEY = get_secret("score-secret-key")["secret-key"]  # noqa: F405
@@ -15,16 +17,19 @@ SECRET_ADMIN_TOKEN = get_secret("score-secret-key")["admin-token"]  # noqa: F405
 ALLOWED_HOSTS = [get_secret("score-allowed-hosts")["score-prod-alb"]]  # noqa: F405
 ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
-CSRF_TRUSTED_ORIGINS = [
-    get_secret("score-allowed-hosts")["score-prod-alb-csrf"]  # noqa: F405
+USE_X_FORWARDED_HOST = True
+SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
+CSRF_TRUSTED_ORIGINS = get_secret("score-allowed-hosts")[
+    "score-prod-alb-csrf"
 ]  # noqa: F405
+
 
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
 DATABASES = {
     "default": {
-        "ENGINE": "django.db.backends.postgresql_psycopg2",
+        "ENGINE": "django.db.backends.postgresql",
         "NAME": get_secret("score_prod_db")["dbname"],  # noqa: F405
         "USER": get_secret("score_prod_db")["username"],  # noqa: F405
         "PASSWORD": get_secret("score_prod_db")["password"],  # noqa: F405
@@ -32,6 +37,7 @@ DATABASES = {
         "PORT": get_secret("score_prod_db")["port"],  # noqa: F405
     },
 }
+
 
 EMAIL_HOST_USER = get_secret("score-settings")["server-email"]  # noqa: F405
 EMAIL_HOST_PASSWORD = get_secret("score-settings")["temp-gmail-pw"]  # noqa: F405

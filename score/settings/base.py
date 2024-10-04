@@ -3,13 +3,59 @@ Base Django settings for score project.
 """
 
 import json
+import os
 from pathlib import Path
 
 import boto3
 from botocore.exceptions import ClientError
 
 
+def get_secret_env(secret_name):
+
+    if secret_name == "score_prod_db":  # noqa: S105
+        score_prod_db = {
+            "dbname": os.environ.get("DB_NAME"),
+            "username": os.environ.get("DB_USERNAME"),
+            "password": os.environ.get("DB_PASSWORD"),
+            "host": os.environ.get("DB_HOST"),
+            "port": os.environ.get("DB_PORT"),
+        }
+
+        return score_prod_db
+
+    if secret_name == "score-settings":  # noqa: S105
+        score_settings = {
+            "recaptcha-public": os.environ.get("RECAPTCHA_PUBLIC_KEY"),
+            "recaptcha-private": os.environ.get("RECAPTCHA_PRIVATE_KEY"),
+            "server-email": os.environ.get("EMAIL_HOST_USER"),
+            "temp-gmail-pw": os.environ.get("EMAIL_HOST_PASSWORD"),
+            "admins": os.environ.get("ADMINS"),
+        }
+
+        return score_settings
+
+    if secret_name == "score-secret-key":  # noqa: S105
+        score_secret_key = {
+            "secret-key": os.environ.get("SECRET_KEY"),
+            "health-check-token": os.environ.get("SECRET_HEALTH_CHECK_TOKEN"),
+            "admin-token": os.environ.get("SECRET_ADMIN_TOKEN"),
+        }
+
+        return score_secret_key
+
+    if secret_name == "score-allowed-hosts":  # noqa: S105
+        score_allowed_hosts = {  # noqa: F841
+            "score-prod-alb-csrf": os.environ.get("CSRF_TRUSTED_ORIGINS"),
+            "score-prod-alb": os.environ.get("ALLOWED_HOSTS"),
+        }
+
+
 def get_secret(secret_name):
+
+    # conditionally get secret from environment variables if they exist
+    if os.environ.get("SECRET_KEY") is not None:
+        return get_secret_env(secret_name)
+
     region_name = "us-east-1"
 
     # Create a Secrets Manager client
@@ -36,7 +82,7 @@ def get_secret(secret_name):
 BASE_DIR = Path(__file__).resolve().parent.parent
 
 
-# Quick-start development settings - unsuitable for production
+# Quick-start development settings - unsuitable for production.
 # See https://docs.djangoproject.com/en/5.0/howto/deployment/checklist/
 
 DEBUG = False
@@ -67,6 +113,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
+    "whitenoise.middleware.WhiteNoiseMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
@@ -131,15 +178,19 @@ USE_I18N = True
 
 USE_TZ = True
 
-
-# Static files (CSS, JavaScript, Images)
-# https://docs.djangoproject.com/en/5.0/howto/static-files/
-
-STATIC_URL = "https://d14txihk1czyln.cloudfront.net/static/"
+STATIC_URL = "static/"
 STATICFILES_DIRS = [
-    BASE_DIR / "static",
+    "/usr/src/app/static",
 ]
-STATIC_ROOT = "static"
+STATIC_ROOT = "/usr/src/app/static"
+COMPRESS_ROOT = "static"
+
+
+print(f"STATIC_ROOT: {STATIC_ROOT}")
+print(f"COMPRESS_ROOT: {COMPRESS_ROOT}")
+print(f"STATICFILES_DIRS: {STATICFILES_DIRS}")
+print(f"BASE_DIR: {BASE_DIR}")
+print(f"STATIC_URL: {STATIC_URL}")
 
 STATICFILES_FINDERS = [
     "compressor.finders.CompressorFinder",

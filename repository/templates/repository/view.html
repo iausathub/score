@@ -4,6 +4,10 @@
 <div class="container-fluid p-3">
     <div class="container-md">
         <h2 class="text-center p-2">Recent Observations</h2>
+        <p>This page displays the 500 most recent satellite observations submitted to our database.
+            Use the search bar to filter and find specific entries, sort columns by clicking on
+            the headers, and adjust the number of entries shown per page.
+            Click on any row to view more detailed information about that observation.</p>
         <table data-toggle="table" data-pagination="true" data-search="true" data-page-list="[25, 50, 100, 200, All]"
             data-page-size="25" data-sort-name="added" data-sort-order="desc" data-classes="table"
             class="table table-hover fs-6" id="obsTable">
@@ -14,7 +18,9 @@
                     </th>
                     <th scope="col" data-sortable="true">Name</th>
                     <th scope="col" data-sortable="true">NORAD ID</th>
-                    <th scope="col" data-sortable="true">Date observed</th>
+                    <th scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed</th>
+                    <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
+                    </th>
                     <th scope="col" data-sortable="true">Mag</th>
                     <th scope="col" data-sortable="true">Latitude</th>
                     <th scope="col" data-sortable="true">Longitude</th>
@@ -32,6 +38,7 @@
                     <td scope="row">{{ observation.satellite_id.sat_name }}</td>
                     <td scope="row">{{ observation.satellite_id.sat_number }}</td>
                     <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
+                    <td scope="row">{{ observation.obs_time_utc.timestamp }}</td>
                     <td scope="row" class="text-end">{{ observation.apparent_mag|floatformat:"-4" }}</td>
                     <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg|floatformat:"-4" }}</td>
                     <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg|floatformat:"-4" }}</td>
@@ -43,7 +50,7 @@
 
             </tbody>
         </table>
-        {% include "repository/modal.html" %}
+        {% include "repository/satellites/modal.html" %}
     </div>
 </div>
 

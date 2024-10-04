@@ -1,0 +1,52 @@
+services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        SETTINGS: ${SETTINGS}
+    platform: linux/amd64
+    image: score-web:latest
+
+    ports:
+      - 8000:8000
+    environment:
+      - DB_NAME=score
+      - DB_USERNAME=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=postgres
+      - DB_PORT=5432
+      - SECRET_KEY=secret-key
+      - SECRET_HEALTH_CHECK_TOKEN=health-check-token
+      - SECRET_ADMIN_TOKEN=admin-token
+      - ALLOWED_HOSTS=score-prod-alb
+      - CSRF_TRUSTED_ORIGINS=https://score-prod-alb-csrf
+      - RECAPTCHA_PUBLIC_KEY=recaptcha-public
+      - RECAPTCHA_PRIVATE_KEY=recaptcha-private
+      - EMAIL_HOST_USER=server-email
+      - EMAIL_HOST_PASSWORD=temp-gmail-pw
+      - ADMINS=admins
+      - SETTINGS_CONFIG=${SETTINGS}
+      - DJANGO_SETTINGS_MODULE=${SETTINGS}
+    depends_on:
+      - redis
+      - celery
+
+  redis:
+    image: redis:latest
+    platform: linux/amd64
+    ports:
+      - "6379:6379"
+    expose:
+      - "6379"
+
+  celery:
+    build:
+      context: .
+      dockerfile: Dockerfile.celery
+      args:
+        SETTINGS: ${SETTINGS}
+    image: score-celery:latest
+    platform: linux/amd64
+    depends_on:
+      - redis

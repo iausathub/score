@@ -6,8 +6,10 @@ import zipfile
 from typing import Union
 
 import requests
+from astropy.time import Time
 from celery.result import AsyncResult
 from django.conf import settings
+from django.db.models import Avg
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.template import loader
@@ -23,15 +25,24 @@ from repository.tasks import process_upload
 from repository.utils import (
     create_csv,
     get_norad_id,
+    get_satellite_metadata,
     get_satellite_name,
     get_stats,
     send_data_change_email,
 )
 
-from .models import Observation
+from .models import Observation, Satellite
 from .serializers import ObservationSerializer
 
 logger = logging.getLogger(__name__)
+
+
+def temp_health_check(request):
+    return HttpResponse("OK", status=200)
+
+
+def custom_404(request, exception):
+    return render(request, "404.html", status=404)
 
 
 def index(request):
@@ -176,30 +187,45 @@ def download_all(request) -> HttpResponse:
 
         # If the reCAPTCHA was valid, proceed with the download
         if result["score"] > 0.7:
-            return create_and_return_csv(False)
+            return create_and_return_csv(False, None)
         else:
             # If the reCAPTCHA was not valid, return an error message
             return JsonResponse({"error": "Invalid reCAPTCHA. Please try again."})
     # If reCAPTCHA is not enabled (development mode), proceed with the download
     else:
-        return create_and_return_csv(False)
+        return create_and_return_csv(False, None)
 
 
-def create_and_return_csv(observations: Union[list[Observation], bool]) -> HttpResponse:
+def create_and_return_csv(
+    observations: Union[list[Observation], bool], satellite_name: str
+) -> HttpResponse:
     """
     Create a CSV file from the provided observations and return it as a zipped file
     in an HTTP response.
 
+    This function generates a CSV file containing the provided observations. If the
+    observations parameter is False, the function will include all available
+    observations in the CSV file. The CSV file is then zipped and returned as an HTTP
+    response with the appropriate headers to prompt a file download.
+
     Args:
         observations (Union[List[Observation], bool]): A list of Observation objects
-        or False. If false, all observations will be included in the CSV file.
+            or False. If False, all observations will be included in the CSV file.
+        satellite_name (str): The name of the satellite for which the observations
+            are being exported. This name is used to generate the filename for the
+            CSV file.
 
     Returns:
         HttpResponse: An HTTP response containing the zipped CSV file. The Content-Type
         of the response is set to "application/zip", and the Content-Disposition is set
         to make the file a download with the appropriate filename.
+
+    Raises:
+        ValueError: If the observations parameter is not a list of Observation objects
+            or False.
     """
-    zipped_file, zipfile_name = create_csv(observations)
+    zipped_file, zipfile_name = create_csv(observations, satellite_name)
+
     response = HttpResponse(zipped_file, content_type="application/zip")
     response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
     return response
@@ -306,17 +332,29 @@ def download_results(request):
     # Download the search results as a CSV file
     if request.method == "POST":
         observation_ids = request.POST.get("obs_ids").split(", ")
-        observation_ids = [int(i.strip("[]")) for i in observation_ids]
+        observation_ids = [int(i.strip("[]")) for i in observation_ids if i.strip("[]")]
+
+        satellite_name = (
+            request.POST.get("satellite_name")
+            if request.POST.get("satellite_name")
+            else None
+        )
 
         observations = Observation.objects.filter(id__in=observation_ids)
 
-        return create_and_return_csv(observations)
+        return create_and_return_csv(observations, satellite_name=satellite_name)
 
     return HttpResponse()
 
 
 def about(request):
     template = loader.get_template("repository/about.html")
+    context = {"": ""}
+    return HttpResponse(template.render(context, request))
+
+
+def getting_started(request):
+    template = loader.get_template("repository/getting-started.html")
     context = {"": ""}
     return HttpResponse(template.render(context, request))
 
@@ -426,6 +464,113 @@ def generate_csv(request):
     return render(request, "repository/generate-csv.html", {"form": GenerateCSVForm})
 
 
+def satellites(request):
+    """
+    View function to display a list of all satellites.
+
+    This function retrieves/displays all Satellite objects from the database.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+
+    Returns:
+        HttpResponse: The rendered HTML page displaying the list of satellites.
+    """
+    satellites = Satellite.objects.all()
+
+    return render(
+        request,
+        "repository/satellites.html",
+        {"satellites": satellites},
+    )
+
+
+def satellite_data_view(request, satellite_number):
+    """
+    View function to display data for a specific satellite.
+
+    This function retrieves a Satellite object based on the provided satellite number.
+    If the satellite or its observations do not exist, it renders a 404 error page.
+    Otherwise, it gathers observation data, calculates statistics, and renders them
+    in the 'repository/satellites/data_view.html' template.
+
+    Args:
+        request (HttpRequest): The HTTP request object.
+        satellite_number (int): The unique number identifying the satellite.
+
+    Returns:
+        HttpResponse: The rendered HTML page displaying the satellite data or a 404
+        error page.
+    """
+    try:
+        satellite = Satellite.objects.get(sat_number=satellite_number)
+    except Satellite.DoesNotExist:
+        context = {
+            "error_title": "Satellite Not Found",
+            "error_message": "The satellite you're looking for doesn't exist "
+            "in our database.",
+        }
+        return render(request, "404.html", context, status=404)
+
+    observations = satellite.observations.all()
+    if not observations:
+        context = {
+            "error_title": "No Observations Found",
+            "error_message": "There are no observations for this satellite in "
+            "our database.",
+        }
+        return render(request, "404.html", context, status=404)
+
+    observations_and_json = [
+        (observation, JSONRenderer().render(ObservationSerializer(observation).data))
+        for observation in observations
+    ]
+
+    # get satellite metadata from SatChecker
+    metadata = get_satellite_metadata(satellite_number)
+
+    observations_data = [
+        {
+            "date": observation.obs_time_utc.strftime("%Y-%m-%d %H:%M:%S"),
+            "magnitude": observation.apparent_mag,
+            "phase_angle": observation.phase_angle,
+        }
+        for observation in observations
+    ]
+
+    # limit the decimal places to 6
+    average_magnitude = round(
+        observations.aggregate(Avg("apparent_mag"))["apparent_mag__avg"], 6
+    )
+    first_observation_date = observations.order_by("obs_time_utc").first().obs_time_utc
+    most_recent_observation_date = (
+        observations.order_by("-obs_time_utc").first().obs_time_utc
+    )
+
+    context = {
+        "satellite": satellite,
+        "observations_and_json": observations_and_json,
+        "num_observations": observations.count(),
+        "average_magnitude": average_magnitude,
+        "first_observation_date": (
+            first_observation_date.date() if first_observation_date else None
+        ),
+        "most_recent_observation_date": (
+            most_recent_observation_date.date() if first_observation_date else None
+        ),
+        "observations_data": observations_data,
+        "rcs_size": metadata.get("rcs_size") if metadata else None,
+        "object_type": metadata.get("object_type") if metadata else None,
+        "launch_date": metadata.get("launch_date") if metadata else None,
+        "decay_date": metadata.get("decay_date") if metadata else None,
+        "intl_designator": (
+            metadata.get("international_designator") if metadata else None
+        ),
+        "obs_ids": [observation.id for observation in observations],
+    }
+    return render(request, "repository/satellites/data_view.html", context)
+
+
 @csrf_exempt
 def name_id_lookup(request):
     """
@@ -461,10 +606,12 @@ def name_id_lookup(request):
 
     if norad_id:
         satellite_name = get_satellite_name(norad_id)
+
         if satellite_name is None:
             return JsonResponse(
                 {"error": "No satellite found for the provided NORAD ID."}
             )
+        return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
 
     if satellite_name:
         norad_id = get_norad_id(satellite_name)
@@ -472,8 +619,154 @@ def name_id_lookup(request):
             return JsonResponse(
                 {"error": "No satellite found for the provided satellite name."}
             )
+        return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
 
-    return JsonResponse({"satellite_name": satellite_name, "norad_id": norad_id})
+
+@csrf_exempt
+def satellite_pos_lookup(request):
+    """
+    This view returns a JSON response containing the satellite's position and other
+    details based on the provided observer's location and time, or an error message.
+
+    The function expects a POST request with the observer's latitude, longitude,
+    altitude, and the date and time of observation. It also requires either a NORAD
+    ID or a satellite name.
+
+    If a NORAD ID is provided, the function queries the SatChecker API to get the
+    associated satellite's position. If a satellite name is provided, the function
+    queries the SatChecker API to get the associated satellite's position.
+
+    If the provided NORAD ID or satellite name is not associated with any satellite,
+    the function returns a JSON response with an error message.
+
+    Parameters:
+    request (HttpRequest): The Django request object containing the observer's
+    location, date and time of observation, and either a NORAD ID or a satellite name.
+
+    Returns:
+    JsonResponse: A JSON response containing either the satellite's position and other
+    details, or an error message.
+    """
+    observer_latitude = request.POST.get("obs_lat")
+    observer_longitude = request.POST.get("obs_long")
+    observer_altitude = request.POST.get("obs_alt")
+    day = request.POST.get("day")
+    month = request.POST.get("month")
+    year = request.POST.get("year")
+    hour = request.POST.get("hour")
+    minutes = request.POST.get("minutes")
+    seconds = request.POST.get("seconds")
+    norad_id = request.POST.get("satellite_id")
+    satellite_name = request.POST.get("satellite_name")
+
+    # Check if any of the values are empty
+    if (
+        not observer_latitude
+        or not observer_longitude
+        or not observer_altitude
+        or not day
+        or not month
+        or not year
+        or not hour
+        or not minutes
+        or not seconds
+    ):
+        return JsonResponse({"error": "One or more required fields are empty."})
+
+    # Convert day, month, year, hour, and minutes to integers
+    day = int(day)
+    month = int(month)
+    year = int(year)
+    hour = int(hour)
+    minutes = int(minutes)
+    seconds = float(seconds)
+
+    if norad_id and satellite_name:
+        return JsonResponse(
+            {"error": "Please provide either a NORAD ID or a satellite name."}
+        )
+
+    # set satellite name to uppercase
+    satellite_name = satellite_name.upper()
+
+    # combine date and time to make a julian date with astropy
+    # Create a datetime object
+    date_time = datetime.datetime(
+        year, month, day, hour, minutes, int(seconds), int((seconds % 1) * 1e6)
+    )
+
+    # Format the date_time as an ISO 8601 string
+    date_time_str = date_time.strftime("%Y-%m-%dT%H:%M:%S.%f")
+
+    julian_date = Time(date_time_str, format="isot", scale="utc").jd
+
+    response = None
+    if norad_id:
+        url = "https://satchecker.cps.iau.org/ephemeris/catalog-number/"
+        params = {
+            "catalog": norad_id,
+            "latitude": observer_latitude,
+            "longitude": observer_longitude,
+            "elevation": observer_altitude,
+            "julian_date": julian_date,
+            "min_altitude": -90,
+        }
+        try:
+            response = requests.get(url, params=params, timeout=10)
+        except requests.exceptions.RequestException:
+            return "Satellite position check failed - try again later."
+    else:
+        url = "https://satchecker.cps.iau.org/ephemeris/name/"
+        params = {
+            "name": satellite_name,
+            "latitude": observer_latitude,
+            "longitude": observer_longitude,
+            "elevation": observer_altitude,
+            "julian_date": julian_date,
+            "min_altitude": -90,
+        }
+        try:
+            response = requests.get(url, params=params, timeout=10)
+        except requests.exceptions.RequestException:
+            return "Satellite position check failed - try again later."
+
+    if response.status_code != 200 or not response.json():
+        return JsonResponse(
+            {
+                "error": "Satellite position check failed"
+                " - check your input and try again."
+            }
+        )
+
+    response_json = response.json()
+    if "data" not in response_json or not response_json["data"]:
+        return JsonResponse({"error": "No satellite data found."})
+
+    satellite_data = response_json["data"][0]
+    fields = response_json.get("fields", [])
+
+    # Mapping fields to their values for easier access
+    data_dict = dict(zip(fields, satellite_data))
+
+    name = data_dict.get("name")
+    id = data_dict.get("catalog_id")
+    alt = round(data_dict.get("altitude_deg", 0), 6)
+    az = round(data_dict.get("azimuth_deg", 0), 6)
+    ra = round(data_dict.get("right_ascension_deg", 0), 6)
+    dec = round(data_dict.get("declination_deg", 0), 6)
+    tle_retrieval_date = data_dict.get("tle_date")
+
+    return JsonResponse(
+        {
+            "satellite_name": name,
+            "norad_id": id,
+            "altitude": alt,
+            "azimuth": az,
+            "ra": ra,
+            "dec": dec,
+            "tle_date": tle_retrieval_date,
+        }
+    )
 
 
 @csrf_exempt

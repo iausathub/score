@@ -19,12 +19,18 @@ class Satellite(models.Model):
     sat_name = models.CharField(max_length=200, null=True, blank=True)
     sat_number = models.IntegerField(default=0)
     date_added = models.DateTimeField("date added", default=timezone.now)
+    intl_designator = models.CharField(max_length=200, null=True, blank=True)
+    launch_date = models.DateField(null=True, blank=True)
+    decay_date = models.DateField(null=True, blank=True)
+    rcs_size = models.CharField(max_length=200, null=True, blank=True)
+    object_type = models.CharField(max_length=200, null=True, blank=True)
 
     def __str__(self):
-        return self.sat_name
+        return str(self.sat_number) + ", " + self.sat_name
 
     class Meta:
         db_table = "satellite"
+        unique_together = ("sat_name", "sat_number")
 
     def clean(self):
         if not self.sat_number:

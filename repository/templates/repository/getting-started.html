@@ -1,0 +1,74 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-3">
+  <div class="container-md">
+    <h2 class="text-center p-2 mb-4">Getting Started with SCORE</h2>
+
+    <div class="row row-cols-1 row-cols-md-2 g-4">
+      <div class="col">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title"><i class="fas fa-file-csv"></i> Understand the Data Format</h5>
+            <p class="card-text flex-grow-1">Download our <a href="{% static 'observation_format_example.csv' %}">sample observation CSV file</a> to familiarize yourself with required and optional fields. Ensure you follow the correct column ordering as specified.</p>
+            <div>
+              <a href="{% url 'data-format' %}" class="btn btn-accent3">View Data Format Details</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title"><i class="fas fa-table"></i> Prepare Your Data</h5>
+            <p class="card-text flex-grow-1">Organize your satellite brightness and position measurements in a CSV file format, using SCORE-specific columns. Leave optional fields blank if no data is available.</p>
+            <div>
+              <a href="{% url 'generate-csv' %}" class="btn btn-accent3">Generate CSV File</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title"><i class="fas fa-upload"></i> Upload Observations</h5>
+            <p class="card-text flex-grow-1">Submit your CSV file on the SCORE homepage. The system will process and store your data, notifying you of any errors while saving correctly formatted observations.</p>
+            <div>
+              <a href="{% url 'root' %}" class="btn btn-accent3">Go to Upload Page</a>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="col">
+        <div class="card h-100">
+          <div class="card-body d-flex flex-column">
+            <h5 class="card-title"><i class="fas fa-database"></i> Review Your Data</h5>
+            <p class="card-text flex-grow-1">After uploading, view your observations in the database. If you need to request changes, use our data change request form.</p>
+            <div>
+              <a href="{% url 'view-data' %}" class="btn btn-accent3 me-2">View Data</a>
+              <a href="{% url 'data-change' %}" class="btn btn-accent3">Request Changes</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-4">
+      <div class="card">
+        <div class="card-body">
+          <h5 class="card-title"><i class="fas fa-quote-right"></i> Cite SCORE in Your Research</h5>
+          <p class="card-text">When using SCORE data in your publications, please include the required acknowledgement paragraph:</p>
+          <blockquote class="text-center fst-italic border border-secondary rounded p-3">"This research made use of data and/or services provided by the International Astronomical Union's Centre for the Protection of the Dark and Quiet Sky from Satellite Constellation Interference (IAU CPS)."</blockquote>
+        </div>
+      </div>
+    </div>
+
+    <div class="alert alert-secondary mt-4">
+      <i class="fas fa-info-circle"></i> For a sample Python script to create a CSV from a Pandas DataFrame, and additional tools, visit our <a href="{% url 'tools' %}">Tools page</a>.
+    </div>
+  </div>
+</div>
+{% endblock %}

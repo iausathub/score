@@ -50,6 +50,7 @@ Development, push celery image tag to EKS Workloads:
     - Development, build celery image
   rules:
     - if: $CI_COMMIT_BRANCH == "develop"
+
       
 ###### Production Web Image ######
 Production, build web image:

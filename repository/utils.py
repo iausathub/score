@@ -1,9 +1,10 @@
 import csv
 import io
 import json
+import logging
 import zipfile
 from collections import namedtuple
-from typing import Tuple, Union
+from typing import Dict, Optional, Tuple, Union
 
 import requests
 from astropy.time import Time
@@ -16,6 +17,7 @@ from rest_framework.renderers import JSONRenderer
 from repository.models import Observation, Satellite
 from repository.serializers import ObservationSerializer
 
+logger = logging.getLogger(__name__)
 # Named tuple to represent additional data from SatChecker for each observation
 SatCheckerData = namedtuple(
     "SatCheckerData",
@@ -30,6 +32,8 @@ SatCheckerData = namedtuple(
         "dra_cosdec_deg_s",
         "sat_dec_deg",
         "sat_ra_deg",
+        "satellite_name",
+        "intl_designator",
     ],
 )
 
@@ -144,9 +148,9 @@ def add_additional_data(
         missing_fields.append("sat_number")
     if not observation_time:
         missing_fields.append("observation_time")
-    if not latitude:
+    if not latitude or not (-90 <= latitude <= 90):
         missing_fields.append("latitude")
-    if not longitude:
+    if not longitude or not (-180 <= longitude <= 180):
         missing_fields.append("longitude")
     if altitude is None:
         missing_fields.append("altitude")
@@ -155,10 +159,10 @@ def add_additional_data(
         missing_fields_str = ", ".join(missing_fields)
         return (
             "Satellite position check failed - check your data. "
-            f"Missing fields: {missing_fields_str}"
+            f"Missing or incorrect fields: {missing_fields_str}"
         )
     obs_time = Time(observation_time, format="isot", scale="utc")
-    url = "https://cps.iau.org/tools/satchecker/api/ephemeris/catalog-number/"
+    url = "https://satchecker.cps.iau.org/ephemeris/catalog-number/"
     params = {
         "catalog": sat_number,
         "latitude": latitude,
@@ -180,7 +184,7 @@ def add_additional_data(
     ):
         # Temporary fix for satellite name changes
 
-        url = "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/"
+        url = "https://satchecker.cps.iau.org/tools/names-from-norad-id/"
         params = {
             "id": sat_number,
         }
@@ -210,23 +214,40 @@ def add_additional_data(
     if isinstance(is_valid, str):
         if is_valid == "archival data":
             return SatCheckerData(
-                None, None, None, None, None, None, None, None, None, None
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                None,
+                satellite_name,
+                None,
             )
         return is_valid
 
     if is_valid and r.json():
-        data = r.json()[0]
+        satellite_data = r.json()["data"][0]
+        fields = r.json().get("fields", [])
+
+        # Mapping fields to their values for easier access
+        data_dict = dict(zip(fields, satellite_data))
         satellite_data = SatCheckerData(
-            phase_angle=round(float(data["PHASE_ANGLE-DEG"]), 7),
-            range_to_sat=round(float(data["RANGE-KM"]), 7),
-            range_rate=round(float(data["RANGE_RATE-KM_PER_SEC"]), 7),
-            illuminated=data["ILLUMINATED"],
-            alt_deg=round(float(data["ALTITUDE-DEG"]), 7),
-            az_deg=round(float(data["AZIMUTH-DEG"]), 7),
-            ddec_deg_s=round(float(data["DDEC-DEG_PER_SEC"]), 7),
-            dra_cosdec_deg_s=round(float(data["DRA_COSDEC-DEG_PER_SEC"]), 7),
-            sat_dec_deg=round(float(data["DECLINATION-DEG"]), 7),
-            sat_ra_deg=round(float(data["RIGHT_ASCENSION-DEG"]), 7),
+            phase_angle=round(data_dict.get("phase_angle_deg", 0), 7),
+            range_to_sat=round(data_dict.get("range_km", 0), 7),
+            range_rate=round(data_dict.get("range_rate_km_per_sec", 0), 7),
+            illuminated=data_dict.get("illuminated"),
+            alt_deg=round(data_dict.get("altitude_deg", 0), 7),
+            az_deg=round(data_dict.get("azimuth_deg", 0), 7),
+            ddec_deg_s=round(data_dict.get("ddec_deg_per_sec", 0), 7),
+            dra_cosdec_deg_s=round(data_dict.get("dra_cosdec_deg_per_sec", 0), 7),
+            sat_dec_deg=round(data_dict.get("declination_deg", 0), 7),
+            sat_ra_deg=round(data_dict.get("right_ascension_deg", 0), 7),
+            satellite_name=data_dict.get("name"),
+            intl_designator=data_dict.get("international_designator"),
         )
         return satellite_data
 
@@ -249,16 +270,19 @@ def validate_position(
     """
     if response.status_code != 200:
         return "Satellite position check failed - verify uploaded data is correct."
-    if not response.json():
+    response_data = response.json()
+    if not response_data.get("data"):
         return "Satellite with this ID not visible at this time and location"
 
+    satellite_info = response_data["data"][0]
     obs_time = Time(obs_time, format="isot")
-    tle_date = Time(response.json()[0]["TLE-DATE"], format="iso")
+    date_str = satellite_info[6].replace(" UTC", "")
+    tle_date = Time(date_str, format="iso", scale="utc")
     if (tle_date - obs_time).jd > 14:
         return "archival data"
-    if satellite_name and response.json()[0]["NAME"] != satellite_name:
+    if satellite_name and satellite_info[0] != satellite_name:
         return "Satellite name and number do not match"
-    if float(response.json()[0]["ALTITUDE-DEG"]) < -5:
+    if float(satellite_info[9]) < -5:
         return "Satellite below horizon at this time and location"
 
     return True
@@ -427,18 +451,31 @@ def get_csv_header() -> list[str]:
         "comments",
         "data_archive_link",
         "mpc_code",
+        "sat_ra_deg_satchecker",
+        "sat_dec_deg_satchecker",
+        "range_to_sat_km_satchecker",
+        "range_rate_sat_km_s_satchecker",
+        "ddec_deg_s_satchecker",
+        "dra_cosdec_deg_s_satchecker",
+        "phase_angle_deg_satchecker",
+        "alt_deg_satchecker",
+        "az_deg_satchecker",
+        "illuminated",
+        "international_designator",
     ]
     return header
 
 
-def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
+def create_csv(
+    observation_list: list[Observation], satellite_name: str
+) -> Tuple[io.BytesIO, str]:
     """
     Creates a CSV file from a list of observations and compresses it into a zip file.
 
     This function takes a list of Observation objects, generates a CSV file with the
     details of each observation, and compresses the CSV file into a zip file. If the
-    observation list is empty, it retrieves all observations from the database. The
-    CSV file includes a header row with the names of all the fields.
+    observation list is empty, it retrieves all observations from the database.
+    The CSV file includes a header row with the names of all the fields.
 
     Args:
         observation_list (list[Observation]): A list of Observation objects.
@@ -456,11 +493,27 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
 
     csv_lines = []
     for observation in observation_list:
+        # format ORC ID string properly - remove brackets and only have quotes around
+        # the field if there is more than one ORCID separated by commas (otherwise no
+        # quotes)
+
+        if isinstance(observation.obs_orc_id, list):
+            orc_id = ", ".join(observation.obs_orc_id)
+        else:
+            orc_id = observation.obs_orc_id.replace("[", "").replace("]", "")
+
+        if "," in orc_id:
+            orc_id = f'"{orc_id}"'
+
+        # format date/time to match upload format
+        obs_time_utc = observation.obs_time_utc.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
+        obs_time_utc = obs_time_utc[:-4] + "Z"  # Trim to 3 digits
+
         csv_lines.append(
             [
                 observation.satellite_id.sat_name,
                 observation.satellite_id.sat_number,
-                observation.obs_time_utc,
+                obs_time_utc,
                 observation.obs_time_uncert_sec,
                 observation.apparent_mag,
                 observation.apparent_mag_uncert,
@@ -471,7 +524,7 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
                 observation.instrument,
                 observation.obs_mode,
                 observation.obs_filter,
-                observation.obs_orc_id,
+                orc_id,
                 observation.sat_ra_deg,
                 observation.sat_dec_deg,
                 observation.sigma_2_ra,
@@ -484,6 +537,17 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
                 observation.comments,
                 observation.data_archive_link,
                 observation.mpc_code,
+                observation.sat_ra_deg_satchecker,
+                observation.sat_dec_deg_satchecker,
+                observation.range_to_sat_km_satchecker,
+                observation.range_rate_sat_km_s_satchecker,
+                observation.ddec_deg_s_satchecker,
+                observation.dra_cosdec_deg_s_satchecker,
+                observation.phase_angle,
+                observation.alt_deg_satchecker,
+                observation.az_deg_satchecker,
+                observation.illuminated,
+                observation.satellite_id.intl_designator,
             ]
         )
 
@@ -492,11 +556,15 @@ def create_csv(observation_list: list[Observation]) -> Tuple[io.BytesIO, str]:
     writer.writerow(header)
     writer.writerows(csv_lines)
 
-    zipfile_name = (
-        "satellite_observations_all.zip"
-        if all_observations
-        else "satellite_observations_search_results.zip"
-    )
+    if satellite_name:
+        zipfile_name = f"{satellite_name}_observations.zip"
+    else:
+        zipfile_name = (
+            "satellite_observations_all.zip"
+            if all_observations
+            else "satellite_observations_search_results.zip"
+        )
+
     zipped_file = io.BytesIO()
 
     with zipfile.ZipFile(zipped_file, "w") as zip:
@@ -526,14 +594,18 @@ def get_satellite_name(norad_id):
     str or None: The name of the satellite associated with the NORAD ID, or None if no
     satellite was found or an error occurred.
     """
-    url = "https://cps.iau.org/tools/satchecker/api/tools/names-from-norad-id/"
+    url = "https://satchecker.cps.iau.org/tools/names-from-norad-id/"
     params = {"id": norad_id}
     try:
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
+
         if not response.json() or response.json()[0] == []:
             return None
-        return response.json()[0]["name"]
+        data = response.json()
+        for item in data:
+            if item["is_current_version"] is True:
+                return item["name"]
     except requests.exceptions.RequestException:
         return None
 
@@ -558,13 +630,58 @@ def get_norad_id(satellite_name):
     str or None: The NORAD ID of the satellite associated with the name, or None if no
     satellite was found or an error occurred.
     """
-    url = "https://cps.iau.org/tools/satchecker/api/tools/norad-ids-from-name/"
+    url = "https://satchecker.cps.iau.org/tools/norad-ids-from-name/"
     params = {"name": satellite_name}
     try:
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
-        if not response.json():
+        data = response.json()
+        if not data:
             return None
-        return response.json()[0]["norad_id"]
+
+        for item in data:
+            if item["is_current_version"] is True:
+                return item["norad_id"]
+
     except requests.exceptions.RequestException:
         return None
+
+
+# Query SatChecker API for satellite metadata
+def get_satellite_metadata(satellite_number: str) -> Optional[Dict[str, Optional[str]]]:
+    """
+    Query SatChecker API for satellite metadata.
+
+    Parameters:
+        satellite_number (str): The satellite catalog number.
+
+    Returns:
+        Optional[Dict[str, Optional[str]]]: A dictionary containing satellite metadata,
+        or None if the request fails or no data is found.
+    """
+    satchecker_url = f"https://satchecker.cps.iau.org/tools/get-satellite-data/?id={satellite_number}&id_type=catalog"
+
+    try:
+        response = requests.get(satchecker_url, timeout=10)
+        response.raise_for_status()
+        satellite_data = response.json()
+
+        if satellite_data:
+            metadata = satellite_data[0]
+            return {
+                "rcs_size": metadata.get("rcs_size"),
+                "object_type": metadata.get("object_type"),
+                "launch_date": metadata.get("launch_date"),
+                "decay_date": metadata.get("decay_date"),
+                "name": metadata.get("name"),
+                "norad_id": metadata.get("norad_id"),
+                "international_designator": metadata.get("international_designator"),
+            }
+        else:
+            logger.warning(f"No metadata found for satellite {satellite_number}")
+    except requests.RequestException as e:
+        logger.error(
+            f"Error fetching metadata for satellite {satellite_number}: {str(e)}"
+        )
+
+    return None

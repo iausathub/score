@@ -1,0 +1,157 @@
+<div id="satellite_pos_lookup" class="border border-2 border-tertiary" role="form">
+    <style>
+        /* This will apply to all number input fields */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+        /* This will apply to Firefox */
+        input[type="number"] {
+            -moz-appearance: textfield;
+            appearance: textfield;
+        }
+    </style>
+    <div class="container-fluid p-4">
+        <h4 class="text-center">Satellite Position Lookup</h4>
+        <form action="{% url 'satellite-pos-lookup' %}" method="post" enctype="multipart/form-data" id="satellite-pos-lookup">
+            {% csrf_token %}
+            <p>
+                Use this tool to find the position of a satellite in the sky (azimuth, altitude, right ascension, and declination).
+                Enter the location of the observer, date/time, and satellite identifier to search for
+                the satellite's position. The observer location should be entered in decimal degrees for
+                latitude and longitude, and in meters for altitude.
+            </p>
+            <div class="text-end">
+                <p><span class="text-danger">*</span> denotes required field</p>
+            </div>
+            <div class="row d-flex" style="min-height: 100%;">
+                <div class="col">
+                    <div class="card h-100">
+                            <div class="card-header fw-bold">
+                                Observer Location
+                            </div>
+                            <div class="card-body flex-fill">
+                                <div class="form-group pb-2">
+                                    <label for="obs_lat">Latitude <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="obs_lat" id="obs_lat" >
+                                    <p id="latitude_help" class="form-text text-muted">
+                                        Decimal degrees - positive is north, negative is south.
+                                    </p>
+                                </div>
+                                <div class="form-group pb-2">
+                                    <label for="obs_long">Longitude <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="obs_long" id="obs_long" >
+                                    <p id="longitude_help" class="form-text text-muted">
+                                        Decimal degrees - positive is east, negative is west.
+                                    </p>
+                                </div>
+                                <div class="form-group">
+                                    <label for="obs_alt">Altitude <span class="text-danger">*</span></label>
+                                    <input type="number" class="form-control" name="obs_alt" id="obs_alt" >
+                                    <p id="altitude_help" class="form-text text-muted">
+                                        Meters above sea level.
+                                    </p>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100">
+                            <div class="card-header fw-bold">
+                                Date/Time (UTC)
+                            </div>
+                            <div class="card-body flex-fill">
+                                <div class="row pb-2">
+                                    <div class="col-4 form-group">
+                                        <label for="day">Day <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" name="day" id="day" >
+                                    </div>
+                                    <div class="col-4 form-group">
+                                        <label for="month">Month <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" name="month" id="month" >
+                                    </div>
+                                    <div class="col-4 form-group">
+                                        <label for="year">Year <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" name="year" id="year" >
+                                    </div>
+                                </div>
+                                <div class="row">
+                                    <div class="col-4 form-group">
+                                        <label for="hour">Hour <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" name="hour" id="hour" >
+                                    </div>
+                                    <div class="col-4 form-group">
+                                        <label for="minutes">Minutes <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" name="minutes" id="minutes" >
+                                    </div>
+                                    <div class="col-4 form-group">
+                                        <label for="seconds">Seconds <span class="text-danger">*</span></label>
+                                        <input type="number" class="form-control" name="seconds" id="seconds" >
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="card h-100">
+                            <div class="card-header fw-bold">
+                                Satellite Identifier <span class="text-danger">*</span>
+                            </div>
+                            <div class="card-body flex-fill">
+                                <label for="seconds">Name</label>
+                                <input type="text" class="form-control" name="satellite_name" id="sat_name" >
+                                <div class="py-2" style="text-align: center;">
+                                    -- or --
+                                </div>
+                                <label for="seconds">NORAD ID</label>
+                                <input type="text" class="form-control" name="norad_id" id="norad_id" >
+
+                            </div>
+                    </div>
+                </div>
+            </div>
+            <div class="p-2 mt-4 alert bg-light border border-2 border-accent3  row" id="results" hidden>
+                <div class="col">
+                    <div class="row">
+                        <div class="col text-end">Satellite name:</div>
+                        <div class="col" id="pos_check_name"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col  text-end">NORAD ID:</div>
+                        <div class="col" id="pos_check_id"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-end">Altitude:</div>
+                        <div class="col" id="pos_check_altitude"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-end">Azimuth:</div>
+                        <div class="col" id="pos_check_azimuth"></div>
+                    </div>
+                </div>
+                <div class="col">
+                    <div class="row">
+                        <div class="col text-end">Right Ascension:</div>
+                        <div class="col" id="pos_check_ra"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-end">Declination:</div>
+                        <div class="col"id="pos_check_dec"></div>
+                    </div>
+                    <div class="row">
+                        <div class="col text-end ">TLE Date:</div>
+                        <div class="col"id="pos_check_date"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <p class="p-2 text-danger" id="sat_pos_lookup_error"></p>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary mt-3" name="submit" id="lookup_btn">Search</button>
+                <button type="reset" class="btn btn-primary mt-3" name="reset" id="reset_btn">Reset</button>
+            </div>
+        </form>
+    </div>
+</div>

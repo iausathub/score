@@ -41,6 +41,8 @@ def process_upload(
     observation_count = len(data)
     obs_num = 0
     confirmation_email = False
+    obs_error_reference = None
+
     try:
         for column in data:
             # Check for data from the sample CSV file
@@ -50,13 +52,20 @@ def process_upload(
                 )
 
             if len(column) != 27:
-                raise UploadError("Incorrect number of fields in csv file.")
+                raise UploadError(
+                    f"Incorrect number of fields in csv file: expected 27, got {len(column)}."  # noqa: E501
+                )
 
             # Satellite names are always upper case for some reason
             column[0] = column[0].upper()
             # Check if satellite is above the horizon
             additional_data = add_additional_data(
-                column[0], column[1], column[2], column[6], column[7], column[8]
+                column[0],
+                column[1],
+                column[2],
+                float(column[6]),
+                float(column[7]),
+                float(column[8]),
             )
 
             obs_error_reference = (
@@ -73,23 +82,35 @@ def process_upload(
                 )
                 raise UploadError(error_message + " - " + obs_error_reference)
 
+            try:
+                obs_lat_deg = float(column[6])
+                obs_long_deg = float(column[7])
+                obs_alt_m = float(column[8])
+            except ValueError as e:
+                raise UploadError(
+                    f"Invalid value: {str(e)} - {obs_error_reference}"
+                ) from e
+
             satellite, sat_created = Satellite.objects.get_or_create(
-                sat_name=column[0],
+                sat_name=column[0] if column[0] else additional_data.satellite_name,
                 sat_number=column[1],
                 defaults={
-                    "sat_name": column[0],
+                    "sat_name": (
+                        column[0] if column[0] else additional_data.satellite_name
+                    ),
                     "sat_number": column[1],
                     "date_added": timezone.now(),
+                    "intl_designator": additional_data.intl_designator,
                 },
             )
             location, loc_created = Location.objects.get_or_create(
-                obs_lat_deg=column[6],
-                obs_long_deg=column[7],
-                obs_alt_m=column[8],
+                obs_lat_deg=obs_lat_deg,
+                obs_long_deg=obs_long_deg,
+                obs_alt_m=obs_alt_m,
                 defaults={
-                    "obs_lat_deg": column[6],
-                    "obs_long_deg": column[7],
-                    "obs_alt_m": column[8],
+                    "obs_lat_deg": obs_lat_deg,
+                    "obs_long_deg": obs_long_deg,
+                    "obs_alt_m": obs_alt_m,
                     "date_added": timezone.now(),
                 },
             )
@@ -191,17 +212,35 @@ def process_upload(
         raise UploadError(error_message) from e
 
     except ValidationError as e:
-        if len(e.messages) > 1:
-            raise UploadError(e.messages[1]) from e
-
+        if hasattr(e, "message_dict"):
+            error_message = ""
+            if obs_error_reference:
+                error_message += obs_error_reference + " - "
+            for field, messages in e.message_dict.items():
+                if field == "__all__":
+                    error_message += "Notes: "
+                else:
+                    error_message += f"Field '{field}':"
+                for message in messages:
+                    error_message += f" {message}"
+                error_message += "\n"
+            raise UploadError(error_message) from e
         else:
-            message_text = ""
-            for key in e.message_dict.keys():
-                message_text += f"{key}: {e.message_dict[key][0]}\n"
-            raise UploadError(message_text) from e
+            if len(e.messages) > 1:
+                error_message = ""
+                if obs_error_reference:
+                    error_message += obs_error_reference + " - "
+                for message in e.messages:
+                    error_message += message + "\n"
+                raise UploadError(error_message) from e
+            else:
+                raise UploadError(e.messages[0]) from e
 
     except Exception as e:
-        raise UploadError(e) from e
+        if obs_error_reference:
+            raise UploadError(str(e) + " - " + obs_error_reference) from e
+        else:
+            raise UploadError(e) from e
 
     send_confirmation_email(obs_ids, confirmation_email)
 
