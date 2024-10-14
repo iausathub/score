@@ -3,8 +3,10 @@ $(document).on('click', '#obsTable tr, #showObsModal', function () {
     var escapedJSON = rowData.replace(/\\u0022/g, '\"').replace(/\\u002D/g, '-').replace(/b\\u0027/g, '').replace(/\\u0027/g, '');
 
     var observation = JSON.parse(escapedJSON);
+    var satelliteDataViewUrl = '/satellite/' + observation.satellite_id.sat_number + '/';
+
     $('#observation_id_label').text(observation.id);
-    $('#satellite_name').text(observation.satellite_id.sat_name);
+    $('#satellite_name').html('<a href="' + satelliteDataViewUrl + '">'+ observation.satellite_id.sat_name +'</a>');
     $('#satellite_number').text(observation.satellite_id.sat_number);
     $('#obs_time_utc').text(observation.obs_time_utc);
     $('#obs_time_uncert').text(observation.obs_time_uncert_sec);

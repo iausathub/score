@@ -19,7 +19,9 @@ crossorigin=""/>
 {% endcompress %}
 
 <head>
+  {% if recaptcha_public_key %}
   <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_public_key }}"></script>
+  {% endif %}
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
