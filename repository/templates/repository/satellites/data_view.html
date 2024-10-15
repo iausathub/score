@@ -79,27 +79,27 @@
                 data-side-pagination="server"
                 data-url="{% url 'satellite-observations' satellite.sat_number %}"
                 data-sort-name="added" data-sort-order="desc" data-classes="table"
-                class="table table-hover fs-6" id="obsTable">
+                class="table table-hover fs-6" id="obsTable"
+                data-row-attributes="rowAttributes">
                 <thead>
                     <tr>
-                        <th data-field="date_added" scope="col" data-sortable="true" data-visible="true">Date added</th>
+                        <th data-field="date_added" scope="col" data-sortable="true" data-visible="true">Date added (UTC)</th>
                         <th data-field="added" scope="col" data-sortable="true" data-visible="false">Date_added_timestamp
                         </th>
-                        <th data-field="sat_name" scope="col" data-sortable="true">Name</th>
-                        <th data-field="sat_number" scope="col" data-sortable="true">NORAD ID</th>
-                        <th data-field="obs_time_utc"scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed</th>
+                        <th data-field="obs_time_utc"scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed (UTC)</th>
                         <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
                         </th>
                         <th data-field="apparent_mag" scope="col" data-sortable="true">Mag</th>
-                        <th data-field="obs_lat_deg" scope="col" data-sortable="true">Latitude</th>
-                        <th data-field="obs_long_deg" scope="col" data-sortable="true">Longitude</th>
-                        <th data-field="obs_alt_m" scope="col" data-sortable="true">Altitude</th>
+                        <th data-field="obs_lat_deg" scope="col" data-sortable="true">Latitude (deg)</th>
+                        <th data-field="obs_long_deg" scope="col" data-sortable="true">Longitude (deg)</th>
+                        <th data-field="obs_alt_m" scope="col" data-sortable="true">Altitude (m)</th>
                         <th data-field="obs_mode" scope="col" data-sortable="true">Obs. mode</th>
                         <th data-field="obs_orc_id" scope="col" data-sortable="true">Observer ORCID</th>
+                        <th data-field="observation_json" data-visible="false" data-formatter="attachJsonToRow">JSON Data</th>
                     </tr>
                 </thead>
-                <tbody class="table-group-divider">
-
+                <tbody class="table-group-divider"
+                        class="clickable">
                 </tbody>
             </table>
             </div>
@@ -150,6 +150,27 @@
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
+
+    var obsTable = document.getElementById('obsTable');
+    obsTable.addEventListener('load-success.bs.table', function(event) {
+      console.log('Table loaded');
+        var data = event.detail;
+        data.rows.forEach(function(row, index) {
+            var rowElement = obsTable.querySelectorAll('tbody tr')[index];
+            console.log(rowElement);
+            rowElement.setAttribute('observation-json', JSON.stringify(row.observation_json));
+        });
+    });
 });
+
+    function rowAttributes(row, index) {
+        return {
+            'data-observation-json': row.observation_json
+        };
+    }
+
+    function attachJsonToRow(value, row, index) {
+        return '<span class="d-none">' + value + '</span>';
+    }
 </script>
 {% endblock %}
