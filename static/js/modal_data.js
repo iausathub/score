@@ -29,7 +29,7 @@ function parseObservationData(data) {
         var escapedJSON = data.replace(/\\u0022/g, '\"').replace(/\\u002D/g, '-').replace(/b\\u0027/g, '').replace(/\\u0027/g, '');
         return JSON.parse(escapedJSON);
     } else if (data && data.observation_json) {
-        // For server-side pagination (data_view.html)
+        // For server-side pagination (currently only data_view.html)
         return JSON.parse(data.observation_json);
     } else {
         console.error('Invalid data format:', data);
@@ -91,14 +91,4 @@ function populateIfExists(elementId, object) {
     if (object.hasOwnProperty(elementId) && document.getElementById(elementId)) {
         document.getElementById(elementId).textContent = object[elementId];
     }
-}
-
-function attachJsonToRow(value, row, index) {
-    return '<span class="d-none">' + value + '</span>';
-}
-
-function rowAttributes(row, index) {
-    return {
-        'data-observation-json': row.observation_json
-    };
 }
