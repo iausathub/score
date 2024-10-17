@@ -1,6 +1,7 @@
 import csv
 import datetime
 import io
+import json
 import logging
 import zipfile
 from typing import Union
@@ -9,7 +10,9 @@ import requests
 from astropy.time import Time
 from celery.result import AsyncResult
 from django.conf import settings
-from django.db.models import Avg
+from django.core.paginator import Paginator
+from django.core.serializers.json import DjangoJSONEncoder
+from django.db.models import Avg, Count
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import redirect, render
 from django.template import loader
@@ -457,7 +460,7 @@ def satellites(request):
     Returns:
         HttpResponse: The rendered HTML page displaying the list of satellites.
     """
-    satellites = Satellite.objects.all()
+    satellites = Satellite.objects.annotate(num_observations=Count("observations"))
 
     return render(
         request,
@@ -494,6 +497,7 @@ def satellite_data_view(request, satellite_number):
         return render(request, "404.html", context, status=404)
 
     observations = satellite.observations.all()
+
     if not observations:
         context = {
             "error_title": "No Observations Found",
@@ -502,9 +506,12 @@ def satellite_data_view(request, satellite_number):
         }
         return render(request, "404.html", context, status=404)
 
+    serialized_observations = ObservationSerializer(observations, many=True).data
     observations_and_json = [
-        (observation, JSONRenderer().render(ObservationSerializer(observation).data))
-        for observation in observations
+        (observation, json.dumps(serialized_observation, cls=DjangoJSONEncoder))
+        for observation, serialized_observation in zip(
+            observations, serialized_observations
+        )
     ]
 
     # get satellite metadata from SatChecker
@@ -524,6 +531,7 @@ def satellite_data_view(request, satellite_number):
     average_magnitude = round(
         observations.aggregate(Avg("apparent_mag"))["apparent_mag__avg"], 6
     )
+
     first_observation_date = observations.order_by("obs_time_utc").first().obs_time_utc
     most_recent_observation_date = (
         observations.order_by("-obs_time_utc").first().obs_time_utc
@@ -550,7 +558,9 @@ def satellite_data_view(request, satellite_number):
         ),
         "obs_ids": [observation.id for observation in observations],
     }
-    return render(request, "repository/satellites/data_view.html", context)
+
+    response = render(request, "repository/satellites/data_view.html", context)
+    return response
 
 
 @csrf_exempt
@@ -796,3 +806,42 @@ def last_observer_location(request):
             "error": "No observations found for the provided ORCID.",
         }
     )
+
+
+@csrf_exempt
+def satellite_observations(request, satellite_number):
+    try:
+        satellite = Satellite.objects.get(sat_number=satellite_number)
+    except Satellite.DoesNotExist:
+        return JsonResponse({"error": "Satellite not found"}, status=404)
+
+    observations = satellite.observations.all()
+
+    limit = int(request.GET.get("limit", 5))
+    offset = int(request.GET.get("offset", 0))
+    paginator = Paginator(observations, limit)
+    page_number = offset // limit + 1
+    page_obj = paginator.get_page(page_number)
+
+    observations_data = [
+        {
+            "date_added": observation.date_added.strftime("%b. %d, %Y %I:%M %p"),
+            "added": observation.date_added.timestamp(),
+            "sat_name": observation.satellite_id.sat_name,
+            "sat_number": observation.satellite_id.sat_number,
+            "obs_time_utc": observation.obs_time_utc.strftime("%b. %d, %Y %I:%M %p"),
+            "observed": observation.obs_time_utc.timestamp(),
+            "apparent_mag": round(observation.apparent_mag, 4),
+            "obs_lat_deg": round(observation.location_id.obs_lat_deg, 4),
+            "obs_long_deg": round(observation.location_id.obs_long_deg, 4),
+            "obs_alt_m": round(observation.location_id.obs_alt_m, 4),
+            "obs_mode": observation.obs_mode,
+            "obs_orc_id": observation.obs_orc_id,
+            "observation_json": json.dumps(
+                ObservationSerializer(observation).data, cls=DjangoJSONEncoder
+            ),
+        }
+        for observation in page_obj
+    ]
+
+    return JsonResponse({"total": paginator.count, "rows": observations_data})

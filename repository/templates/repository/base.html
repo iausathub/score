@@ -19,7 +19,9 @@ crossorigin=""/>
 {% endcompress %}
 
 <head>
+  {% if recaptcha_public_key %}
   <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_public_key }}"></script>
+  {% endif %}
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
@@ -176,19 +178,19 @@ crossorigin=""/>
             <h6 class="text-uppercase fw-bold">Data</h6>
             <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: #4d85ff; height: 2px" />
             <p>
-              <a href="index" class="text-white">Upload observation file</a>
+              <a href="{% url 'index' %}" class="text-white">Upload observation file</a>
             </p>
             <p>
-              <a href="generate-csv" class="text-white">Generate CSV file</a>
+              <a href="{% url 'generate-csv' %}" class="text-white">Generate CSV file</a>
             </p>
             <p>
-              <a href="search" class="text-white">Search</a>
+              <a href="{% url 'search' %}" class="text-white">Search</a>
             </p>
             <p>
-              <a href="view" class="text-white">View recent observations</a>
+              <a href="{% url 'view-data' %}" class="text-white">View recent observations</a>
             </p>
             <p>
-              <a href="data-change" class="text-white">Data change request</a>
+              <a href="{% url 'data-change' %}" class="text-white">Data change request</a>
             </p>
           </div>
           <!-- Grid column -->
@@ -199,15 +201,15 @@ crossorigin=""/>
             <h6 class="text-uppercase fw-bold">Resources</h6>
             <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: #4d85ff; height: 2px" />
             <p>
-              <a href="data-format" class="text-white">Data format</a>
+              <a href="{% url 'data-format' %}" class="text-white">Data format</a>
             </p>
             <p>
-              <a href="about" class="text-white">About</a>
+              <a href="{% url 'about' %}" class="text-white">About</a>
             </p>
             <p>
-              <a href="tools" class="text-white">Tools</a>
+              <a href="{% url 'tools' %}" class="text-white">Tools</a>
             </p>
-            <p><i class="fab fa-github"></i> <a href="https://github.com/iausathub/score" class="text-white">Github</a>
+            <p><i class="fab fa-github"></i> <a href="https://github.com/iausathub/score" class="text-white">GitHub</a>
             </p>
             <p><i class="fas fa-envelope mr-3"></i> <a href="mailto:sathub@cps.iau.org"
                 class="text-white">sathub@cps.iau.org</a></p>

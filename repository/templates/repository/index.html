@@ -212,15 +212,23 @@
       var observerLocations = JSON.parse("{{ observer_locations|escapejs }}");
       var group = L.layerGroup().addTo(map);
 
+      var maxCount = Math.max(...observerLocations.map(location => location.count));
+      console.log(maxCount);
+
       for (var i = 0; i < observerLocations.length; i++) {
           var location = observerLocations[i];
+          //var radius = location.count * 200;
+          //radius = Math.min(radius,1200000);
+          // Normalize the radius based on the maximum count
+          var radius = (location.count / maxCount) * 800000;
+          radius = Math.max(radius, 10000);
           var circle = L.circle([location.location_id__obs_lat_deg, location.location_id__obs_long_deg], {
               color: 'red',
               fillColor: '#f03',
               fillOpacity: 0.5,
               // this number is in meters, so as the number of observations
               // increases, the size might need to be revisited/scaled/limited
-              radius: location.count * 200
+              radius: radius
           }).addTo(group);
 
           // add popup on click with observer location details (exact location and number of observations)

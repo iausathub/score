@@ -2,7 +2,6 @@ document.addEventListener('DOMContentLoaded', function() {
   const observationsDataElement = document.getElementById('observations-data');
 
   if (!observationsDataElement) {
-    console.log('Observations data element not found. Charts will not be rendered.');
     return;
   }
 
@@ -46,8 +45,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (brightnessChart) {
       brightnessChart.destroy();
     }
-
-    console.log('Creating brightness chart with data:', brightness_data);
 
     brightnessChart = new Chart(
       document.getElementById('brightness_chart'),
@@ -154,7 +151,6 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     );
 
-    console.log('Brightness chart created:', brightnessChart);
     return brightnessChart;
   }
 
@@ -170,8 +166,6 @@ document.addEventListener('DOMContentLoaded', function() {
     if (phaseAngleChart) {
       phaseAngleChart.destroy();
     }
-
-    console.log('Creating phase angle chart with data:', phase_angle_data);
 
     // Calculate the min and max values from the data
     phaseAngleDataMin = Math.floor(Math.min(...phase_angle_data.map(item => item.x))) - 5;
@@ -292,12 +286,10 @@ document.addEventListener('DOMContentLoaded', function() {
       }
     );
 
-    console.log('Phase angle chart created:', phaseAngleChart);
     return phaseAngleChart;
   }
 
   function updateCharts() {
-    console.log('Updating charts. Current theme:', getCurrentTheme());
     brightnessChart = createBrightnessChart();
     phaseAngleChart = createPhaseAngleChart();
   }
@@ -312,14 +304,11 @@ document.addEventListener('DOMContentLoaded', function() {
   });
 
   // Handle theming
-  console.log('DOM content loaded. Initial theme:', getCurrentTheme());
   updateCharts();
 
   document.querySelectorAll('[data-bs-theme-value]').forEach(toggle => {
     toggle.addEventListener('click', () => {
-      console.log('Theme toggle clicked');
       setTimeout(() => {
-        console.log('Delayed update. Current theme:', getCurrentTheme());
         updateCharts();
       }, 100);
     });

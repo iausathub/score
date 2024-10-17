@@ -12,13 +12,14 @@
         <div class="row justify-content-center">
             <div class="col-12 col-lg-10 col-xl-8">
                 <table data-toggle="table" data-pagination="true" data-search="true" data-page-list="[25, 50, 100, 200, All]"
-                    data-page-size="25" data-sort-name="added" data-sort-order="desc" data-classes="table"
+                    data-page-size="25" data-sort-name="num_obs" data-sort-order="desc" data-classes="table"
                     class="table table-hover fs-6" id="satTable">
                     <thead>
                         <tr>
                             <th scope="col" data-sortable="true" class="col-3">Name</th>
                             <th scope="col" data-sortable="true" class="col-3">NORAD ID</th>
                             <th scope="col" data-sortable="true" class="col-3">International Designator/COSPAR ID</th>
+                            <th data-field="num_obs" scope="col" data-sortable="true" class="col-3">Number of Observations</th>
                         </tr>
                     </thead>
                     <tbody class="table-group-divider">
@@ -27,6 +28,7 @@
                             <td scope="row">{{ satellite.sat_name }}</td>
                             <td scope="row">{{ satellite.sat_number }}</td>
                             <td scope="row">{{ satellite.intl_designator|default:"N/A" }}</td>
+                            <td scope="row">{{ satellite.num_observations }}</td>
                         </tr>
                         {% endfor %}
                     </tbody>
