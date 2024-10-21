@@ -3,10 +3,11 @@ import io
 import logging
 import time
 import zipfile
-from typing import Tuple
+from typing import List, Tuple
 
 from repository.models import Observation
 
+logger = logging.getLogger(__name__)
 
 # CSV header - same as upload format minus the email address for privacy
 def get_csv_header() -> list[str]:
@@ -62,11 +63,8 @@ def get_csv_header() -> list[str]:
     return header
 
 
-logger = logging.getLogger(__name__)
-
-
 def create_csv(
-    observation_list: list[Observation], satellite_name: str
+    observation_list: List[Observation], satellite_name: str
 ) -> Tuple[io.BytesIO, str]:
     """
     Creates a CSV file from a list of observations and compresses it into a zip file.
@@ -77,7 +75,7 @@ def create_csv(
     The CSV file includes a header row with the names of all the fields.
 
     Args:
-        observation_list (list[Observation]): A list of Observation objects.
+        observation_list (List[Observation]): A list of Observation objects.
 
     Returns:
         Tuple[io.BytesIO, str]: A tuple containing the compressed zip file and the
@@ -95,74 +93,85 @@ def create_csv(
     header = get_csv_header()
     logger.info("CSV header retrieved")
 
-    csv_lines = []
-    csv_start_time = time.time()
+    # Use BytesIO for the zip file
+    zipped_file = io.BytesIO()
 
-    for observation in observation_list:
-        # format ORC ID string properly
-        if isinstance(observation.obs_orc_id, list):
-            orc_id = ", ".join(observation.obs_orc_id)
-        else:
-            orc_id = observation.obs_orc_id.replace("[", "").replace("]", "")
+    with zipfile.ZipFile(zipped_file, "w") as zip:
+        # Create a StringIO stream for the CSV
+        with io.StringIO() as csv_file:
+            writer = csv.writer(csv_file)
+            writer.writerow(header)
 
-        if "," in orc_id:
-            orc_id = f'"{orc_id}"'
+            # Write rows in chunks
+            chunk_size = 1000  # Adjust chunk size as needed
+            for i in range(0, len(observation_list), chunk_size):
+                chunk = observation_list[i : i + chunk_size]
+                csv_lines = []
+                for observation in chunk:
+                    # format ORC ID string properly
+                    orc_id = (
+                        ", ".join(observation.obs_orc_id)
+                        if isinstance(observation.obs_orc_id, list)
+                        else observation.obs_orc_id.replace("[", "").replace("]", "")
+                    )
+                    if "," in orc_id:
+                        orc_id = f'"{orc_id}"'
 
-        # format date/time to match upload format
-        obs_time_utc = observation.obs_time_utc.strftime("%Y-%m-%dT%H:%M:%S.%fZ")
-        obs_time_utc = obs_time_utc[:-4] + "Z"  # Trim to 3 digits
+                    # format date/time to match upload format
+                    obs_time_utc = (
+                        observation.obs_time_utc.strftime("%Y-%m-%dT%H:%M:%S.%fZ")[:-4]
+                        + "Z"
+                    )
 
-        csv_lines.append(
-            [
-                observation.satellite_id.sat_name,
-                observation.satellite_id.sat_number,
-                obs_time_utc,
-                observation.obs_time_uncert_sec,
-                observation.apparent_mag,
-                observation.apparent_mag_uncert,
-                observation.location_id.obs_lat_deg,
-                observation.location_id.obs_long_deg,
-                observation.location_id.obs_alt_m,
-                observation.limiting_magnitude,
-                observation.instrument,
-                observation.obs_mode,
-                observation.obs_filter,
-                orc_id,
-                observation.sat_ra_deg,
-                observation.sat_dec_deg,
-                observation.sigma_2_ra,
-                observation.sigma_ra_sigma_dec,
-                observation.sigma_2_dec,
-                observation.range_to_sat_km,
-                observation.range_to_sat_uncert_km,
-                observation.range_rate_sat_km_s,
-                observation.range_rate_sat_uncert_km_s,
-                observation.comments,
-                observation.data_archive_link,
-                observation.mpc_code,
-                observation.sat_ra_deg_satchecker,
-                observation.sat_dec_deg_satchecker,
-                observation.range_to_sat_km_satchecker,
-                observation.range_rate_sat_km_s_satchecker,
-                observation.ddec_deg_s_satchecker,
-                observation.dra_cosdec_deg_s_satchecker,
-                observation.phase_angle,
-                observation.alt_deg_satchecker,
-                observation.az_deg_satchecker,
-                observation.illuminated,
-                observation.satellite_id.intl_designator,
-            ]
-        )
+                    csv_lines.append(
+                        [
+                            observation.satellite_id.sat_name,
+                            observation.satellite_id.sat_number,
+                            obs_time_utc,
+                            observation.obs_time_uncert_sec,
+                            observation.apparent_mag,
+                            observation.apparent_mag_uncert,
+                            observation.location_id.obs_lat_deg,
+                            observation.location_id.obs_long_deg,
+                            observation.location_id.obs_alt_m,
+                            observation.limiting_magnitude,
+                            observation.instrument,
+                            observation.obs_mode,
+                            observation.obs_filter,
+                            orc_id,
+                            observation.sat_ra_deg,
+                            observation.sat_dec_deg,
+                            observation.sigma_2_ra,
+                            observation.sigma_ra_sigma_dec,
+                            observation.sigma_2_dec,
+                            observation.range_to_sat_km,
+                            observation.range_to_sat_uncert_km,
+                            observation.range_rate_sat_km_s,
+                            observation.range_rate_sat_uncert_km_s,
+                            observation.comments,
+                            observation.data_archive_link,
+                            observation.mpc_code,
+                            observation.sat_ra_deg_satchecker,
+                            observation.sat_dec_deg_satchecker,
+                            observation.range_to_sat_km_satchecker,
+                            observation.range_rate_sat_km_s_satchecker,
+                            observation.ddec_deg_s_satchecker,
+                            observation.dra_cosdec_deg_s_satchecker,
+                            observation.phase_angle,
+                            observation.alt_deg_satchecker,
+                            observation.az_deg_satchecker,
+                            observation.illuminated,
+                            observation.satellite_id.intl_designator,
+                        ]
+                    )
 
-    csv_end_time = time.time()
-    logger.info(f"CSV lines creation took {csv_end_time - csv_start_time:.4f} seconds")
+                # Write the chunk to the CSV file
+                writer.writerows(csv_lines)
 
-    output = io.StringIO()
-    writer = csv.writer(output)
-    writer.writerow(header)
-    writer.writerows(csv_lines)
+            # Write the CSV content to the zip file as bytes
+            zip.writestr("observations.csv", csv_file.getvalue().encode("utf-8"))
 
-    zipfile_start_time = time.time()
+    zipped_file.seek(0)
     if satellite_name:
         zipfile_name = f"{satellite_name}_observations.zip"
     else:
@@ -172,18 +181,9 @@ def create_csv(
             else "satellite_observations_search_results.zip"
         )
 
-    zipped_file = io.BytesIO()
-
-    with zipfile.ZipFile(zipped_file, "w") as zip:
-        zip.writestr("observations.csv", output.getvalue())
-    zipped_file.seek(0)
-
-    zipfile_end_time = time.time()
+    logger.info(f"Zipping the CSV file took {time.time() - start_time:.4f} seconds")
     logger.info(
-        f"Zipping the CSV file took {zipfile_end_time - zipfile_start_time:.4f} seconds"
+        f"Total create_csv execution time: {time.time() - start_time:.4f} seconds"
     )
-
-    total_time = time.time() - start_time
-    logger.info(f"Total create_csv execution time: {total_time:.4f} seconds")
 
     return zipped_file, zipfile_name
