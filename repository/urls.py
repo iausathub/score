@@ -37,4 +37,9 @@ urlpatterns = [
         name="satellite-data-view",
     ),
     path("satellites", views.satellites, name="satellites"),
+    path(
+        "satellite/<int:satellite_number>/observations/",
+        views.satellite_observations,
+        name="satellite-observations",
+    ),
 ]
