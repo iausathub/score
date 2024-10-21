@@ -1,5 +1,7 @@
 import csv
 import io
+import logging
+import time
 import zipfile
 from typing import Tuple
 
@@ -60,6 +62,9 @@ def get_csv_header() -> list[str]:
     return header
 
 
+logger = logging.getLogger(__name__)
+
+
 def create_csv(
     observation_list: list[Observation], satellite_name: str
 ) -> Tuple[io.BytesIO, str]:
@@ -78,19 +83,23 @@ def create_csv(
         Tuple[io.BytesIO, str]: A tuple containing the compressed zip file and the
         name of the zip file.
     """
+    logger.info("Starting create_csv function")
+    start_time = time.time()
+
     all_observations = False
     if not observation_list:
+        logger.info("No observation list provided, retrieving all observations")
         observation_list = Observation.objects.all()
         all_observations = True
 
     header = get_csv_header()
+    logger.info("CSV header retrieved")
 
     csv_lines = []
-    for observation in observation_list:
-        # format ORC ID string properly - remove brackets and only have quotes around
-        # the field if there is more than one ORCID separated by commas (otherwise no
-        # quotes)
+    csv_start_time = time.time()
 
+    for observation in observation_list:
+        # format ORC ID string properly
         if isinstance(observation.obs_orc_id, list):
             orc_id = ", ".join(observation.obs_orc_id)
         else:
@@ -145,11 +154,15 @@ def create_csv(
             ]
         )
 
+    csv_end_time = time.time()
+    logger.info(f"CSV lines creation took {csv_end_time - csv_start_time:.4f} seconds")
+
     output = io.StringIO()
     writer = csv.writer(output)
     writer.writerow(header)
     writer.writerows(csv_lines)
 
+    zipfile_start_time = time.time()
     if satellite_name:
         zipfile_name = f"{satellite_name}_observations.zip"
     else:
@@ -164,5 +177,13 @@ def create_csv(
     with zipfile.ZipFile(zipped_file, "w") as zip:
         zip.writestr("observations.csv", output.getvalue())
     zipped_file.seek(0)
+
+    zipfile_end_time = time.time()
+    logger.info(
+        f"Zipping the CSV file took {zipfile_end_time - zipfile_start_time:.4f} seconds"
+    )
+
+    total_time = time.time() - start_time
+    logger.info(f"Total create_csv execution time: {total_time:.4f} seconds")
 
     return zipped_file, zipfile_name

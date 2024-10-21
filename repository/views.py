@@ -2,6 +2,7 @@ import csv
 import datetime
 import io
 import logging
+import time
 import zipfile
 from typing import Union
 
@@ -298,21 +299,47 @@ def search(request):
 
 
 def download_results(request):
-    # Download the search results as a CSV file
+    start_time = time.time()
+    logger.info("Starting download_results function")
+
     if request.method == "POST":
+        logger.info("POST request received")
+
+        # Benchmark parsing observation IDs
+        parse_start = time.time()
         observation_ids = request.POST.get("obs_ids").split(", ")
         observation_ids = [int(i.strip("[]")) for i in observation_ids if i.strip("[]")]
+        parse_end = time.time()
+        logger.info(
+            f"Parsing observation IDs took {parse_end - parse_start:.4f} seconds"
+        )
 
         satellite_name = (
             request.POST.get("satellite_name")
             if request.POST.get("satellite_name")
             else None
         )
+        logger.info(f"Satellite name: {satellite_name}")
 
+        # Benchmark database query
+        query_start = time.time()
         observations = Observation.objects.filter(id__in=observation_ids)
+        query_end = time.time()
+        logger.info(f"Database query took {query_end - query_start:.4f} seconds")
+        logger.info(f"Number of observations retrieved: {observations.count()}")
 
-        return create_and_return_csv(observations, satellite_name=satellite_name)
+        # Benchmark CSV creation and return
+        csv_start = time.time()
+        response = create_and_return_csv(observations, satellite_name=satellite_name)
+        csv_end = time.time()
+        logger.info(f"CSV creation and return took {csv_end - csv_start:.4f} seconds")
 
+        total_time = time.time() - start_time
+        logger.info(f"Total download_results execution time: {total_time:.4f} seconds")
+
+        return response
+
+    logger.info("Non-POST request received, returning empty HttpResponse")
     return HttpResponse()
 
 
