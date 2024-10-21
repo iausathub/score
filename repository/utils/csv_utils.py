@@ -9,6 +9,7 @@ from repository.models import Observation
 
 logger = logging.getLogger(__name__)
 
+
 # CSV header - same as upload format minus the email address for privacy
 def get_csv_header() -> list[str]:
     """
