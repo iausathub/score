@@ -1,7 +1,6 @@
 import csv
 import datetime
 import io
-import json
 import logging
 import zipfile
 from typing import Union
@@ -11,13 +10,11 @@ from astropy.time import Time
 from celery.result import AsyncResult
 from django.conf import settings
 from django.core.paginator import Paginator
-from django.core.serializers.json import DjangoJSONEncoder
 from django.db.models import Avg, Count
 from django.http import HttpResponse, JsonResponse
-from django.shortcuts import redirect, render
+from django.shortcuts import get_object_or_404, redirect, render
 from django.template import loader
 from django.views.decorators.csrf import csrf_exempt
-from rest_framework.renderers import JSONRenderer
 
 from repository.forms import (
     DataChangeForm,
@@ -148,16 +145,10 @@ def view_data(request) -> HttpResponse:
     # Show the 500 most recent observations
     observation_list = Observation.objects.order_by("-date_added")[:500]
 
-    # JSON is also needed for the modal view to show the observation details
-    observation_list_json = [
-        (JSONRenderer().render(ObservationSerializer(observation).data))
-        for observation in observation_list
-    ]
-    observations_and_json = zip(observation_list, observation_list_json)
     return render(
         request,
         "repository/view.html",
-        {"observations_and_json": observations_and_json},
+        {"observations": observation_list},
     )
 
 
@@ -283,12 +274,6 @@ def search(request):
         form = SearchForm(request.POST)
         if form.is_valid():
             observations = filter_observations(form.cleaned_data)
-
-            observation_list_json = [
-                (JSONRenderer().render(ObservationSerializer(observation).data))
-                for observation in observations
-            ]
-            observations_and_json = zip(observations, observation_list_json)
             observation_ids = [observation.id for observation in observations]
 
             if len(observations) == 0:
@@ -301,7 +286,7 @@ def search(request):
                 request,
                 "repository/search.html",
                 {
-                    "observations": observations_and_json,
+                    "observations": observations,
                     "obs_ids": observation_ids,
                     "form": form,
                 },
@@ -506,14 +491,6 @@ def satellite_data_view(request, satellite_number):
         }
         return render(request, "404.html", context, status=404)
 
-    serialized_observations = ObservationSerializer(observations, many=True).data
-    observations_and_json = [
-        (observation, json.dumps(serialized_observation, cls=DjangoJSONEncoder))
-        for observation, serialized_observation in zip(
-            observations, serialized_observations
-        )
-    ]
-
     # get satellite metadata from SatChecker
     metadata = get_satellite_metadata(satellite_number)
 
@@ -539,7 +516,7 @@ def satellite_data_view(request, satellite_number):
 
     context = {
         "satellite": satellite,
-        "observations_and_json": observations_and_json,
+        "observations": observations,
         "num_observations": observations.count(),
         "average_magnitude": average_magnitude,
         "first_observation_date": (
@@ -810,6 +787,17 @@ def last_observer_location(request):
 
 @csrf_exempt
 def satellite_observations(request, satellite_number):
+    """
+    Retrieve observations for a specific satellite and return them as JSON.
+
+    Args:
+        request (HttpRequest): The request object.
+        satellite_number (int): The NORAD ID of the satellite.
+
+    Returns:
+        JsonResponse: The JSON response containing the observations for the satellite.
+    """
+
     try:
         satellite = Satellite.objects.get(sat_number=satellite_number)
     except Satellite.DoesNotExist:
@@ -837,11 +825,26 @@ def satellite_observations(request, satellite_number):
             "obs_alt_m": round(observation.location_id.obs_alt_m, 4),
             "obs_mode": observation.obs_mode,
             "obs_orc_id": observation.obs_orc_id,
-            "observation_json": json.dumps(
-                ObservationSerializer(observation).data, cls=DjangoJSONEncoder
-            ),
+            "observation_id": observation.id,
         }
         for observation in page_obj
     ]
 
     return JsonResponse({"total": paginator.count, "rows": observations_data})
+
+
+@csrf_exempt
+def get_observation_by_id(request, observation_id):
+    """
+    Retrieve observation data by observation ID and return it as JSON.
+
+    Args:
+        request (HttpRequest): The request object.
+        observation_id (int): The ID of the observation.
+
+    Returns:
+        JsonResponse: The JSON response containing the observation data.
+    """
+    observation = get_object_or_404(Observation, id=observation_id)
+    serialized_observation = ObservationSerializer(observation).data
+    return JsonResponse(serialized_observation)

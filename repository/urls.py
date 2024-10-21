@@ -42,4 +42,9 @@ urlpatterns = [
         views.satellite_observations,
         name="satellite-observations",
     ),
+    path(
+        "observation/<int:observation_id>/",
+        views.get_observation_by_id,
+        name="get_observation_by_id",
+    ),
 ]

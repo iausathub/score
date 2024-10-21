@@ -123,9 +123,9 @@
         <h5 class="card-title text-center bg-accent1 p-3 rounded-top-2 ">Recent observations</h5>
         <div class="card-body bg-light rounded-bottom-2 p-3">
           {% if latest_obs_list %}
-          {% for obs, obs_json in latest_obs_list %}
+          {% for obs in latest_obs_list %}
 
-          <a href="#obsModal" id="showObsModal" class="btn btn-custom" data-content="{{obs_json|escapejs|safe}}"
+          <a href="#obsModal" id="showObsModal" class="btn btn-custom" data-observation-id="{{ obs.id }}"
             data-bs-toggle="modal" role="button">
             {{ obs.date_added|date:"M. d, Y h:i A" }} - {{ obs.satellite_id.sat_name|default:obs.satellite_id.sat_number }}</a>
           {% endfor %}

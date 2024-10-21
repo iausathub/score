@@ -130,9 +130,9 @@
                 </tr>
             </thead>
             <tbody class="table-group-divider">
-                {% for observation, observation_json in observations %}
+                {% for observation in observations %}
                 <tr data-bs-toggle="modal" data-bs-target="#obsModal"
-                    data-content="{{observation_json|escapejs|safe}}">
+                    data-observation-id="{{ observation.id }}">
                     <td scope="row">{{ observation.date_added|date:"M. d, Y h:i A" }}</td>
                     <td scope="row">{{ observation.date_added.timestamp }}</td>
                     <td scope="row">{{ observation.satellite_id.sat_name }}</td>
