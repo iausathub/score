@@ -7,10 +7,8 @@ import requests
 from astropy.time import Time
 from django.db.models import Count
 from requests import Response
-from rest_framework.renderers import JSONRenderer
 
 from repository.models import Observation, Satellite
-from repository.serializers import ObservationSerializer
 
 logger = logging.getLogger(__name__)
 # Named tuple to represent additional data from SatChecker for each observation
@@ -86,18 +84,11 @@ def get_stats():
     observer_locations_list = list(observer_locations)
     observer_locations_json = json.dumps(observer_locations_list)
 
-    # JSON is also needed for the modal view when an observation in the list is clicked
-    observation_list_json = [
-        (JSONRenderer().render(ObservationSerializer(observation).data))
-        for observation in latest_obs_list
-    ]
-    observations_and_json = zip(latest_obs_list, observation_list_json)
-
     return stats(
         satellite_count,
         observation_count,
         observer_count,
-        observations_and_json,
+        latest_obs_list,
         observer_locations_json,
     )
 

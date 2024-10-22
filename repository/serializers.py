@@ -30,7 +30,6 @@ class ObservationSerializer(serializers.ModelSerializer):
             "instrument",
             "obs_mode",
             "obs_filter",
-            "obs_email",
             "obs_orc_id",
             "sat_ra_deg",
             "sat_dec_deg",

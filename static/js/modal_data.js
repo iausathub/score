@@ -1,37 +1,27 @@
 document.addEventListener('DOMContentLoaded', function() {
     // Handle server-side pagination (data_view.html)
     $('#obsTable').on('click-row.bs.table', function (e, row, $element) {
-        handleObservationClick(row, true);
+        handleObservationClick(row.observation_id, true);
     });
 
     // Handle client-side data (index, search, etc.)
     $(document).on('click', '[data-bs-toggle="modal"][data-bs-target="#obsModal"], #showObsModal', function(e) {
-        var observationJson = $(this).data('content');
-        handleObservationClick(observationJson, false);
+        var observationId = $(this).data('observation-id');
+        handleObservationClick(observationId, false);
     });
 });
 
-function handleObservationClick(data, showModal) {
-    var observation = parseObservationData(data);
-    if (!observation) return;
-
-    populateModalFields(observation);
-
-    if (showModal) {
-        var obsModal = new bootstrap.Modal(document.getElementById('obsModal'));
-        obsModal.show();
-    }
-}
-
-function parseObservationData(data) {
-    if (typeof data === 'string') {
-        // For client-side data (index, search, etc.)
-        var escapedJSON = data.replace(/\\u0022/g, '\"').replace(/\\u002D/g, '-').replace(/b\\u0027/g, '').replace(/\\u0027/g, '');
-        return JSON.parse(escapedJSON);
-    } else if (data && data.observation_json) {
-        // For server-side pagination (currently only data_view.html)
-        return JSON.parse(data.observation_json);
-    }
+function handleObservationClick(observationId, showModal) {
+    fetch(`/observation/${observationId}/`)
+    .then(response => response.json())
+    .then(observation => {
+        populateModalFields(observation);
+        if (showModal) {
+            var obsModal = new bootstrap.Modal(document.getElementById('obsModal'));
+            obsModal.show();
+        }
+    })
+    .catch(error => console.error('Error fetching observation data:', error));
 }
 
 function populateModalFields(observation) {

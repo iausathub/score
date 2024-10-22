@@ -95,7 +95,7 @@
                         <th data-field="obs_alt_m" scope="col" data-sortable="true">Altitude (m)</th>
                         <th data-field="obs_mode" scope="col" data-sortable="true">Obs. mode</th>
                         <th data-field="obs_orc_id" scope="col" data-sortable="true">Observer ORCID</th>
-                        <th data-field="observation_json" data-visible="false" data-formatter="attachJsonToRow">JSON Data</th>
+                        <th data-field="observation_id" data-visible="false">observation_id</th>
                     </tr>
                 </thead>
                 <tbody class="table-group-divider"
@@ -143,34 +143,4 @@
     </div>
   </div>
 </div>
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-    var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
-    var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
-        return new bootstrap.Tooltip(tooltipTriggerEl)
-    })
-
-    var obsTable = document.getElementById('obsTable');
-    obsTable.addEventListener('load-success.bs.table', function(event) {
-      console.log('Table loaded');
-        var data = event.detail;
-        data.rows.forEach(function(row, index) {
-            var rowElement = obsTable.querySelectorAll('tbody tr')[index];
-            console.log(rowElement);
-            rowElement.setAttribute('observation-json', JSON.stringify(row.observation_json));
-        });
-    });
-});
-
-    function rowAttributes(row, index) {
-        return {
-            'data-observation-json': row.observation_json
-        };
-    }
-
-    function attachJsonToRow(value, row, index) {
-        return '<span class="d-none">' + value + '</span>';
-    }
-</script>
 {% endblock %}
