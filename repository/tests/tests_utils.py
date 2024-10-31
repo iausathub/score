@@ -61,6 +61,15 @@ def test_validate_position(requests_mock, setup_data):
                     "",  # noqa: B033
                     "",  # noqa: B033
                     "10",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "2024-02-20 00:36:13 UTC",
                 ]
             ]
         },
@@ -91,6 +100,15 @@ def test_validate_position_invalid_sat_name(requests_mock, setup_data):
                     "",  # noqa: B033
                     "",  # noqa: B033
                     "10",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "2024-02-20 00:36:13 UTC",
                 ]
             ]
         },
