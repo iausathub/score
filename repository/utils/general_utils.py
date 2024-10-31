@@ -263,7 +263,9 @@ def validate_position(
 
     satellite_info = response_data["data"][0]
     obs_time = Time(obs_time, format="isot")
-    date_str = satellite_info[6].replace(" UTC", "")
+
+    # use tle_epoch, not tle_date (that is the date it was collected)
+    date_str = satellite_info[18].replace(" UTC", "")
     tle_date = Time(date_str, format="iso", scale="utc")
     if (tle_date - obs_time).jd > 14:
         return "archival data"
