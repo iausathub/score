@@ -165,7 +165,7 @@ def add_additional_data(
     is_valid = validate_position(r, satellite_name, observation_time)
 
     if (
-        obs_time < Time("2020-01-01T00:00:00.000", format="isot")
+        obs_time < Time("2024-05-01T00:00:00.000", format="isot")
         and not is_valid == "archival data"
     ):
         # Temporary fix for satellite name changes
