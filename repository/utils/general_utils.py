@@ -156,7 +156,6 @@ def add_additional_data(
         "elevation": altitude,
         "julian_date": obs_time.jd,
         "min_altitude": -90,
-        "data_source": "spacetrack",
     }
     try:
         r = requests.get(url, params=params, timeout=10)
