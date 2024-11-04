@@ -163,6 +163,7 @@ def add_additional_data(
         return "Satellite position check failed - try again later."
 
     is_valid = validate_position(r, satellite_name, observation_time)
+    updated_satellite_name = None
 
     if (
         obs_time < Time("2024-05-01T00:00:00.000", format="isot")
@@ -193,10 +194,10 @@ def add_additional_data(
                 )
 
                 # Name is valid - now make sure it's the most recent version
-                if satellite_found:
+                if satellite_found or (not satellite_found and satellite_name == ""):
                     for item in response_json:
-                        if item.get("is_current_version") is True:
-                            satellite_name = item.get("name")
+                        if item.get("is_current_version") == True:  # noqa: E712
+                            updated_satellite_name = item.get("name")
                             break
 
         except requests.exceptions.RequestException:
@@ -242,7 +243,7 @@ def add_additional_data(
             dra_cosdec_deg_s=round(data_dict.get("dra_cosdec_deg_per_sec", 0), 7),
             sat_dec_deg=round(data_dict.get("declination_deg", 0), 7),
             sat_ra_deg=round(data_dict.get("right_ascension_deg", 0), 7),
-            satellite_name=data_dict.get("name"),
+            satellite_name=updated_satellite_name or data_dict.get("name"),
             intl_designator=data_dict.get("international_designator"),
         )
         return satellite_data
