@@ -30,6 +30,7 @@ def filter_observations(form_data):
         "observer_orcid": "obs_orc_id__icontains",
         "mpc_code": "mpc_code",
         "intl_designator": "satellite_id__intl_designator",
+        "instrument": "instrument__icontains",
     }
 
     observations = Observation.objects.all()
