@@ -168,7 +168,9 @@ def add_additional_data(
         obs_time < Time("2024-05-01T00:00:00.000", format="isot")
         and not is_valid == "archival data"
     ):
-        # Temporary fix for satellite name changes
+        # Temporary fix for satellite name changes - make sure that the
+        # current satellite name is used instead of something like
+        # "STARLINK K"
 
         url = "https://satchecker.cps.iau.org/tools/names-from-norad-id/"
         params = {
@@ -189,6 +191,14 @@ def add_additional_data(
                 satellite_found = any(
                     item.get("name") == satellite_name for item in response_json
                 )
+
+                # Name is valid - now make sure it's the most recent version
+                if satellite_found:
+                    for item in response_json:
+                        if item.get("is_current_version") is True:
+                            satellite_name = item.get("name")
+                            break
+
         except requests.exceptions.RequestException:
             error = "Satellite info check failed - try again later."
             is_valid = False
