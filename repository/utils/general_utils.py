@@ -165,10 +165,14 @@ def add_additional_data(
     is_valid = validate_position(r, satellite_name, observation_time)
     updated_satellite_name = None
 
+    # There are a few cases where we need to confirm the satellite name
+    # is correct, one being older, non-archival data, and the other being
+    # if the satellite name is flagged as incorrect (and it may not be due
+    # to a TLE source using an older name)
     if (
         obs_time < Time("2024-05-01T00:00:00.000", format="isot")
         and not is_valid == "archival data"
-    ):
+    ) or is_valid == "Satellite name and number do not match":
         # Temporary fix for satellite name changes - make sure that the
         # current satellite name is used instead of something like
         # "STARLINK K"
