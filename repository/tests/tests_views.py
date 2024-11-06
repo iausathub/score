@@ -212,6 +212,7 @@ class SearchViewTest(TestCase):
                 "end_date_range": "",
                 "observation_id": "",
                 "observer_orcid": "",
+                "instrument": "",
             },
         )
         self.assertEqual(response.status_code, 200)

@@ -89,6 +89,11 @@ class SearchForm(Form):
         label="End Date",
         widget=forms.DateInput(attrs={"type": "date", "class": "form-control"}),
     )
+    instrument = forms.CharField(
+        required=False,
+        label="Instrument",
+        widget=forms.TextInput(attrs={"class": "form-control"}),
+    )
     observation_id = forms.IntegerField(
         required=False,
         label="Observation ID",
