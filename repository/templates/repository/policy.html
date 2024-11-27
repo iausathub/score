@@ -1,0 +1,51 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-3">
+  <div class="container-md">
+    <h2 class="text-center p-2">SCORE Usage Policy</h2>
+
+    <div class="policy-section mb-5">
+      <h3 class="border-bottom pb-2 mb-4 text-primary">General</h3>
+      <p>The Satellite Constellation Observation Repository (SCORE), <a href="https://score.cps.iau.org">score.cps.iau.org</a>, is provided on a best-efforts basis.
+        No party makes any guarantee, particularly pertaining to data accuracy, suitability for any purpose, or service uptime.</p>
+      <p>The International Astronomical Union Centre for the Protection of the Dark and Quiet Sky from Satellite Constellation
+        Interference (IAU CPS) reserves the right to alter the SCORE use policy at any time without prior consultation of anyone.</p>
+      <p>"You" refers to observers and users of SCORE.</p>
+      <p>"We" and "us" refers to the IAU CPS Management Team and SatHub leadership.</p>
+    </div>
+
+    <div class="policy-section mb-5">
+      <h3 class="border-bottom pb-2 mb-4 text-primary">For observers</h3>
+      <ul>
+        <li>Data will be shared under the <a href="https://creativecommons.org/licenses/by/4.0/deed.en">Creative Commons Attribution (CC-BY) 4.0</a> licence. Observations you submit can be published, or made otherwise available by third parties, as long as you are credited and your data is properly attributed. Data submitted to SCORE automatically becomes "public data" as described in the "Information Management" Section of the <a href="https://drive.google.com/file/d/1tPChesKIz9VSQshb3oPcM1J71xpayS9v/view">IAU CPS Collaboration Agreement</a>.</li>
+        <li>We store some of your user information, in particular your <a href="https://orcid.org/">ORCID ID</a>, so that we can attribute your observations.</li>
+        <li>You acknowledge that observation data submitted to SCORE may be used freely, indefinitely, and without prior consent by CPS Members and by the general public under the CC-BY licencing terms. Attribution per the CC-BY licence is required when using SCORE data.</li>
+        <li>If you have published data elsewhere under a CC-BY licence, we may import this into SCORE and use it as described in this use policy.</li>
+        <li>CC-BY licences are irrevocable, and we will only, if at all, change or delete SCORE data in exceptional circumstances.</li>
+        <li>Observations that you submit have to be your own and/or released under the CC-BY-4.0 licence.</li>
+        <li>Written permission by the original observer is required if you submit observations conducted by others. A confirmation email by the original observer together with their ORCID must be sent to the SCORE maintainers. The confirmation email must include an affirmation they understand that the submissions will be made to SCORE and will be subject to the CC-BY licence. We reserve the right to seek additional confirmation from the original observer(s).</li>
+        <li>You indemnify us from any third party claims arising from your failure to comply with these terms. In particular, you indemnify us from any claims arising from the unauthorized submission or sharing of others' observations.</li>
+        <li>We reserve the right to decline publication or the removal of any submissions at any time for any reason without notice to anyone.</li>
+      </ul>
+    </div>
+
+    <div class="policy-section mb-5">
+      <h3 class="border-bottom pb-2 mb-4 text-primary">For users</h3>
+      <ul>
+        <li>If you use data from SCORE, you must follow the CC-BY licences and credit the observers appropriately.</li>
+        <li>As SCORE has been in part developed in the framework of a National Science Foundation funded project, users are required to produce the following statement on any publication, presentation, website or web service that uses SCORE data:</li>
+        <p class="alert alert-secondary m-2">"Any opinions, findings, and conclusions or recommendations expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation or the International Astronomical Union."</p>
+        <li>If you publish a paper or otherwise publicly share products that use data from SCORE, please include the following acknowledgement:</li>
+        <p class="alert alert-secondary m-2">"This research made use of data and/or services provided by the International Astronomical Union Centre for the Protection of the Dark and Quiet Sky from Satellite Constellation Interference (IAU CPS) SatHub. The development of SCORE has been supported by the National Science Foundation (NSF) under grant number: AST 2332736. SCORE is hosted at the NSF NOIRLab."</p>
+        <li>If you are writing publications based on SCORE data, please consider offering co-authorship to those observers that produced the data you are using.</li>
+        <li>Please let us know that you have used SCORE to help us track who is using it, or if you have any questions, by emailing <a href="mailto:score@cps.iau.org">score@cps.iau.org</a>.</li>
+        <li>You indemnify us from any third party claims arising from your failure to comply with these terms.</li>
+      </ul>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

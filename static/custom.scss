@@ -82,7 +82,6 @@ $font-size-base: .9rem;
 .info-icon:hover i {
   opacity: 1;
 }
-
 //
 $form-file-button-color:         #000000;
 $form-file-button-bg:            map-get($theme-colors, "tertiary");
@@ -132,6 +131,7 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
   --bs-link-dark-color: #{map-get($theme-colors, "accent3")};
   --bs-bg-accent1-subtle-dark: #{map-get($theme-colors-dark, "accent1-subtle")};
   --bs-bg-alert-primary-dark: #{lighten(map-get($theme-colors-dark, "primary"), 2%)};
+  --bs-primary-text-dark: #{map-get($theme-colors-dark, "primary")};
 
 
   .bg-light {
@@ -184,5 +184,8 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
   }
   .bg-png{
     background-color: var(--bs-bg-tertiary-dark) !important;
+  }
+  .text-primary {
+    color: var(--bs-bg-primary-text-dark) !important;
   }
 }
