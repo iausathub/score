@@ -3,7 +3,6 @@ import io
 import logging
 import time
 import zipfile
-from typing import List, Tuple
 
 from repository.models import Observation
 
@@ -65,8 +64,8 @@ def get_csv_header() -> list[str]:
 
 
 def create_csv(
-    observation_list: List[Observation], satellite_name: str
-) -> Tuple[io.BytesIO, str]:
+    observation_list: list[Observation], satellite_name: str
+) -> tuple[io.BytesIO, str]:
     """
     Creates a CSV file from a list of observations and compresses it into a zip file.
 

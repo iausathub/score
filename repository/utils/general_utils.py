@@ -1,7 +1,7 @@
 import json
 import logging
 from collections import namedtuple
-from typing import Dict, Optional, Union
+from typing import Optional, Union
 
 import requests
 from astropy.time import Time
@@ -405,7 +405,7 @@ def get_norad_id(satellite_name):
 
 
 # Query SatChecker API for satellite metadata
-def get_satellite_metadata(satellite_number: str) -> Optional[Dict[str, Optional[str]]]:
+def get_satellite_metadata(satellite_number: str) -> Optional[dict[str, Optional[str]]]:
     """
     Query SatChecker API for satellite metadata.
 
