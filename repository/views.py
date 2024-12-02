@@ -363,6 +363,12 @@ def download_data(request):
     return HttpResponse(template.render(context, request))
 
 
+def policy(request):
+    template = loader.get_template("repository/policy.html")
+    context = {"": ""}
+    return HttpResponse(template.render(context, request))
+
+
 def data_change(request):
     if request.method == "POST":
         form = DataChangeForm(request.POST)
