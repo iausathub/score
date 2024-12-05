@@ -4,6 +4,7 @@ document.getElementById('progress-bar').hidden = false;
 function customResult(resultElement, result) {
     document.getElementById('upload_btn').disabled = false;
     document.getElementById('upload_ctrl').disabled = false;
+    document.getElementById('licenseCheck').disabled = false;
 
     $('#upload_ctrl').val('');
     if (result.status == "success") {
