@@ -68,18 +68,24 @@
                 required="required" aria-label="File upload control">
               {% endif %}
             </div>
-            <div class="row d-inline-flex flex-row pt-3 align-items-center ">
+
+            <div class="row d-inline-flex flex-row pt-3 align-items-center">
               <div class="col">
+                <div class="form-check mb-3 d-flex align-items-center">
+                  <input class="form-check-input mt-0 me-2" type="checkbox" id="licenseCheck">
+                  <label class="form-check-label" for="licenseCheck">
+                    I have read and agree to the <a href="{% url 'policy' %}" target="_blank">SCORE Use Policy</a>.
+                  </label>
+                </div>
                 {% if task_id %}
                 <input type="submit" class="btn btn-primary" value="Upload" name="submit_obs" id="upload_btn"
                   disabled="true" aria-label="Upload button disabled">
                 {% else %}
-                <input type="submit" class="btn btn-primary" value="Upload" onclick="this.form.submit(); this.disabled=true;
-                            return true;" name="submit_obs" id="upload_btn" aria-label="Upload button">
+                <input type="submit" class="btn btn-primary" value="Upload"
+                    onclick="this.form.submit(); this.disabled=true; return true;"
+                    name="submit_obs" id="upload_btn" aria-label="Upload button">
                 {% endif %}
-
               </div>
-
             </div>
 
           </form>
@@ -238,6 +244,39 @@
       }
 
     }
+  });
+
+  document.addEventListener('DOMContentLoaded', function() {
+    const uploadBtn = document.getElementById('upload_btn');
+    const licenseCheck = document.getElementById('licenseCheck');
+    const errorElement = document.getElementById('progress-bar-message');
+
+    function updateStates() {
+        const taskId = '{{ task_id }}';
+        const isLicenseChecked = licenseCheck.checked;
+        const hasError = errorElement && errorElement.textContent.includes('error');
+
+        // Only disable controls if there's a taskId AND no error
+        if (taskId && !hasError) {
+            uploadBtn.disabled = true;
+            licenseCheck.disabled = true;
+        } else {
+            // Normal operation - only check license agreement
+            uploadBtn.disabled = !isLicenseChecked;
+            licenseCheck.disabled = false;
+        }
+    }
+
+    licenseCheck.addEventListener('change', updateStates);
+
+    // Also check state when results come in
+    const observer = new MutationObserver(updateStates);
+    if (errorElement) {
+        observer.observe(errorElement, { childList: true, characterData: true, subtree: true });
+    }
+
+    // Initial state
+    updateStates();
   });
 </script>
 {% endblock %}
