@@ -1,6 +1,12 @@
 // Custom.scss
 @import "theme";
 
+:root {
+  --bs-tooltip-opacity: 0.95;
+}
+
+
+
 .page-item.active .page-link{
   background-color: map-get($theme-colors, "primary");
   color: map-get($theme-colors, "light");
@@ -114,6 +120,7 @@ $theme-colors: map-merge($theme-colors, $theme-colors);
 // Define dark theme colors
 $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
 
+
 [data-bs-theme="dark"] {
   --bs-primary: #{shade-color($primary, 80%)};
   --bs-bg-primary-dark: #{map-get($theme-colors-dark, "primary")};
@@ -132,6 +139,8 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
   --bs-bg-accent1-subtle-dark: #{map-get($theme-colors-dark, "accent1-subtle")};
   --bs-bg-alert-primary-dark: #{lighten(map-get($theme-colors-dark, "primary"), 2%)};
   --bs-primary-text-dark: #{map-get($theme-colors-dark, "primary")};
+  --bs-tooltip-bg: var(--bs-dark);
+  --bs-tooltip-color: var(--bs-white);
 
 
   .bg-light {
@@ -187,5 +196,11 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
   }
   .text-primary {
     color: var(--bs-bg-primary-text-dark) !important;
+  }
+
+  .tooltip {
+    --#{$prefix}tooltip-color: var(--bs-tooltip-color);
+    --#{$prefix}tooltip-bg: var(--bs-tooltip-bg);
+    --#{$prefix}tooltip-opacity: var(--bs-tooltip-opacity);
   }
 }

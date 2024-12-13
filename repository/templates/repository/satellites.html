@@ -22,7 +22,7 @@
                             <th data-field="num_obs" scope="col" data-sortable="true" class="col-3">Number of Observations</th>
                         </tr>
                     </thead>
-                    <tbody class="table-group-divider">
+                    <tbody class="table-group-divider clickable">
                         {% for satellite in satellites %}
                         <tr class="clickable-row" data-href="{% url 'satellite-data-view' satellite.sat_number %}">
                             <td scope="row">{{ satellite.sat_name }}</td>
