@@ -92,20 +92,34 @@ def process_upload(
                     f"Invalid value: {str(e)} - {obs_error_reference}"
                 ) from e
 
-            satellite, sat_created = Satellite.objects.get_or_create(
-                sat_name=(
-                    column[0] if column[0] != "" else additional_data.satellite_name
-                ),
-                sat_number=column[1],
-                defaults={
-                    "sat_name": (
+            # First try to get existing satellite by number
+            try:
+                satellite = Satellite.objects.get(sat_number=column[1])
+                # If satellite exists but has no name and new data has a name, update it
+                if not satellite.sat_name and (
+                    column[0] != "" or additional_data.satellite_name
+                ):
+                    satellite.sat_name = (
+                        column[0] if column[0] != "" else additional_data.satellite_name
+                    )
+                    satellite.save()
+
+                # If satellite exists but has no intl_designator, update it
+                if not satellite.intl_designator and additional_data.intl_designator:
+                    satellite.intl_designator = additional_data.intl_designator
+                    satellite.save()
+
+            except Satellite.DoesNotExist:
+                # Only create new satellite if it doesn't exist
+                satellite = Satellite.objects.create(
+                    sat_name=(
                         column[0] if column[0] != "" else additional_data.satellite_name
                     ),
-                    "sat_number": column[1],
-                    "date_added": timezone.now(),
-                    "intl_designator": additional_data.intl_designator,
-                },
-            )
+                    sat_number=column[1],
+                    date_added=timezone.now(),
+                    intl_designator=additional_data.intl_designator,
+                )
+
             location, loc_created = Location.objects.get_or_create(
                 obs_lat_deg=obs_lat_deg,
                 obs_long_deg=obs_long_deg,
