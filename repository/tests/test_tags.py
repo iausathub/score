@@ -19,8 +19,8 @@ def test_round_uncertainty():
 
 def test_format_magnitude():
     test_cases = [
-        (None, None, ""),  # Test None values
-        (12.345, None, ""),
+        (None, None, "N/A"),  # Test None values
+        (12.345, None, "N/A"),
         (12.345, 0, "12.345"),
         (12.345, 0.123, "12.35"),
         (12.345, 0.023, "12.345"),
