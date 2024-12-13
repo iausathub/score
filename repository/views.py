@@ -838,11 +838,36 @@ def satellite_observations(request, satellite_number):
 
     observations = satellite.observations.all()
 
+    # Handle sorting
+    sort = request.GET.get("sort")
+    order = request.GET.get("order", "desc")
+
+    if sort:
+        # Convert table field names to model field names
+        field_mapping = {
+            "added": "date_added",
+            "observed": "obs_time_utc",
+            "apparent_mag": "apparent_mag",
+            "obs_filter": "obs_filter",
+            "obs_mode": "obs_mode",
+            "obs_lat_deg": "location_id__obs_lat_deg",
+            "obs_long_deg": "location_id__obs_long_deg",
+            "obs_alt_m": "location_id__obs_alt_m",
+        }
+
+        sort_field = field_mapping.get(sort, sort)
+        if order == "desc":
+            sort_field = f"-{sort_field}"
+
+        observations = observations.order_by(sort_field)
+
     limit = int(request.GET.get("limit", 5))
     offset = int(request.GET.get("offset", 0))
+
     paginator = Paginator(observations, limit)
     page_number = offset // limit + 1
     page_obj = paginator.get_page(page_number)
+    logger.debug(f"Items in page: {len(page_obj)}")
 
     observations_data = [
         {
@@ -865,7 +890,20 @@ def satellite_observations(request, satellite_number):
         for observation in page_obj
     ]
 
-    return JsonResponse({"total": paginator.count, "rows": observations_data})
+    response_data = {
+        "total": paginator.count,
+        "rows": observations_data,
+        "debug": {
+            "limit": limit,
+            "offset": offset,
+            "page": page_number,
+            "total_pages": paginator.num_pages,
+            "sort": sort,
+            "order": order,
+            "sort_field": sort_field if sort else None,
+        },
+    }
+    return JsonResponse(response_data)
 
 
 @csrf_exempt

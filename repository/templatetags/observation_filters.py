@@ -35,7 +35,7 @@ def format_magnitude(value, uncertainty):
     """
     # Handle None cases
     if uncertainty is None or value is None:
-        return ""
+        return "N/A"
 
     if uncertainty == 0:
         return str(value)
