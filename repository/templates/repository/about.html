@@ -11,9 +11,19 @@
       Interference (IAU CPS).</p>
 
     <p>SCORE's data includes reference values from SatChecker for the time
-      and location of each observation. For more infomation on that data, please
-      visit the <a href="https://satchecker.readthedocs.io/en/latest/api_response.html">SatChecker documentation</a>.</p>
+      and location of each observation - SatChecker makes use of data obtained from <a href="https://www.space-track.org/">Space-Track</a>
+      and <a href="https://www.celestrak.com/">Celestrak</a> to predict satellite positions.
+      For more infomation on that data, please visit the <a href="https://satchecker.readthedocs.io/en/latest/api_response.html">SatChecker documentation</a>.
     </p>
+
+    <p>All data in SCORE is made available under the <a href="{% url 'policy' %}">SCORE Use Policy</a>, and should be cited with the following statements:</p>
+    <blockquote class="fst-italic border border-secondary rounded p-3">"This research made use of data and/or services provided by the International Astronomical Union Centre
+      for the Protection of the Dark and Quiet Sky from Satellite Constellation Interference (IAU CPS) SatHub.
+      The development of SCORE has been supported by the National Science Foundation (NSF) under grant number: AST 2332736.
+      SCORE is hosted at the NSF NOIRLab. Any opinions, findings, and conclusions or recommendations expressed in this material are
+      those of the author(s) and do not necessarily reflect the views of the National Science Foundation or the International
+      Astronomical Union."
+    </blockquote>
     <div class="row text-center pt-3">
       <div class="col d-flex align-items-center"><img src="{% static 'images/noirlab_logo.png' %}" alt="NOIRLab logo"
           class="img-fluid" width="200px"></div>

@@ -84,7 +84,9 @@ function populateIfExists(elementId, object) {
 }
 
 function roundUncertainty(uncertainty) {
-    if (uncertainty === 0) return "0";
+    if (uncertainty === null || uncertainty === undefined || uncertainty === 0) {
+        return "";
+    }
 
     // order of magnitude of the uncertainty
     const magnitude = Math.floor(Math.log10(uncertainty));
@@ -106,7 +108,8 @@ function roundUncertainty(uncertainty) {
 }
 
 function roundMagnitude(value, uncertainty) {
-    if (uncertainty === 0) return value.toString();
+    if (value === null || value === undefined) return "N/A";
+    if (uncertainty === 0 || uncertainty === "") return value.toString();
 
     // get number of decimal places in uncertainty
     const uncertaintyStr = uncertainty.toString();

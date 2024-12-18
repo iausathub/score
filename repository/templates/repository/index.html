@@ -4,7 +4,7 @@
 {% block content %}
 <div class="container-fluid p-3">
   <div class="d-grid gap-3 pt-3 opacity-100" style="grid-template-columns: 2.25fr 380px;">
-    <div>
+    <div class="">
       <div class="container p-3">
         <p>The Satellite Constellation Observation Repository (SCORE) is a project developed and maintained
         by the International Astronomical Union Centre for the Protection of the Dark and Quiet Sky
@@ -12,27 +12,97 @@
         satellite brightness observations. Its primary function is to provide a comprehensive and organized
         platform for researchers to contribute, store, and access observational data of artificial space objects.
         Datasets curated in SCORE are free and open for download. If you make use of SCORE data in your
-        research, kindly add the following paragraph to your acknowledgments section:</p>
-
-        <blockquote class="text-center fst-italic border border-secondary rounded p-3">"This research made use of data and/or services provided by the
+        research, please add the following paragraphs to your acknowledgments section (as found in the <a href="{% url 'policy' %}">SCORE Use Policy</a>):</p>
+        <blockquote class="fst-italic border border-secondary rounded p-3">"This research made use of data and/or services provided by the
           International Astronomical Union's Centre for the Protection of the Dark and Quiet Sky from
           Satellite Constellation Interference (IAU CPS). The development of SCORE has been supported by the National Science Foundation (NSF)
-          under grant number: AST 2332736. SCORE is hosted at the NSF NOIRLab."</blockquote>
+          under grant number: AST 2332736. SCORE is hosted at the NSF NOIRLab. Any opinions, findings, and conclusions or recommendations
+          expressed in this material are those of the author(s) and do not necessarily reflect the views of the National Science Foundation
+          or the International Astronomical Union."
+        </blockquote>
       </div>
 
       <div class="p-3">
       <div class="bg-light border rounded-3 p-3 ms-2">
         <div class="container">
           <h3 class="text-center" id="upload_file">Upload Observation File</h3>
-          <p class="p-3 mt-3">
-            Upload observations of artificial satellites in a <a href="https://www.freecodecamp.org/news/what-is-a-csv-file-and-how-to-open-the-csv-file-format/">
-              CSV file format</a> - follow the SCORE specific columns outlined in the
-              <a href="{% static 'observation_format_example.csv' %}" download>example observation file</a>.<br /><br />
-              Incorrectly formatted observations will result in an error message. However,
+          <div class="py-3 mt-3">
+            <span class="fw-bold">New to SCORE? Check out our <a href="{% url 'getting-started' %}">getting started guide</a>.</span>
+          </div>
+          <div id="upload_form" class="mt-3">
+            <form method="post" enctype="multipart/form-data">
+              {% csrf_token %}
+              <div class="row">
+                {% if task_id %}
+                <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv"
+                  required="required" disabled="true" aria-label="File upload control disabled">
+                {% else %}
+                <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv"
+                  required="required" aria-label="File upload control">
+                {% endif %}
+              </div>
+
+              <div class="row d-inline-flex flex-row pt-3 align-items-center">
+                <div class="col">
+                  <div class="form-check mb-3 d-flex align-items-center">
+                    <input class="form-check-input mt-0 me-2" type="checkbox" id="licenseCheck">
+                    <label class="form-check-label" for="licenseCheck">
+                      I have read and agree to the <a href="{% url 'policy' %}" target="_blank">SCORE Use Policy</a>.
+                    </label>
+                  </div>
+                  {% if task_id %}
+                  <input type="submit" class="btn btn-primary" value="Upload" name="submit_obs" id="upload_btn"
+                    disabled="true" aria-label="Upload button disabled">
+                  {% else %}
+                  <input type="submit" class="btn btn-primary" value="Upload"
+                      onclick="this.form.submit(); this.disabled=true; return true;"
+                      name="submit_obs" id="upload_btn" aria-label="Upload button">
+                  {% endif %}
+                </div>
+              </div>
+
+            </form>
+            <div class="text-center">
+              <div id="progress-bar-message">
+              </div>
+            </div>
+            <div class='progress-wrapper'>
+              <div id='progress-bar' class='progress-bar progress-bar-striped' role='progressbar' aria-label="Progress bar" hidden>&nbsp;</div>
+            </div>
+            <div id="celery-result"></div>
+
+            {% if error %}
+            <p class="text-danger">Error: {{ error }}</p>
+            {% endif %}
+
+
+            <div class="container-md bg-success border border-success rounded-3 mt-3 pt-2 " style="--bs-bg-opacity: .2;"
+              id="success_message" hidden>
+              <span class="fw-bold">Upload successful!</span>
+
+              <p id="obs_added_text"></p>
+              <p class="mb-3">Confirmation email with observation ID(s) sent to: <span id="email"></span></p>
+              <p>Observation ID(s) with corresponding satellite name and observation date/time
+                can also be downloaded as a .csv file:</p>
+              <form action="/download-ids" method="post">
+                {% csrf_token %}
+                <input type="hidden" name="obs_ids" id="download_obs_ids">
+                <button class="btn btn-primary btn-sm mb-3" type="submit" aria-controls="downloadObsIds">
+                  Download file
+                </button>
+              </form>
+            </div>
+
+          </div>
+          <hr class="my-3">
+          <div id="note" class="my-3">
+            <p>
+            Incorrectly formatted observations will result in an error message. However,
             correctly formatted observations processed before an error occurs will be saved in the database and won't
             need to be resubmitted. SCORE will identify duplicate observations and provide the corresponding IDs of the original ones.
-          </p>
-          <div class="px-3 alert alert-primary">
+            </p>
+          </div>
+          <div class="my-3 alert alert-primary">
             <div class="row">
               <div class="col-auto">
                 <i class="fas fa-info-circle me-2"></i>
@@ -44,88 +114,11 @@
               </div>
             </div>
           </div>
-          <p>
-            <a href="{% url 'data-format' %}">Full data format information</a>
-          </p>
-          <p>
-            <a href="{% static 'observation_format_example.csv' %}">Sample observation CSV file with examples of both required and optional fields (download)</a>
-          </p>
-          <p>
-            <a href="{% static 'visual_observation_format_example.csv' %}">Sample observation CSV file for visual observers (download)</a>
-          </p>
-          <p>
-            <a href="{% url 'generate-csv' %}">Form to generate CSV file from individual observations</a>
-          </p>
-
-          <form method="post" enctype="multipart/form-data">
-            {% csrf_token %}
-            <div class="row">
-              {% if task_id %}
-              <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv"
-                required="required" disabled="true" aria-label="File upload control disabled">
-              {% else %}
-              <input type="file" id="upload_ctrl" class="form-control " name="uploaded_file" accept=".csv"
-                required="required" aria-label="File upload control">
-              {% endif %}
-            </div>
-
-            <div class="row d-inline-flex flex-row pt-3 align-items-center">
-              <div class="col">
-                <div class="form-check mb-3 d-flex align-items-center">
-                  <input class="form-check-input mt-0 me-2" type="checkbox" id="licenseCheck">
-                  <label class="form-check-label" for="licenseCheck">
-                    I have read and agree to the <a href="{% url 'policy' %}" target="_blank">SCORE Use Policy</a>.
-                  </label>
-                </div>
-                {% if task_id %}
-                <input type="submit" class="btn btn-primary" value="Upload" name="submit_obs" id="upload_btn"
-                  disabled="true" aria-label="Upload button disabled">
-                {% else %}
-                <input type="submit" class="btn btn-primary" value="Upload"
-                    onclick="this.form.submit(); this.disabled=true; return true;"
-                    name="submit_obs" id="upload_btn" aria-label="Upload button">
-                {% endif %}
-              </div>
-            </div>
-
-          </form>
-          <div class="text-center">
-            <div id="progress-bar-message">
-            </div>
-          </div>
-          <div class='progress-wrapper'>
-            <div id='progress-bar' class='progress-bar progress-bar-striped' role='progressbar' aria-label="Progress bar" hidden>&nbsp;</div>
-          </div>
-          <div id="celery-result"></div>
-
-          {% if error %}
-          <p class="text-danger">Error: {{ error }}</a></p>
-          {% endif %}
-
-
-          <div class="container-md bg-success border border-success rounded-3 mt-3 pt-2 " style="--bs-bg-opacity: .2;"
-            id="success_message" hidden>
-            <span class="fw-bold">Upload successful!</span>
-
-            <p id="obs_added_text"></p>
-            <p class="mb-3">Confirmation email with observation ID(s) sent to: <span id="email"></span></p>
-            <p>Observation ID(s) with corresponding satellite name and observation date/time
-              can also be downloaded as a .csv file:</p>
-            <form action="/download-ids" method="post">
-              {% csrf_token %}
-              <input type="hidden" name="obs_ids" id="download_obs_ids">
-              <button class="btn btn-primary btn-sm mb-3" type="submit" aria-controls="downloadObsIds">
-                Download file
-              </button>
-            </form>
-          </div>
-
-
         </div>
       </div>
     </div>
     </div>
-    <div class="container">
+    <div class="">
       <div class="shadow rounded-2 mb-3" style="min-height:50px;">
         <h5 class="card-title text-center bg-accent1 p-3 rounded-top-2 ">Recent observations</h5>
         <div class="card-body bg-light rounded-bottom-2 p-3">
@@ -179,11 +172,8 @@
           {% endif %}
         </div>
       </div>
-
-
     </div>
   </div>
-</div>
 </div>
 {% endblock %}
 

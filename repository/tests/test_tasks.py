@@ -1,5 +1,7 @@
 import pytest
+from django.utils import timezone
 
+from repository.models import Satellite
 from repository.tasks import UploadError, process_upload
 
 
@@ -21,7 +23,7 @@ def test_process_upload_valid_data(mocker):
             "WATEC 902H2 Supreme + 1.2/85 mm",
             "CCD",
             "CLEAR",
-            "michelle.dadighat@noirlab.edu",
+            "test@example.com",
             "0000-0001-6659-9253",
             185.4465171,
             25.69768917,
@@ -141,7 +143,7 @@ def test_process_upload_value_error(mocker):
             "WATEC 902H2 Supreme + 1.2/85 mm",
             "CCD",
             "CLEAR",
-            "michelle.dadighat@noirlab.edu",
+            "test@example.com",
             "0000-0001-6659-9253",
             185.4465171,
             25.69768917,
@@ -180,7 +182,7 @@ def test_process_upload_validation_error(mocker):
             "WATEC 902H2 Supreme + 1.2/85 mm",
             "CCD",
             "CLEAR",
-            "michelle.dadighat@noirlab.edu",
+            "test@example.com",
             "0",
             185.4465171,
             25.69768917,
@@ -219,7 +221,7 @@ def test_process_upload_general_exception(mocker):
             "WATEC 902H2 Supreme + 1.2/85 mm",
             "CCD",
             "CLEAR",
-            "michelle.dadighat@noirlab.edu",
+            "test@example.com",
             "0000-0001-6659-9253",
             185.4465171,
             25.69768917,
@@ -257,7 +259,7 @@ def test_process_upload_name_id_mismatch(mocker):
             "WATEC 902H2 Supreme + 1.2/85 mm",
             "CCD",
             "CLEAR",
-            "michelle.dadighat@noirlab.edu",
+            "test@example.com",
             "0000-0001-6659-9253",
             185.4465171,
             25.69768917,
@@ -276,3 +278,225 @@ def test_process_upload_name_id_mismatch(mocker):
 
     with pytest.raises(UploadError):
         process_upload(data)
+
+
+@pytest.mark.django_db
+def test_process_upload_existing_satellite(mocker):
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+
+    # Create existing satellite with name
+    Satellite.objects.create(
+        sat_name="STARLINK-1234",
+        sat_number="58296",
+        date_added=timezone.now(),
+        intl_designator="2020-001A",
+    )
+
+    # Test data with same number but no name (archival case)
+    data = [
+        [
+            "",
+            "58296",
+            "2020-05-08T21:42:54.572Z",
+            0.001,
+            6.0418,
+            0.0952,
+            52.01,
+            4.49085,
+            8,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            185.4465171,
+            25.69768917,
+            0,
+            0,
+            0,
+            571.894,
+            0,
+            0,
+            0,
+            "5-frame average",
+            "",
+            "",
+        ]
+    ]
+
+    result = process_upload(data)
+
+    # Verify satellite wasn't duplicated
+    assert Satellite.objects.count() == 1
+
+    # Verify existing satellite was used and maintained its data
+    satellite = Satellite.objects.get(sat_number="58296")
+    assert satellite.sat_name == "STARLINK-1234"
+    assert satellite.intl_designator == "2020-001A"
+    assert result["status"] == "success"
+
+
+@pytest.mark.django_db
+def test_process_upload_update_empty_name(mocker):
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+
+    # Create satellite with empty name
+    Satellite.objects.create(sat_name="", sat_number="58296", date_added=timezone.now())
+
+    # Test data with name for existing number
+    data = [
+        [
+            "STARLINK-1234",
+            "58296",
+            "2020-05-08T21:42:54.572Z",
+            0.001,
+            6.0418,
+            0.0952,
+            52.01,
+            4.49085,
+            8,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            185.4465171,
+            25.69768917,
+            0,
+            0,
+            0,
+            571.894,
+            0,
+            0,
+            0,
+            "5-frame average",
+            "",
+            "",
+        ]
+    ]
+
+    result = process_upload(data)
+
+    # Verify satellite name was updated
+    satellite = Satellite.objects.get(sat_number="58296")
+    assert satellite.sat_name == "STARLINK-1234"
+    assert result["status"] == "success"
+
+
+@pytest.mark.django_db
+def test_process_upload_new_satellites(mocker):
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+
+    data = [
+        [
+            "STARLINK-1234",
+            "58295",
+            "2020-05-08T21:42:54.572Z",
+            0.001,
+            6.0418,
+            0.0952,
+            52.01,
+            4.49085,
+            8,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            185.4465171,
+            25.69768917,
+            0,
+            0,
+            0,
+            571.894,
+            0,
+            0,
+            0,
+            "5-frame average",
+            "",
+            "",
+        ]
+    ]
+
+    result = process_upload(data)
+
+    # Verify satellite name was updated
+    satellite = Satellite.objects.get(sat_number="58295")
+    assert satellite.sat_name == "STARLINK-1234"
+    assert result["status"] == "success"
+
+    # Archival case - won't have a name
+    data = [
+        [
+            "",
+            "58297",
+            "2020-05-08T21:42:54.572Z",
+            0.001,
+            6.0418,
+            0.0952,
+            52.01,
+            4.49085,
+            8,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            185.4465171,
+            25.69768917,
+            0,
+            0,
+            0,
+            571.894,
+            0,
+            0,
+            0,
+            "5-frame average",
+            "",
+            "",
+        ]
+    ]
+    result = process_upload(data)
+    assert result["status"] == "success"
+    assert Satellite.objects.count() == 2
+    assert Satellite.objects.get(sat_number="58297").sat_name == ""
+
+    data = [
+        [
+            "",
+            "58296",
+            "2024-05-08T21:42:54.572Z",
+            0.001,
+            6.0418,
+            0.0952,
+            52.01,
+            4.49085,
+            8,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            185.4465171,
+            25.69768917,
+            0,
+            0,
+            0,
+            571.894,
+            0,
+            0,
+            0,
+            "5-frame average; lim mag of instrument",
+            "",
+            "",
+        ]
+    ]
+    result = process_upload(data)
+    assert result["status"] == "success"
+    assert Satellite.objects.count() == 3
+    assert Satellite.objects.get(sat_number="58296").sat_name == "PELICAN 3001"

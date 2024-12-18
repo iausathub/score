@@ -30,20 +30,30 @@
                   <p>
                     <strong>RCS Size:</strong>
                     <span id="rcs_size">{{ rcs_size|default:"N/A" }}</span>
-                    <span class="ms-1 text-muted info-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                          title="Radar Cross Section (RCS) is a measure of how detectable an object is by radar.
-                          It helps estimate the satellite's size and reflectivity.<br><br>
-                          SMALL:  &lt; 0.1 m&sup2;<br>
-                          MEDIUM:  0.1 to 1.0 m&sup2<br>
+                    <span class="ms-1 text-muted info-icon"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-html="true"
+                          tabindex="0"
+                          title="Radar Cross Section (RCS) is a measure of how detectable an object is by radar. <br><br>
+                          It helps estimate the satellite's size and reflectivity.
+                          <br><br>
+                          SMALL:  &lt; 0.1 m&sup2;
+                          <br>
+                          MEDIUM:  0.1 to 1.0 m&sup2
+                          <br>
                           LARGE:  &gt; 1.0 m&sup2;">
                       <i class="fas fa-info-circle"></i>
                     </span>
                   </p>
                   <p><strong>Object Type:</strong>
                      <span id="object_type">{{ object_type|default:"N/A" }}</span>
-                     <span class="ms-1 text-muted info-icon" data-bs-toggle="tooltip" data-bs-placement="top" data-bs-html="true"
-                          title="Object type as defined by the NORAD satellite catalog.<br><br>
-                          PAYLOAD, ROCKET BODY, DEBRIS, and UNKNOWN">
+                     <span class="ms-1 text-muted info-icon"
+                          data-bs-toggle="tooltip"
+                          data-bs-placement="top"
+                          data-bs-html="true"
+                          tabindex="0"
+                          title="Object type as defined by the NORAD satellite catalog.<br><br>PAYLOAD<br>ROCKET BODY<br>DEBRIS<br>UNKNOWN">
                       <i class="fas fa-info-circle"></i>
                     </span>
                     </p>
@@ -89,7 +99,8 @@
                         <th data-field="obs_time_utc"scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed (UTC)</th>
                         <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
                         </th>
-                        <th data-field="apparent_mag" scope="col" data-sortable="true">Mag</th>
+                        <th data-field="apparent_mag" scope="col" data-sortable="true" data-formatter="magnitudeFormatter">Mag</th>
+                        <th data-field="obs_filter" scope="col" data-sortable="true">Filter</th>
                         <th data-field="obs_lat_deg" scope="col" data-sortable="true">Latitude (deg)</th>
                         <th data-field="obs_long_deg" scope="col" data-sortable="true">Longitude (deg)</th>
                         <th data-field="obs_alt_m" scope="col" data-sortable="true">Altitude (m)</th>
@@ -98,8 +109,7 @@
                         <th data-field="observation_id" data-visible="false">observation_id</th>
                     </tr>
                 </thead>
-                <tbody class="table-group-divider"
-                        class="clickable">
+                <tbody class="table-group-divider clickable">
                 </tbody>
             </table>
             </div>
@@ -143,4 +153,19 @@
     </div>
   </div>
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const tooltipTriggerList = document.querySelectorAll('[data-bs-toggle="tooltip"]');
+    [...tooltipTriggerList].map(tooltipTriggerEl => new bootstrap.Tooltip(tooltipTriggerEl, {
+        html: true,
+        template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
+    }));
+});
+
+function magnitudeFormatter(value, row) {
+    var apparent_mag_uncert = roundUncertainty(row.apparent_mag_uncert);
+    return roundMagnitude(row.apparent_mag, apparent_mag_uncert);
+}
+</script>
 {% endblock %}
