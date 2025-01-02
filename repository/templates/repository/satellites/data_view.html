@@ -75,45 +75,31 @@
         <div class="row p-2">
             <div class="col-12">
                 <table data-toggle="table" data-pagination="true" data-page-list="[5, 10, 25, 50]"
-                data-page-size="5" data-sort-name="added" data-sort-order="desc" data-classes="table"
-                class="table table-hover fs-6" id="obsTable">
+                data-page-size="5"
+                data-side-pagination="server"
+                data-url="{% url 'satellite-observations' satellite.sat_number %}"
+                data-sort-name="added" data-sort-order="desc" data-classes="table"
+                class="table table-hover fs-6" id="obsTable"
+                data-row-attributes="rowAttributes">
                 <thead>
                     <tr>
-                        <th scope="col" data-sortable="true" data-visible="true">Date added</th>
+                        <th data-field="date_added" scope="col" data-sortable="true" data-visible="true">Date added (UTC)</th>
                         <th data-field="added" scope="col" data-sortable="true" data-visible="false">Date_added_timestamp
                         </th>
-                        <th scope="col" data-sortable="true">Name</th>
-                        <th scope="col" data-sortable="true">NORAD ID</th>
-                        <th scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed</th>
+                        <th data-field="obs_time_utc"scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed (UTC)</th>
                         <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
                         </th>
-                        <th scope="col" data-sortable="true">Mag</th>
-                        <th scope="col" data-sortable="true">Latitude</th>
-                        <th scope="col" data-sortable="true">Longitude</th>
-                        <th scope="col" data-sortable="true">Altitude</th>
-                        <th scope="col" data-sortable="true">Obs. mode</th>
-                        <th scope="col" data-sortable="true">Observer ORCID</th>
+                        <th data-field="apparent_mag" scope="col" data-sortable="true">Mag</th>
+                        <th data-field="obs_lat_deg" scope="col" data-sortable="true">Latitude (deg)</th>
+                        <th data-field="obs_long_deg" scope="col" data-sortable="true">Longitude (deg)</th>
+                        <th data-field="obs_alt_m" scope="col" data-sortable="true">Altitude (m)</th>
+                        <th data-field="obs_mode" scope="col" data-sortable="true">Obs. mode</th>
+                        <th data-field="obs_orc_id" scope="col" data-sortable="true">Observer ORCID</th>
+                        <th data-field="observation_json" data-visible="false" data-formatter="attachJsonToRow">JSON Data</th>
                     </tr>
                 </thead>
-                <tbody class="table-group-divider">
-                    {% for observation, observation_json in observations_and_json %}
-                    <tr data-bs-toggle="modal" data-bs-target="#obsModal" data-content="{{observation_json|escapejs|safe}}"
+                <tbody class="table-group-divider"
                         class="clickable">
-                        <td scope="row">{{ observation.date_added|date:"M. d, Y h:i A" }}</td>
-                        <td scope="row">{{ observation.date_added.timestamp }}</td>
-                        <td scope="row">{{ observation.satellite_id.sat_name }}</td>
-                        <td scope="row">{{ observation.satellite_id.sat_number }}</td>
-                        <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
-                        <td scope="row">{{ observation.obs_time_utc.timestamp }}</td>
-                        <td scope="row" class="text-end">{{ observation.apparent_mag|floatformat:"-4" }}</td>
-                        <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg|floatformat:"-4" }}</td>
-                        <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg|floatformat:"-4" }}</td>
-                        <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m|floatformat:"-4" }}</td>
-                        <td scope="row">{{ observation.obs_mode }}</td>
-                        <td scope="row">{{ observation.obs_orc_id|first }}</td>
-                    </tr>
-                    {% endfor %}
-
                 </tbody>
             </table>
             </div>
@@ -139,11 +125,17 @@
             <div class="col-md-6">
             <div class="chart-container" style="position: relative; height:40vh; width:100%">
                 <canvas id="brightness_chart"></canvas>
+                <button class="btn btn-sm btn-primary m-2" id="reset_zoom_brightness">Reset Chart</button>
             </div>
             </div>
             <div class="col-md-6">
             <div class="chart-container" style="position: relative; height:40vh; width:100%">
                 <canvas id="phase_angle_chart"></canvas>
+                <button class="btn btn-sm btn-primary m-2" id="reset_zoom_phase">Reset Chart</button>
+                <label>
+                  <input type="checkbox" id="toggle_data_range" />
+                  Use Data Range
+              </label>
             </div>
             </div>
         </div>
@@ -158,6 +150,27 @@
     var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
         return new bootstrap.Tooltip(tooltipTriggerEl)
     })
+
+    var obsTable = document.getElementById('obsTable');
+    obsTable.addEventListener('load-success.bs.table', function(event) {
+      console.log('Table loaded');
+        var data = event.detail;
+        data.rows.forEach(function(row, index) {
+            var rowElement = obsTable.querySelectorAll('tbody tr')[index];
+            console.log(rowElement);
+            rowElement.setAttribute('observation-json', JSON.stringify(row.observation_json));
+        });
+    });
 });
+
+    function rowAttributes(row, index) {
+        return {
+            'data-observation-json': row.observation_json
+        };
+    }
+
+    function attachJsonToRow(value, row, index) {
+        return '<span class="d-none">' + value + '</span>';
+    }
 </script>
 {% endblock %}

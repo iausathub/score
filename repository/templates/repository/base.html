@@ -19,14 +19,19 @@ crossorigin=""/>
 {% endcompress %}
 
 <head>
+  {% if recaptcha_public_key %}
   <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_public_key }}"></script>
+  {% endif %}
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
      integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
      crossorigin=""></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js"
     integrity="sha512-ZwR1/gSZM3ai6vCdI+LVF1zSq/5HznD3ZSTk7kajkaj4D292NLuduDCO1c/NT8Id+jE58KYLKT7hXnbtryGmMg=="
     crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@4.4.1/build/index.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
   <script src="{% static 'js/theme_switcher.js' %}"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
   <title>{% block title %}Satellite Constellation Observation Repository{% endblock %}</title>
@@ -91,7 +96,7 @@ crossorigin=""/>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'download-data' %}">Download all
                   observations</a></li>
                 <div class="dropdown-divider"></div>
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'satellites' %}">List of observed satellites</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'satellites' %}">Observed satellites</a></li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'data-change' %}">Data change
                     request</a></li>
               </ul>
@@ -173,19 +178,19 @@ crossorigin=""/>
             <h6 class="text-uppercase fw-bold">Data</h6>
             <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: #4d85ff; height: 2px" />
             <p>
-              <a href="index" class="text-white">Upload observation file</a>
+              <a href="{% url 'index' %}" class="text-white">Upload observation file</a>
             </p>
             <p>
-              <a href="generate-csv" class="text-white">Generate CSV file</a>
+              <a href="{% url 'generate-csv' %}" class="text-white">Generate CSV file</a>
             </p>
             <p>
-              <a href="search" class="text-white">Search</a>
+              <a href="{% url 'search' %}" class="text-white">Search</a>
             </p>
             <p>
-              <a href="view" class="text-white">View recent observations</a>
+              <a href="{% url 'view-data' %}" class="text-white">View recent observations</a>
             </p>
             <p>
-              <a href="data-change" class="text-white">Data change request</a>
+              <a href="{% url 'data-change' %}" class="text-white">Data change request</a>
             </p>
           </div>
           <!-- Grid column -->
@@ -196,15 +201,15 @@ crossorigin=""/>
             <h6 class="text-uppercase fw-bold">Resources</h6>
             <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: #4d85ff; height: 2px" />
             <p>
-              <a href="data-format" class="text-white">Data format</a>
+              <a href="{% url 'data-format' %}" class="text-white">Data format</a>
             </p>
             <p>
-              <a href="about" class="text-white">About</a>
+              <a href="{% url 'about' %}" class="text-white">About</a>
             </p>
             <p>
-              <a href="tools" class="text-white">Tools</a>
+              <a href="{% url 'tools' %}" class="text-white">Tools</a>
             </p>
-            <p><i class="fab fa-github"></i> <a href="https://github.com/iausathub/score" class="text-white">Github</a>
+            <p><i class="fab fa-github"></i> <a href="https://github.com/iausathub/score" class="text-white">GitHub</a>
             </p>
             <p><i class="fas fa-envelope mr-3"></i> <a href="mailto:sathub@cps.iau.org"
                 class="text-white">sathub@cps.iau.org</a></p>

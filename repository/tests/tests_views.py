@@ -179,7 +179,7 @@ class SearchViewTest(TestCase):
     def test_search_get(self):
         response = self.client.get(reverse("search"))
         self.assertEqual(response.status_code, 200)
-        self.assertIs(response.context["form"], SearchForm)
+        self.assertIsInstance(response.context["form"], SearchForm)
 
     def test_search_post_success(self):
         response = self.client.post(

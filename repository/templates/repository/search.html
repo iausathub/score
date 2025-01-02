@@ -1,145 +1,176 @@
 {% extends "repository/base.html" %}
 
 {% block content %}
-
 <div class="container-fluid p-3">
-    <div class="container-sm">
+    <div class="container-lg">
         <h2 class="text-center p-2 pb-4">Search</h2>
-        <div class="d-flex justify-content-center ">
-            <form action="{% url 'search' %}" method="post" enctype="multipart/form-data">
-                {% csrf_token %}
-                <div class="row">
-                    <div class="col">
-                        <div class=" pb-4">
-                            {{ form.sat_name.label_tag }}
-                            {{ form.sat_name }}
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class=" pb-4">
-                            {{ form.sat_number.label_tag }}
-                            {{ form.sat_number }}
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <div class=" pb-4">
-                            {{ form.start_date_range.label_tag}}
-                            {{ form.start_date_range }}
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class=" pb-4">
-                            {{ form.end_date_range.label_tag}}
-                            {{ form.end_date_range }}
-                        </div>
-                    </div>
-                </div>
-                <div class="row">
-                    <div class="col">
-                        <div class=" pb-4">
-                            {{ form.obs_mode.label_tag}}
-                            {{ form.obs_mode }}
-                        </div>
-                    </div>
 
-                </div>
-
-                <div class="row">
-                    <div class="col">
-                        <div class="pb-4">
-                            {{ form.observation_id.label_tag}}
-                            {{ form.observation_id }}
-                        </div>
-                    </div>
-                    <div class="col">
-                        <div class="pb-4">
-                            {{ form.mpc_code.label_tag}}
-                            {{ form.mpc_code }}
-                        </div>
-                    </div>
-                </div>
-
-                <div class="pb-4">
-                    {{ form.observer_orcid.label_tag}}
-                    {{ form.observer_orcid }}
-                    <div class="text-danger">
-                        {{ form.observer_orcid.errors }}
-                    </div>
-                </div>
-                <div class="form-group">
-                    <input class="btn btn-primary" type="submit" value="Submit">
-                </div>
-            </form>
+        <div class="p-3">
+            <p>
+                Use the filters below to search the SCORE dataset and find specific observations. Search results can be downloaded as a CSV file.
+                Satellite name can be a partial match, but satellite number (NORAD ID) and International Designator (COSPAR ID) must match exactly
+                to return results if used.
+            </p>
         </div>
-        <div class="container-md">
-            {% if observations %}
-            <table data-toggle="table" data-pagination="true" data-search="true"
-                data-page-list="[25, 50, 100, 200, All]" data-page-size="25" data-sort-name="added"
-                data-sort-order="desc" data-classes="table" class="table table-hover fs-6" id="obsTable">
-                <thead>
-                    <tr>
-                        <th scope="col" data-sortable="true" data-visible="true">Date added</th>
-                        <th data-field="added" scope="col" data-sortable="true" data-visible="false">
-                            Date_added_timestamp</th>
-                        <th scope="col" data-sortable="true">Name</th>
-                        <th scope="col" data-sortable="true">NORAD ID</th>
-                        <th scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed</th>
-                        <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
-                        </th>
-                        <th scope="col" data-sortable="true">Mag</th>
-                        <th scope="col" data-sortable="true">Latitude</th>
-                        <th scope="col" data-sortable="true">Longitude</th>
-                        <th scope="col" data-sortable="true">Altitude</th>
-                        <th scope="col" data-sortable="true">Obs. mode</th>
-                        <th scope="col" data-sortable="true">Observer ORCID</th>
-                    </tr>
-                </thead>
-                <tbody class="table-group-divider">
-                    {% for observation, observation_json in observations %}
-                    <tr data-bs-toggle="modal" data-bs-target="#obsModal"
-                        data-content="{{observation_json|escapejs|safe}}">
-                        <td scope="row">{{ observation.date_added|date:"M. d, Y h:i A" }}</td>
-                        <td scope="row">{{ observation.date_added.timestamp }}</td>
-                        <td scope="row">{{ observation.satellite_id.sat_name }}</td>
-                        <td scope="row">{{ observation.satellite_id.sat_number }}</td>
-                        <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
-                        <td scope="row">{{ observation.obs_time_utc.timestamp }}</td>
-                        <td scope="row" class="text-end">{{ observation.apparent_mag|floatformat:"-4" }}</td>
-                        <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg|floatformat:"-4" }}</td>
-                        <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg|floatformat:"-4" }}
-                        </td>
-                        <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m|floatformat:"-4" }}</td>
-                        <td scope="row">{{ observation.obs_mode }}</td>
-                        <td scope="row">{{ observation.obs_orc_id|first }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            <div class="col p-3">
-                {% if obs_ids %}
-                <div class="float-end">
-                    <form action="{% url 'download-results' %}" method="post">
-                        {% csrf_token %}
-                        <input type="hidden" name="obs_ids" value="{{ obs_ids }}">
-                        <button type="submit" class="btn btn-primary">
-                            <i class="fas fa-download"></i> Download search results
-                        </button>
-                    </form>
+        <form action="{% url 'search' %}" method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+
+            <div class="row">
+                <!-- Satellite Section -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header fw-bold">Satellite</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.sat_name.label_tag }}
+                                {{ form.sat_name }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.sat_number.label_tag }}
+                                {{ form.sat_number }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.intl_designator.label_tag }}
+                                {{ form.intl_designator }}
+                            </div>
+                        </div>
+                    </div>
                 </div>
-                {% endif %}
+
+                <!-- Observation Section -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header fw-bold">Observation</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.obs_mode.label_tag }}
+                                {{ form.obs_mode }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.observation_id.label_tag }}
+                                {{ form.observation_id }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.start_date_range.label_tag }}
+                                {{ form.start_date_range }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.end_date_range.label_tag }}
+                                {{ form.end_date_range }}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Observer Section -->
+                <div class="col-md-4 mb-3">
+                    <div class="card h-100">
+                        <div class="card-header fw-bold">Observer</div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                {{ form.observer_orcid.label_tag }}
+                                {{ form.observer_orcid }}
+                            </div>
+                            <div class="mb-3">
+                                {{ form.mpc_code.label_tag }}
+                                {{ form.mpc_code }}
+                            </div>
+                            <div class="mb-3">
+                                <label class="form-label">Observer Location:</label>
+                                <div class="input-group mb-2">
+                                    <span class="input-group-text">Lat</span>
+                                    {{ form.observer_latitude }}
+                                    <span class="input-group-text">Lon</span>
+                                    {{ form.observer_longitude }}
+                                </div>
+                                <div class="input-group">
+                                    <span class="input-group-text">Radius (km)</span>
+                                    {{ form.observer_radius }}
+                                </div>
+                                <div class="form-text text-muted">Latitude and longitude are in decimal degrees, and
+                                    radius is in kilometers.
+                                </div>
+                                {% if form.non_field_errors %}
+                                <div class="alert alert-danger mt-2">
+                                    {{ form.non_field_errors.0 }}
+                                </div>
+                            {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
-            {% include "repository/satellites/modal.html" %}
-            {% endif %}
-            {% if error %}
-            <div class="container-md text-center mt-5">
-                <h4 class="text-danger">{{ error }}</h4>
+
+            <div class="text-center mt-3">
+                <button type="submit" class="btn btn-primary">Search</button>
+            </div>
+        </form>
+
+        <!-- Results table (unchanged) -->
+        {% if observations %}
+        <table data-toggle="table" data-pagination="true" data-search="true"
+            data-page-list="[25, 50, 100, 200, All]" data-page-size="25" data-sort-name="added"
+            data-sort-order="desc" data-classes="table" class="table table-hover fs-6" id="obsTable">
+            <thead>
+                <tr>
+                    <th scope="col" data-sortable="true" data-visible="true">Date added</th>
+                    <th data-field="added" scope="col" data-sortable="true" data-visible="false">
+                        Date_added_timestamp</th>
+                    <th scope="col" data-sortable="true">Name</th>
+                    <th scope="col" data-sortable="true">NORAD ID</th>
+                    <th scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed</th>
+                    <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
+                    </th>
+                    <th scope="col" data-sortable="true">Mag</th>
+                    <th scope="col" data-sortable="true">Latitude (deg)</th>
+                    <th scope="col" data-sortable="true">Longitude (deg)</th>
+                    <th scope="col" data-sortable="true">Altitude (m)</th>
+                    <th scope="col" data-sortable="true">Obs. mode</th>
+                    <th scope="col" data-sortable="true">Observer ORCID</th>
+                </tr>
+            </thead>
+            <tbody class="table-group-divider">
+                {% for observation, observation_json in observations %}
+                <tr data-bs-toggle="modal" data-bs-target="#obsModal"
+                    data-content="{{observation_json|escapejs|safe}}">
+                    <td scope="row">{{ observation.date_added|date:"M. d, Y h:i A" }}</td>
+                    <td scope="row">{{ observation.date_added.timestamp }}</td>
+                    <td scope="row">{{ observation.satellite_id.sat_name }}</td>
+                    <td scope="row">{{ observation.satellite_id.sat_number }}</td>
+                    <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
+                    <td scope="row">{{ observation.obs_time_utc.timestamp }}</td>
+                    <td scope="row" class="text-end">{{ observation.apparent_mag|floatformat:"-4" }}</td>
+                    <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg|floatformat:"-4" }}</td>
+                    <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg|floatformat:"-4" }}
+                    </td>
+                    <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m|floatformat:"-4" }}</td>
+                    <td scope="row">{{ observation.obs_mode }}</td>
+                    <td scope="row">{{ observation.obs_orc_id|first }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        <div class="col p-3">
+            {% if obs_ids %}
+            <div class="float-end">
+                <form action="{% url 'download-results' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="obs_ids" value="{{ obs_ids }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download search results
+                    </button>
+                </form>
             </div>
             {% endif %}
         </div>
+        {% include "repository/satellites/modal.html" %}
+        {% endif %}
 
+        {% if error %}
+        <div class="container-md text-center mt-5">
+            <h4 class="text-danger">{{ error }}</h4>
+        </div>
+        {% endif %}
     </div>
 </div>
-
 {% endblock %}
