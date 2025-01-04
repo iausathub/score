@@ -1,5 +1,6 @@
 {% extends "repository/base.html" %}
 {% load observation_filters %}
+{% load static %}
 
 {% block content %}
 <div class="container-fluid p-3">
@@ -192,21 +193,7 @@
 </div>
 
 <script>
-document.addEventListener('DOMContentLoaded', function() {
-    // listen for form submit
-    const form = document.querySelector(`form[action="{% url 'search' %}"]`);
-
-    if (form) {
-        form.addEventListener('submit', function() {
-            document.getElementById('searchLoadingIndicator').style.display = 'block';
-
-            // hide existing results
-            const tableContainer = document.querySelector('.table-container');
-            if (tableContainer) {
-                tableContainer.style.display = 'none';
-            }
-        });
-    }
-});
+    window.SEARCH_URL = "{% url 'search' %}";
 </script>
+<script src="{% static 'js/search.js' %}"></script>
 {% endblock %}
