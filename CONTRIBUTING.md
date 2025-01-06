@@ -13,6 +13,8 @@ For any questions not answered here please email sathub@cps.iau.org or open an i
 4. Open a pull request when you're done - if this was for a new feature, only features approved by a project maintainer will be considered for merging into the project.
 
 ## Code Quality
+* Please review the IAU CPS SatHub general guidelines [here](https://github.com/iausathub/.github/blob/main/CONTRIBUTING.md)
+  
 * The project has Ruff and Black set up to run as part of pull requests and commits to branches in this repository, and info on the rules used for those can be found in the README [here](https://github.com/iausathub/score).
 
 * Pytest is used for testing.
