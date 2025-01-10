@@ -75,6 +75,15 @@ function populateModalFields(observation) {
     } else {
         document.getElementById('data_archive_link').textContent = "";
     }
+
+    // Add launch link only if there's an international designator
+    const launchLinkContainer = document.getElementById('launch_link_container');
+    if (observation.satellite_id.intl_designator) {
+        const baseDesignator = observation.satellite_id.intl_designator.slice(0, 8);
+        launchLinkContainer.innerHTML = `<a href="/launch/${baseDesignator}/">View other objects from this launch</a>`;
+    } else {
+        launchLinkContainer.innerHTML = '';
+    }
 }
 
 function populateIfExists(elementId, object) {

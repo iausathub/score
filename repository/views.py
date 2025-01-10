@@ -573,6 +573,24 @@ def satellite_data_view(request, satellite_number):
     return response
 
 
+def launch_view(request, launch_number):
+    """
+    View function to display data for a specific launch.
+    """
+    satellites = Satellite.objects.filter(
+        intl_designator__icontains=launch_number
+    ).annotate(num_observations=Count("observations"))
+
+    return render(
+        request,
+        "repository/satellites/launch_view.html",
+        {
+            "satellites": satellites,
+            "launch_number": launch_number,
+        },
+    )
+
+
 @csrf_exempt
 def name_id_lookup(request):
     """
