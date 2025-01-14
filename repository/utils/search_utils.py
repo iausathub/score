@@ -39,6 +39,11 @@ def filter_observations(form_data):
         if value:
             observations = observations.filter(**{condition: value})
 
+    if form_data.get("has_position_data"):
+        observations = observations.filter(
+            sat_ra_deg__isnull=False, sat_dec_deg__isnull=False
+        )
+
     latitude = form_data.get("observer_latitude")
     longitude = form_data.get("observer_longitude")
     radius = form_data.get("observer_radius")

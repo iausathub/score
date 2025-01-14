@@ -288,3 +288,17 @@ def test_filter_observations_location(setup_data):
     results = filter_observations(form_data)
     assert len(results) == 1
     assert results[0] == observation
+
+
+@pytest.mark.django_db
+def test_filter_observations_position_data(setup_data):
+    location, satellite, observation = setup_data
+
+    form_data = {"has_position_data": True}
+    results = filter_observations(form_data)
+    assert len(results) == 0
+
+    form_data = {"has_position_data": False}
+    results = filter_observations(form_data)
+    assert len(results) == 1
+    assert results[0] == observation
