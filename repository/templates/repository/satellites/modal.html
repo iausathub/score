@@ -16,195 +16,198 @@
                     </div>
                 </div>
                 <div class="row pb-4">
-                    <div class="col-2 text-center">
+                    <div class="col-12 col-sm-2 text-center mb-2">
                         <div class="fw-bold fs-5">Basic</div>
                     </div>
-                    <div class="col-5">
-                        <div class="row">
-                            <div class="col text-end px-0">Satellite Name:</div>
-                            <div class="col text-start" id="satellite_name"></div>
+                    <div class="col-12 col-md-5">
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">Satellite Name:</div>
+                            <div class="col-6 col-sm-6 text-start" id="satellite_name"></div>
                         </div>
-                        <div class="row">
-                            <div class="col text-end px-0">NORAD ID:</div>
-                            <div class="col text-start" id="satellite_number"></div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">NORAD ID:</div>
+                            <div class="col-6 col-sm-6 text-start" id="satellite_number"></div>
                         </div>
-                        <div class="row">
-                            <div class="col text-end px-0">Obs. time (UTC):</div>
-                            <div class="col text-start" id="obs_time_utc"></div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">Obs. time (UTC):</div>
+                            <div class="col-6 col-sm-6 text-start" id="obs_time_utc"></div>
                         </div>
-                        <div class="row align-items-end">
-                            <div class="col text-end px-0">Obs. time uncertainty (s):</div>
-                            <div class="col " id="obs_time_uncert"></div>
+                        <div class="row g-2 align-items-end">
+                            <div class="col-6 col-sm-6 text-end px-0">Obs. time uncertainty (s):</div>
+                            <div class="col-6 col-sm-6 " id="obs_time_uncert"></div>
                         </div>
-                        <div class="row">
-                            <div class="col text-end px-0">Apparent magnitude:</div>
-                            <div class="col text-start" id="apparent_mag"></div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">Apparent magnitude:</div>
+                            <div class="col-6 col-sm-6 text-start" id="apparent_mag"></div>
                         </div>
-                        <div class="row">
-                            <div class="col text-end px-0">Apparent magnitude uncertainty:</div>
-                            <div class="col text-start" id="apparent_mag_uncert"></div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">Apparent magnitude uncertainty:</div>
+                            <div class="col-6 col-sm-6 text-start" id="apparent_mag_uncert"></div>
                         </div>
                     </div>
-                    <div class="col-5">
-                        <div class="row align-items-end">
-                            <div class="col text-end px-0">International Designator/<br>COSPAR ID:</div>
-                            <div class="col text-start" id="intl_designator"></div>
+                    <div class="col-12 col-md-5">
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">International Designator/<br>COSPAR ID:</div>
+                            <div class="col-6 col-sm-6 text-start">
+                                <div id="intl_designator"></div>
+                                <div id="launch_link_container"></div>
+                            </div>
                         </div>
-                        <div class="row">
-                            <div class="col text-end px-0">Observing mode:</div>
-                            <div class="col text-start" id="obs_mode"></div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">Observing mode:</div>
+                            <div class="col-6 col-sm-6 text-start" id="obs_mode"></div>
                         </div>
-                        <div class="row">
-                            <div class="col text-end px-0">Filter:</div>
-                            <div class="col text-start" id="obs_filter"></div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">Filter:</div>
+                            <div class="col-6 col-sm-6 text-start" id="obs_filter"></div>
                         </div>
-                        <div class="row">
-                            <div class="col text-end px-0">Instrument:</div>
-                            <div class="col text-start" id="obs_instrument"></div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">Instrument:</div>
+                            <div class="col-6 col-sm-6 text-start" id="obs_instrument"></div>
                         </div>
-                        <div class="row">
-                            <div class="col text-end px-0">Limiting magnitude:</div>
-                            <div class="col text-start" id="limiting_magnitude"></div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">Limiting magnitude:</div>
+                            <div class="col-6 col-sm-6 text-start" id="limiting_magnitude"></div>
                         </div>
-                        <div class="row">
-                            <div class="col text-end px-0">Data archive:</div>
-                            <div class="col text-start" id="data_archive_link"></div>
+                        <div class="row g-2">
+                            <div class="col-6 col-sm-6 text-end px-0">Data archive:</div>
+                            <div class="col-6 col-sm-6 text-start" id="data_archive_link"></div>
                         </div>
                     </div>
                 </div>
                 <div class="bg-light">
                     <div class="row p-2">
-                        <div class="col-2 text-center">
+                        <div class="col-12 col-sm-2 text-center mb-2">
                             <div class="fw-bold fs-5">Position</div>
                         </div>
-                        <div class="col-5">
-                            <div class="row">
-                                <div class="col text-end px-0">Satellite RA (deg.):</div>
-                                <div class="col text-start" id="sat_ra_deg"></div>
+                        <div class="col-12 col-md-5">
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Satellite RA (deg.):</div>
+                                <div class="col-6 col-sm-6 text-start" id="sat_ra_deg"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Satellite Dec. (deg.):</div>
-                                <div class="col text-start" id="sat_dec_deg"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Satellite Dec. (deg.):</div>
+                                <div class="col-6 col-sm-6 text-start" id="sat_dec_deg"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Range to satellite (km):</div>
-                                <div class="col text-start" id="range_to_sat_km"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Range to satellite (km):</div>
+                                <div class="col-6 col-sm-6 text-start" id="range_to_sat_km"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Range uncertainty (km):</div>
-                                <div class="col text-start" id="range_to_sat_uncert_km"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Range uncertainty (km):</div>
+                                <div class="col-6 col-sm-6 text-start" id="range_to_sat_uncert_km"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Range rate (km/s):</div>
-                                <div class="col text-start" id="range_rate_km_s"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Range rate (km/s):</div>
+                                <div class="col-6 col-sm-6 text-start" id="range_rate_km_s"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Range rate uncertainty (km/s):</div>
-                                <div class="col text-start" id="range_rate_uncert_km_s"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Range rate uncertainty (km/s):</div>
+                                <div class="col-6 col-sm-6 text-start" id="range_rate_uncert_km_s"></div>
                             </div>
                         </div>
-                        <div class="col-5">
-                            <div class="row">
-                                <div class="col text-end px-0 fw-bold">RA/Dec. uncertainty</div>
-                                <div class="col text-start" ></div>
+                        <div class="col-12 col-md-5">
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0 fw-bold">RA/Dec. uncertainty</div>
+                                <div class="col-6 col-sm-6 text-start" ></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Sigma^2 RA:</div>
-                                <div class="col text-start" id="sigma_2_ra"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Sigma^2 RA:</div>
+                                <div class="col-6 col-sm-6 text-start" id="sigma_2_ra"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Sigma RA * Sigma Dec:</div>
-                                <div class="col text-start" id="sigma_ra_sigma_dec"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Sigma RA * Sigma Dec:</div>
+                                <div class="col-6 col-sm-6 text-start" id="sigma_ra_sigma_dec"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Sigma^2 Dec:</div>
-                                <div class="col text-start" id="sigma_2_dec"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Sigma^2 Dec:</div>
+                                <div class="col-6 col-sm-6 text-start" id="sigma_2_dec"></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="">
                     <div class="row p-2">
-                        <div class="col-2 text-center">
+                        <div class="col-12 col-sm-2 text-center mb-2">
                             <div class="fw-bold fs-5">Observer</div>
                         </div>
-                        <div class="col-5">
-                            <div class="row">
-                                <div class="col text-end px-0">Observation latitude (deg.):</div>
-                                <div class="col text-start" id="obs_lat_deg"></div>
+                        <div class="col-12 col-md-5">
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Observation latitude (deg.):</div>
+                                <div class="col-6 col-sm-6 text-start" id="obs_lat_deg"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Observation longitude (deg.):</div>
-                                <div class="col text-start" id="obs_long_deg"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Observation longitude (deg.):</div>
+                                <div class="col-6 col-sm-6 text-start" id="obs_long_deg"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Observation altitude (m):</div>
-                                <div class="col text-start" id="obs_alt_m"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Observation altitude (m):</div>
+                                <div class="col-6 col-sm-6 text-start" id="obs_alt_m"></div>
                             </div>
                         </div>
-                        <div class="col-5">
-                            <div class="row">
-                                <div class="col text-end px-0">Observer ORCID(s):</div>
-                                <div class="col text-start" id="obs_orc_id"></div>
+                        <div class="col-12 col-md-5">
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Observer ORCID(s):</div>
+                                <div class="col-6 col-sm-6 text-start" id="obs_orc_id"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Commments:</div>
-                                <div class="col text-start" id="obs_comments"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Comments:</div>
+                                <div class="col-6 col-sm-6 text-start" id="obs_comments"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">MPC Code:</div>
-                                <div class="col text-start" id="mpc_code"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">MPC Code:</div>
+                                <div class="col-6 col-sm-6 text-start" id="mpc_code"></div>
                             </div>
                         </div>
                     </div>
                 </div>
                 <div class="bg-light">
                     <div class="row p-2">
-                        <div class="col-2 text-center">
+                        <div class="col-12 col-sm-2 text-center mb-2">
                             <div class="fw-bold fs-5">Reference data<span class="fw-normal">*</span></div>
                         </div>
-                        <div class="col-5">
-                            <div class="row">
-                                <div class="col text-end px-0">Satellite RA (deg.):</div>
-                                <div class="col text-start" id="sat_ra_deg_satchecker"></div>
+                        <div class="col-12 col-md-5">
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Satellite RA (deg.):</div>
+                                <div class="col-6 col-sm-6 text-start" id="sat_ra_deg_satchecker"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Satellite Dec. (deg):</div>
-                                <div class="col text-start" id="sat_dec_deg_satchecker"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Satellite Dec. (deg):</div>
+                                <div class="col-6 col-sm-6 text-start" id="sat_dec_deg_satchecker"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Range to satellite (km):</div>
-                                <div class="col text-start" id="range_to_sat_km_satchecker"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Range to satellite (km):</div>
+                                <div class="col-6 col-sm-6 text-start" id="range_to_sat_km_satchecker"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Range rate (km/s):</div>
-                                <div class="col text-start" id="range_rate_sat_km_s_satchecker"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Range rate (km/s):</div>
+                                <div class="col-6 col-sm-6 text-start" id="range_rate_sat_km_s_satchecker"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Phase angle (deg.):</div>
-                                <div class="col text-start" id="phase_angle"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Phase angle (deg.):</div>
+                                <div class="col-6 col-sm-6 text-start" id="phase_angle"></div>
                             </div>
                         </div>
-                        <div class="col-5">
-                            <div class="row">
-                                <div class="col text-end px-0">DRA (cosdec/deg/s):</div>
-                                <div class="col text-start" id="dra_cosdec_deg_s_satchecker"></div>
+                        <div class="col-12 col-md-5">
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">DRA (cosdec/deg/s):</div>
+                                <div class="col-6 col-sm-6 text-start" id="dra_cosdec_deg_s_satchecker"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">DDec (deg/s):</div>
-                                <div class="col text-start" id="ddec_deg_s_satchecker"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">DDec (deg/s):</div>
+                                <div class="col-6 col-sm-6 text-start" id="ddec_deg_s_satchecker"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Alt (deg):</div>
-                                <div class="col text-start" id="alt_deg_satchecker"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Alt (deg):</div>
+                                <div class="col-6 col-sm-6 text-start" id="alt_deg_satchecker"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Az (deg):</div>
-                                <div class="col text-start" id="az_deg_satchecker"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Az (deg):</div>
+                                <div class="col-6 col-sm-6 text-start" id="az_deg_satchecker"></div>
                             </div>
-                            <div class="row">
-                                <div class="col text-end px-0">Illuminated:</div>
-                                <div class="col text-start" id="illuminated"></div>
+                            <div class="row g-2">
+                                <div class="col-6 col-sm-6 text-end px-0">Illuminated:</div>
+                                <div class="col-6 col-sm-6 text-start" id="illuminated"></div>
                             </div>
                         </div>
                     </div>

@@ -48,4 +48,5 @@ urlpatterns = [
         views.get_observation_by_id,
         name="get_observation_by_id",
     ),
+    path("launch/<str:launch_number>/", views.launch_view, name="launch-view"),
 ]

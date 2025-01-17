@@ -198,6 +198,11 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
     color: var(--bs-bg-primary-text-dark) !important;
   }
 
+  .alert-link {
+    color: var(--bs-link-dark-color) !important;
+    text-decoration: underline;
+  }
+
   .tooltip {
     --#{$prefix}tooltip-color: var(--bs-tooltip-color);
     --#{$prefix}tooltip-bg: var(--bs-tooltip-bg);

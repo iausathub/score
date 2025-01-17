@@ -89,6 +89,12 @@ class SearchForm(Form):
         label="End Date",
         widget=forms.DateInput(attrs={"type": "date", "class": "form-control"}),
     )
+    has_position_data = forms.BooleanField(
+        required=False,
+        label="Only show observations with position data",
+        label_suffix="",
+        widget=forms.CheckboxInput(attrs={"class": "form-check-input"}),
+    )
     instrument = forms.CharField(
         required=False,
         label="Instrument",

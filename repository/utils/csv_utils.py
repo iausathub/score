@@ -90,6 +90,8 @@ def create_csv(
         observation_list = Observation.objects.all()
         all_observations = True
 
+    observation_list = observation_list.select_related("satellite_id", "location_id")
+
     header = get_csv_header()
     logger.info("CSV header retrieved")
 

@@ -115,10 +115,11 @@ document.addEventListener('DOMContentLoaded', function() {
             tooltip: {
               callbacks: {
                 title: function(tooltipItems) {
-                  return `Magnitude: ${tooltipItems[0].parsed.y.toFixed(2)}`;
+                  const uncertainty = window.NumberFormatting.roundUncertainty(tooltipItems[0].raw.uncertainty);
+                  return `Magnitude: ${window.NumberFormatting.roundMagnitude(tooltipItems[0].parsed.y, uncertainty)}`;
                 },
                 afterTitle: function(tooltipItems) {
-                  const uncertainty = tooltipItems[0].raw.uncertainty;
+                  const uncertainty = window.NumberFormatting.roundUncertainty(tooltipItems[0].raw.uncertainty);
                   const date = new Date(tooltipItems[0].parsed.x).toLocaleDateString();
                   return [`Uncertainty: ${uncertainty}`, `Date: ${date}`, `Number of points: ${tooltipItems.length}`];
                 },
@@ -244,16 +245,13 @@ document.addEventListener('DOMContentLoaded', function() {
             tooltip: {
               callbacks: {
                 title: function(tooltipItems) {
-                  return `Magnitude: ${tooltipItems[0].parsed.y.toFixed(2)}`;
+                  const uncertainty = window.NumberFormatting.roundUncertainty(tooltipItems[0].raw.uncertainty);
+                  return `Magnitude: ${window.NumberFormatting.roundMagnitude(tooltipItems[0].parsed.y, uncertainty)}`;
                 },
                 afterTitle: function(tooltipItems) {
+                  const uncertainty = window.NumberFormatting.roundUncertainty(tooltipItems[0].raw.uncertainty);
                   const date = tooltipItems[0].raw.date.toLocaleDateString();
-                  return [
-                    `Uncertainty: ${tooltipItems[0].raw.uncertainty}`,
-                    `Phase Angle: ${tooltipItems[0].parsed.x.toFixed(2)}°`,
-                    `Date: ${date}`,
-                    `Number of points: ${tooltipItems.length}`,
-                  ];
+                  return [`Uncertainty: ${uncertainty}`, `Phase Angle: ${tooltipItems[0].parsed.x.toFixed(2)}°`, `Date: ${date}`, `Number of points: ${tooltipItems.length}`];
                 },
                 label: function(context) {
                   return null;

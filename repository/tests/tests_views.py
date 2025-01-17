@@ -217,3 +217,90 @@ class SearchViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         self.assertIn("STARLINK-123", response.content.decode())
+
+
+class LaunchViewTests(TestCase):
+    def setUp(self):
+        # Create test location once for all tests
+        self.location = Location.objects.create(
+            obs_lat_deg=33,
+            obs_long_deg=-117,
+            obs_alt_m=100,
+            date_added=timezone.now(),
+        )
+
+        # Create base test satellites
+        self.satellite1 = Satellite.objects.create(
+            sat_name="Test-1", sat_number="12345", intl_designator="2023-001A"
+        )
+        self.satellite2 = Satellite.objects.create(
+            sat_name="Test-2", sat_number="12346", intl_designator="2023-001B"
+        )
+        self.satellite3 = Satellite.objects.create(
+            sat_name="Different-Launch", sat_number="12347", intl_designator="2023-002A"
+        )
+        self.satellite_no_designator = Satellite.objects.create(
+            sat_name="No-Designator", sat_number="12348"
+        )
+
+    def create_observation(self, satellite):
+        """Helper method to create an observation"""
+        return Observation.objects.create(
+            satellite_id=satellite,
+            obs_time_utc=timezone.now(),
+            obs_time_uncert_sec=1.0,
+            instrument="none",
+            obs_mode="VISUAL",
+            obs_filter="CLEAR",
+            obs_email="test@example.com",
+            obs_orc_id=["0000-0000-0000-0000"],
+            location_id=self.location,
+        )
+
+    def test_launch_view_basic(self):
+        """Test basic launch view functionality"""
+        response = self.client.get(reverse("launch-view", args=["2023-001"]))
+        self.assertEqual(response.status_code, 200)
+        satellites = response.context["satellites"]
+
+        # Check correct satellites are included/excluded
+        self.assertEqual(len(satellites), 2)
+        self.assertIn(self.satellite1, satellites)
+        self.assertIn(self.satellite2, satellites)
+        self.assertNotIn(self.satellite3, satellites)
+        self.assertNotIn(self.satellite_no_designator, satellites)
+
+    def test_launch_number_extraction(self):
+        """Test launch number extraction from international designators"""
+        test_cases = [
+            ("2023-001A", "2023-001"),  # Standard format
+            ("2023-001AA", "2023-001"),  # Multiple letters
+            ("", None),  # Empty string
+            (None, None),  # No designator
+        ]
+
+        for designator, expected in test_cases:
+            if expected:  # Only test valid designators
+                response = self.client.get(reverse("launch-view", args=[expected]))
+                self.assertEqual(response.status_code, 200)
+                if designator:
+                    satellites = response.context["satellites"]
+                    matching_sats = [
+                        s for s in satellites if s.intl_designator.startswith(expected)
+                    ]
+                    self.assertTrue(len(matching_sats) > 0)
+
+    def test_observation_counting(self):
+        """Test observation counting for satellites in same launch"""
+        # Create observations
+        self.create_observation(self.satellite1)
+        self.create_observation(self.satellite1)
+        self.create_observation(self.satellite2)
+
+        response = self.client.get(reverse("launch-view", args=["2023-001"]))
+        satellites = response.context["satellites"]
+
+        # Check observation counts
+        counts = {s.sat_number: s.num_observations for s in satellites}
+        self.assertEqual(counts[self.satellite1.sat_number], 2)
+        self.assertEqual(counts[self.satellite2.sat_number], 1)
