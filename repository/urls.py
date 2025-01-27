@@ -3,8 +3,10 @@ from django.urls import include, path
 from django.views.generic.base import RedirectView
 
 from . import views
+from .api import api
 
 handler404 = views.custom_404
+
 
 urlpatterns = [
     path("", views.index, name="root"),
@@ -49,4 +51,5 @@ urlpatterns = [
         name="get_observation_by_id",
     ),
     path("launch/<str:launch_number>/", views.launch_view, name="launch-view"),
+    path("api/", api.urls),
 ]

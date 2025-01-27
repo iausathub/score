@@ -116,83 +116,86 @@
             </div>
         </form>
 
-        <!-- Loading indicator -->
-        <div id="searchLoadingIndicator" class="text-center my-4" style="display: none;">
-            <div class="spinner-border text-primary" role="status">
-                <span class="visually-hidden">Searching...</span>
+        <!-- Results Container -->
+        <div class="results-container mt-4">
+            <!-- Loading indicator -->
+            <div id="searchLoadingIndicator" class="text-center my-4" style="display: none;">
+                <div class="spinner-border text-primary" role="status">
+                    <span class="visually-hidden">Searching...</span>
+                </div>
+                <div class="mt-2">Searching observations...</div>
             </div>
-            <div class="mt-2">Searching observations...</div>
-        </div>
 
-        <!-- Results table -->
-        {% if observations %}
-        <div class="table-container">
-            <table data-toggle="table" data-pagination="true" data-search="true"
-                data-page-list="[25, 50, 100, 200, All]" data-page-size="25" data-sort-name="added"
-                data-sort-order="desc" data-classes="table" class="table table-hover fs-6" id="obsTable">
-                <thead>
-                    <tr>
-                        <th scope="col" data-sortable="true" data-visible="true">Date added</th>
-                        <th data-field="added" scope="col" data-sortable="true" data-visible="false">
-                            Date_added_timestamp</th>
-                        <th scope="col" data-sortable="true">Name</th>
-                        <th scope="col" data-sortable="true">NORAD ID</th>
-                        <th scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed</th>
-                        <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
-                        </th>
-                        <th scope="col" data-sortable="true">Mag</th>
-                        <th scope="col" data-sortable="true">Filter</th>
-                        <th scope="col" data-sortable="true">Latitude (deg)</th>
-                        <th scope="col" data-sortable="true">Longitude (deg)</th>
-                        <th scope="col" data-sortable="true">Altitude (m)</th>
-                        <th scope="col" data-sortable="true">Obs. mode</th>
-                        <th scope="col" data-sortable="true">Observer ORCID</th>
-                    </tr>
-                </thead>
-                <tbody class="table-group-divider clickable">
-                    {% for observation in observations %}
-                    <tr data-bs-toggle="modal" data-bs-target="#obsModal"
-                        data-observation-id="{{ observation.id }}">
-                        <td scope="row">{{ observation.date_added|date:"M. d, Y h:i A" }}</td>
-                        <td scope="row">{{ observation.date_added.timestamp }}</td>
-                        <td scope="row">{{ observation.satellite_id.sat_name }}</td>
-                        <td scope="row">{{ observation.satellite_id.sat_number }}</td>
-                        <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
-                        <td scope="row">{{ observation.obs_time_utc.timestamp }}</td>
-                        <td scope="row" class="text-end">{{ observation.apparent_mag|format_magnitude:observation.apparent_mag_uncert }}</td>
-                        <td scope="row">{{ observation.obs_filter }}</td>
-                        <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg|floatformat:"-4" }}</td>
-                        <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg|floatformat:"-4" }}
-                        </td>
-                        <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m|floatformat:"-4" }}</td>
-                        <td scope="row">{{ observation.obs_mode }}</td>
-                        <td scope="row">{{ observation.obs_orc_id|first }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="col p-3">
-            {% if obs_ids %}
-            <div class="float-end">
-                <form action="{% url 'download-results' %}" method="post">
-                    {% csrf_token %}
-                    <input type="hidden" name="obs_ids" value="{{ obs_ids }}">
-                    <button type="submit" class="btn btn-primary">
-                        <i class="fas fa-download"></i> Download search results
-                    </button>
-                </form>
+            <!-- Results table -->
+            {% if observations %}
+            <div class="table-container">
+                <table data-toggle="table" data-pagination="true" data-search="true"
+                    data-page-list="[25, 50, 100, 200, All]" data-page-size="25" data-sort-name="added"
+                    data-sort-order="desc" data-classes="table" class="table table-hover fs-6" id="obsTable">
+                    <thead>
+                        <tr>
+                            <th scope="col" data-sortable="true" data-visible="true">Date added</th>
+                            <th data-field="added" scope="col" data-sortable="true" data-visible="false">
+                                Date_added_timestamp</th>
+                            <th scope="col" data-sortable="true">Name</th>
+                            <th scope="col" data-sortable="true">NORAD ID</th>
+                            <th scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed</th>
+                            <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
+                            </th>
+                            <th scope="col" data-sortable="true">Mag</th>
+                            <th scope="col" data-sortable="true">Filter</th>
+                            <th scope="col" data-sortable="true">Latitude (deg)</th>
+                            <th scope="col" data-sortable="true">Longitude (deg)</th>
+                            <th scope="col" data-sortable="true">Altitude (m)</th>
+                            <th scope="col" data-sortable="true">Obs. mode</th>
+                            <th scope="col" data-sortable="true">Observer ORCID</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider clickable">
+                        {% for observation in observations %}
+                        <tr data-bs-toggle="modal" data-bs-target="#obsModal"
+                            data-observation-id="{{ observation.id }}">
+                            <td scope="row">{{ observation.date_added|date:"M. d, Y h:i A" }}</td>
+                            <td scope="row">{{ observation.date_added.timestamp }}</td>
+                            <td scope="row">{{ observation.satellite_id.sat_name }}</td>
+                            <td scope="row">{{ observation.satellite_id.sat_number }}</td>
+                            <td scope="row">{{ observation.obs_time_utc|date:"M. d, Y h:i A" }}</td>
+                            <td scope="row">{{ observation.obs_time_utc.timestamp }}</td>
+                            <td scope="row" class="text-end">{{ observation.apparent_mag|format_magnitude:observation.apparent_mag_uncert }}</td>
+                            <td scope="row">{{ observation.obs_filter }}</td>
+                            <td scope="row" class="text-end">{{ observation.location_id.obs_lat_deg|floatformat:"-4" }}</td>
+                            <td scope="row" class="text-end">{{ observation.location_id.obs_long_deg|floatformat:"-4" }}
+                            </td>
+                            <td scope="row" class="text-end">{{ observation.location_id.obs_alt_m|floatformat:"-4" }}</td>
+                            <td scope="row">{{ observation.obs_mode }}</td>
+                            <td scope="row">{{ observation.obs_orc_id|first }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="col p-3">
+                {% if obs_ids %}
+                <div class="float-end">
+                    <form action="{% url 'download-results' %}" method="post">
+                        {% csrf_token %}
+                        <input type="hidden" name="obs_ids" value="{{ obs_ids }}">
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-download"></i> Download search results
+                        </button>
+                    </form>
+                </div>
+                {% endif %}
+            </div>
+            {% include "repository/satellites/modal.html" %}
+            {% endif %}
+
+            {% if error %}
+            <div class="container-md text-center mt-5">
+                <h4 class="text-danger">{{ error }}</h4>
             </div>
             {% endif %}
         </div>
-        {% include "repository/satellites/modal.html" %}
-        {% endif %}
-
-        {% if error %}
-        <div class="container-md text-center mt-5">
-            <h4 class="text-danger">{{ error }}</h4>
-        </div>
-        {% endif %}
     </div>
 </div>
 
