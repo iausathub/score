@@ -271,9 +271,11 @@ def get_observation_stats(request):
             "last": time_stats["latest_observation"],
         },
         "magnitude_stats": {
-            "average": round(mag_stats["avg_magnitude"], 2)
-            if mag_stats["avg_magnitude"]
-            else None,
+            "average": (
+                round(mag_stats["avg_magnitude"], 2)
+                if mag_stats["avg_magnitude"]
+                else None
+            ),
             "brightest": mag_stats["brightest"],
             "faintest": mag_stats["faintest"],
         },
