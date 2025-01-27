@@ -386,13 +386,13 @@ def data_change(request):
                     "msg": "Your request has been submitted. "
                     "You will receive an email confirmation "
                     "when your request is reviewed.",
-                    "form": DataChangeForm,
+                    "form": DataChangeForm(),
                 },
             )
     else:
         form = DataChangeForm()
 
-    return render(request, "repository/data-change.html", {"form": DataChangeForm})
+    return render(request, "repository/data-change.html", {"form": form})
 
 
 def tools(request):
@@ -463,7 +463,7 @@ def generate_csv(request):
 
         else:
             return render(request, "repository/generate-csv.html", {"form": form})
-    return render(request, "repository/generate-csv.html", {"form": GenerateCSVForm})
+    return render(request, "repository/generate-csv.html", {"form": GenerateCSVForm()})
 
 
 def satellites(request):
@@ -571,6 +571,24 @@ def satellite_data_view(request, satellite_number):
 
     response = render(request, "repository/satellites/data_view.html", context)
     return response
+
+
+def launch_view(request, launch_number):
+    """
+    View function to display data for a specific launch.
+    """
+    satellites = Satellite.objects.filter(
+        intl_designator__icontains=launch_number
+    ).annotate(num_observations=Count("observations"))
+
+    return render(
+        request,
+        "repository/satellites/launch_view.html",
+        {
+            "satellites": satellites,
+            "launch_number": launch_number,
+        },
+    )
 
 
 @csrf_exempt
@@ -871,11 +889,11 @@ def satellite_observations(request, satellite_number):
 
     observations_data = [
         {
-            "date_added": observation.date_added.strftime("%b. %d, %Y %I:%M %p"),
+            "date_added": observation.date_added.isoformat(),
             "added": observation.date_added.timestamp(),
             "sat_name": observation.satellite_id.sat_name,
             "sat_number": observation.satellite_id.sat_number,
-            "obs_time_utc": observation.obs_time_utc.strftime("%b. %d, %Y %I:%M %p"),
+            "obs_time_utc": observation.obs_time_utc.isoformat(),
             "observed": observation.obs_time_utc.timestamp(),
             "apparent_mag": observation.apparent_mag,
             "apparent_mag_uncert": observation.apparent_mag_uncert,

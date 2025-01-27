@@ -244,3 +244,5 @@ JAZZMIN_SETTINGS = {
     "site_header": "SCORE Admin",
     "site_brand": "SCORE",
 }
+
+NINJA_PAGINATION_PER_PAGE = 1000
