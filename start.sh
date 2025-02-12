@@ -18,4 +18,4 @@ fi
 
 echo "${0}: starting server."
 ENV DJANGO_SETTINGS_MODULE=$1
-gunicorn -b 0.0.0.0 -w 2 score.wsgi:application
+gunicorn -b 0.0.0.0 -w 2 --timeout 120 score.wsgi:application
