@@ -976,15 +976,14 @@ def satellite_observations(request, satellite_number):
     paginator = Paginator(observations, limit)
     page_number = offset // limit + 1
     page_obj = paginator.get_page(page_number)
-    logger.debug(f"Items in page: {len(page_obj)}")
 
     observations_data = [
         {
-            "date_added": observation.date_added.isoformat(),
+            "date_added": observation.date_added.strftime("%b. %d, %Y %I:%M %p"),
             "added": observation.date_added.timestamp(),
             "sat_name": observation.satellite_id.sat_name,
             "sat_number": observation.satellite_id.sat_number,
-            "obs_time_utc": observation.obs_time_utc.isoformat(),
+            "obs_time_utc": observation.obs_time_utc.strftime("%b. %d, %Y %I:%M %p"),
             "observed": observation.obs_time_utc.timestamp(),
             "apparent_mag": observation.apparent_mag,
             "apparent_mag_uncert": observation.apparent_mag_uncert,
