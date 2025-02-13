@@ -85,21 +85,23 @@
 
         <div class="row p-2">
             <div class="col-12">
-                <table data-toggle="table" data-pagination="true" data-page-list="[5, 10, 25, 50]"
-                data-page-size="5"
-                data-side-pagination="server"
-                data-url="{% url 'satellite-observations' satellite.sat_number %}"
-                data-sort-name="added" data-sort-order="desc" data-classes="table"
-                class="table table-hover fs-6" id="obsTable"
-                data-row-attributes="rowAttributes">
+                <table data-toggle="table"
+                       data-pagination="true"
+                       data-page-list="[5, 10, 25, 50]"
+                       data-page-size="5"
+                       data-side-pagination="server"
+                       data-url="{% url 'satellite-observations' satellite.sat_number %}"
+                       data-sort-name="added"
+                       data-sort-order="desc"
+                       data-classes="table"
+                       class="table table-hover fs-6"
+                       id="obsTable">
                 <thead>
                     <tr>
                         <th data-field="date_added" scope="col" data-sortable="true" data-visible="true">Date added (UTC)</th>
-                        <th data-field="added" scope="col" data-sortable="true" data-visible="false">Date_added_timestamp
-                        </th>
-                        <th data-field="obs_time_utc"scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed (UTC)</th>
-                        <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp
-                        </th>
+                        <th data-field="added" scope="col" data-sortable="true" data-visible="false">Date_added_timestamp</th>
+                        <th data-field="obs_time_utc" scope="col" data-sortable="true" data-visible="true" data-sort-name="observed">Date observed (UTC)</th>
+                        <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp</th>
                         <th data-field="apparent_mag" scope="col" data-sortable="true" data-formatter="magnitudeFormatter">Mag</th>
                         <th data-field="obs_filter" scope="col" data-sortable="true">Filter</th>
                         <th data-field="obs_lat_deg" scope="col" data-sortable="true">Latitude (deg)</th>
@@ -162,6 +164,14 @@ document.addEventListener('DOMContentLoaded', function() {
         html: true,
         template: '<div class="tooltip" role="tooltip"><div class="tooltip-arrow"></div><div class="tooltip-inner"></div></div>'
     }));
+
+    // Initialize Bootstrap Table with event handler
+    $('#obsTable').on('click-row.bs.table', function(e, row, $element) {
+        if (row.observation_id) {
+            var obsModal = new bootstrap.Modal(document.getElementById('obsModal'));
+            handleObservationClick(row.observation_id, true);
+        }
+    });
 });
 
 function magnitudeFormatter(value, row) {
