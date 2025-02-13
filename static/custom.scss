@@ -5,7 +5,37 @@
   --bs-tooltip-opacity: 0.95;
 }
 
+// Bootstrap Table styles
+.table-cursor-pointer tbody tr {
+  cursor: pointer;
+}
 
+.bootstrap-table {
+  // Prevent any animations/transitions
+  * {
+    transition: none !important;
+  }
+
+  // Set background colors for all table elements
+  .fixed-table-container,
+  .fixed-table-body,
+  .table {
+    background-color: var(--bs-body-bg) !important;
+  }
+
+  // Style loading state
+  .fixed-table-loading {
+    background: var(--bs-body-bg) !important;
+    color: var(--bs-body-color) !important;
+  }
+}
+
+// Dark theme specific styles
+[data-bs-theme="dark"] {
+  .bootstrap-table .table {
+    color: var(--bs-body-color);
+  }
+}
 
 .page-item.active .page-link{
   background-color: map-get($theme-colors, "primary");
