@@ -10,8 +10,8 @@ import requests
 from astropy.time import Time
 from celery.result import AsyncResult
 from django.conf import settings
-from django.core.paginator import Paginator
-from django.db.models import Avg, Count
+from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
+from django.db.models import Avg, Count, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template import loader
@@ -274,22 +274,113 @@ def search(request):
     if request.method == "POST":
         form = SearchForm(request.POST)
         if form.is_valid():
-            observations = filter_observations(form.cleaned_data)
-            observation_ids = [observation.id for observation in observations]
+            # Convert form data to a serializable format
+            search_params = {}
+            for key, value in form.cleaned_data.items():
+                if isinstance(value, datetime.date):
+                    search_params[key] = value.isoformat()
+                else:
+                    search_params[key] = value
 
+            request.session["search_params"] = search_params
+            observations = filter_observations(form.cleaned_data)
+
+            if request.headers.get("X-Requested-With") == "XMLHttpRequest":
+                limit = int(request.POST.get("limit", 25))
+                offset = int(request.POST.get("offset", 0))
+                sort = request.POST.get("sort", "date_added")
+                order = request.POST.get("order", "desc")
+                search_term = request.POST.get("search", "")
+
+                # Handle sorting
+                if order == "desc":
+                    sort = f"-{sort}"
+                observations = observations.order_by(sort)
+
+                # Apply search filter if search term exists
+                if search_term:
+                    observations = observations.filter(
+                        Q(satellite_id__sat_name__icontains=search_term)
+                        | Q(satellite_id__sat_number__icontains=search_term)
+                        | Q(obs_mode__icontains=search_term)
+                        | Q(obs_filter__icontains=search_term)
+                        | Q(obs_orc_id__icontains=search_term)
+                        | Q(instrument__icontains=search_term)
+                        | Q(date_added__icontains=search_term)
+                        | Q(obs_time_utc__icontains=search_term)
+                        | Q(apparent_mag__icontains=search_term)
+                        | Q(location_id__obs_lat_deg__icontains=search_term)
+                        | Q(location_id__obs_long_deg__icontains=search_term)
+                        | Q(location_id__obs_alt_m__icontains=search_term)
+                    )
+
+                # Get total count before pagination
+                total = observations.count()
+
+                # Return early if no results
+                if total == 0:
+                    return JsonResponse({"total": 0, "rows": [], "total_results": 0})
+
+                # Paginate
+                paginator = Paginator(observations, limit)
+                try:
+                    page = (offset // limit) + 1
+                    page_obj = paginator.page(page)
+                except (ValueError, EmptyPage, PageNotAnInteger):
+                    page_obj = paginator.page(1)
+
+                # Format data for bootstrap-table
+                rows = []
+                for obs in page_obj:
+                    rows.append(
+                        {
+                            "date_added": obs.date_added.strftime(
+                                "%b. %d, %Y %I:%M %p"
+                            ),
+                            "date_added_timestamp": obs.date_added.timestamp(),
+                            "satellite_name": obs.satellite_id.sat_name,
+                            "satellite_number": obs.satellite_id.sat_number,
+                            "obs_time_utc": obs.obs_time_utc.strftime(
+                                "%b. %d, %Y %I:%M %p"
+                            ),
+                            "obs_time_utc_timestamp": obs.obs_time_utc.timestamp(),
+                            "apparent_mag": obs.apparent_mag,
+                            "apparent_mag_uncert": obs.apparent_mag_uncert,
+                            "obs_filter": obs.obs_filter,
+                            "obs_lat_deg": round(obs.location_id.obs_lat_deg, 4),
+                            "obs_long_deg": round(obs.location_id.obs_long_deg, 4),
+                            "obs_alt_m": round(obs.location_id.obs_alt_m, 4),
+                            "obs_mode": obs.obs_mode,
+                            "obs_orc_id": obs.obs_orc_id,
+                            "id": obs.id,
+                        }
+                    )
+
+                return JsonResponse(
+                    {
+                        "total": total,  # For bootstrap-table pagination
+                        "total_results": total,  # For our custom message
+                        "rows": rows,
+                    }
+                )
+
+            # Handle regular form submission
             if len(observations) == 0:
                 return render(
                     request,
                     "repository/search.html",
                     {"error": "No observations found.", "form": form},
                 )
+
+            # Initial page load
             return render(
                 request,
                 "repository/search.html",
                 {
-                    "observations": observations,
-                    "obs_ids": observation_ids,
+                    "observations": observations[:25],  # Initial page
+                    "obs_ids": [o.id for o in observations],
                     "form": form,
+                    "total_results": observations.count(),
                 },
             )
         else:

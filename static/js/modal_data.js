@@ -1,7 +1,13 @@
 document.addEventListener('DOMContentLoaded', function() {
-    // Handle server-side pagination (data_view.html)
-    $('#obsTable').on('click-row.bs.table', function (e, row, $element) {
-        handleObservationClick(row.observation_id, true);
+    // Add global modal cleanup listener
+    document.addEventListener('hidden.bs.modal', function (event) {
+        if (event.target.id === 'obsModal') {
+            document.body.classList.remove('modal-open');
+            const modalBackdrops = document.getElementsByClassName('modal-backdrop');
+            while(modalBackdrops.length > 0) {
+                modalBackdrops[0].remove();
+            }
+        }
     });
 
     // Handle client-side data (index, search, etc.)

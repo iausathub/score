@@ -204,6 +204,7 @@ class SearchViewTest(TestCase):
         self.assertContains(response, "No observations found")
 
     def test_search_post_empty(self):
+        # Test initial page load with empty search
         response = self.client.post(
             reverse("search"),
             {
@@ -218,7 +219,29 @@ class SearchViewTest(TestCase):
             },
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("STARLINK-123", response.content.decode())
+
+        response = self.client.post(
+            reverse("search"),
+            {
+                "sat_name": "",
+                "sat_number": "",
+                "obs_mode": "",
+                "start_date_range": "",
+                "end_date_range": "",
+                "observation_id": "",
+                "observer_orcid": "",
+                "instrument": "",
+                "limit": "25",
+                "offset": "0",
+                "sort": "date_added",
+                "order": "desc",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+        self.assertTrue(len(data["rows"]) > 0)
+        self.assertEqual(data["rows"][0]["satellite_name"], "STARLINK-123")
 
     def test_custom_404(self):
         # Test the custom 404 handler
