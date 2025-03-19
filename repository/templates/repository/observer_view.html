@@ -1,0 +1,92 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block content %}
+<div class="container-fluid p-3">
+    <div class="container-md">
+        <h2 class="text-center p-2">Observations by {{ orc_id }}</h2>
+        <p>
+            Below are all the observations made by this observer.
+            You can search, sort, and view detailed information about each observation.
+            Click on a row to see more details about a specific observation.
+        </p>
+        <div class="row justify-content-center">
+            <div class="col-12">
+                <table data-toggle="table"
+                       data-pagination="true"
+                       data-search="true"
+                       data-page-list="[25, 50, 100, 200]"
+                       data-page-size="25"
+                       data-sort-name="observed"
+                       data-sort-order="desc"
+                       data-side-pagination="server"
+                       data-url="{% url 'observer-observations' orc_id %}"
+                       data-classes="table"
+                       class="table table-hover fs-6"
+                       id="obsTable">
+                    <thead>
+                        <tr>
+                            <th data-field="sat_name" scope="col" data-sortable="true">Name</th>
+                            <th data-field="sat_number" scope="col" data-sortable="true">NORAD ID</th>
+                            <th data-field="obs_time_utc" scope="col" data-sortable="true" data-sort-name="observed">Date observed (UTC)</th>
+                            <th data-field="observed" scope="col" data-sortable="true" data-visible="false">Date_observed_timestamp</th>
+                            <th data-field="apparent_mag" scope="col" data-sortable="true" data-formatter="magnitudeFormatter">Mag</th>
+                            <th data-field="obs_filter" scope="col" data-sortable="true">Filter</th>
+                            <th data-field="obs_lat_deg" scope="col" data-sortable="true">Latitude (deg)</th>
+                            <th data-field="obs_long_deg" scope="col" data-sortable="true">Longitude (deg)</th>
+                            <th data-field="obs_alt_m" scope="col" data-sortable="true">Altitude (m)</th>
+                            <th data-field="obs_mode" scope="col" data-sortable="true">Obs. mode</th>
+                            <th data-field="observation_id" data-visible="false">ID</th>
+                        </tr>
+                    </thead>
+                    <tbody class="table-group-divider clickable">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Download button -->
+        <div class="row mt-3">
+            <div class="col-12 text-end">
+                <form action="{% url 'download-observer-data' %}" method="post">
+                    {% csrf_token %}
+                    <input type="hidden" name="orc_id" value="{{ orc_id }}">
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-download"></i> Download observations
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% include "repository/satellites/modal.html" %}
+
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/utils/number_formatting.js' %}"></script>
+<script src="{% static 'js/modal_data.js' %}"></script>
+<script>
+    function magnitudeFormatter(value, row) {
+        if (value === null || value === undefined) return '';
+        var apparent_mag_uncert = window.NumberFormatting.roundUncertainty(row.apparent_mag_uncert);
+        return window.NumberFormatting.roundMagnitude(value, apparent_mag_uncert);
+    }
+
+    $(document).ready(function() {
+        // Initialize Bootstrap Table with event handler
+        $('#obsTable').on('click-row.bs.table', function(e, row, $element) {
+            if (row.observation_id) {
+                var obsModal = new bootstrap.Modal(document.getElementById('obsModal'));
+                handleObservationClick(row.observation_id, true);
+            }
+        });
+
+        // Add pointer cursor to all rows
+        $('#obsTable').on('post-body.bs.table', function () {
+            $(this).find('tbody tr').css('cursor', 'pointer');
+        });
+    });
+</script>
+{% endblock %}
