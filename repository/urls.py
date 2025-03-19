@@ -51,5 +51,16 @@ urlpatterns = [
         name="get_observation_by_id",
     ),
     path("launch/<str:launch_number>/", views.launch_view, name="launch-view"),
+    path("observer/<str:orc_id>/", views.observer_view, name="observer-view"),
+    path(
+        "observer/<str:orc_id>/observations/",
+        views.observer_observations,
+        name="observer-observations",
+    ),
     path("api/", api.urls),
+    path(
+        "download-observer-data/",
+        views.download_observer_data,
+        name="download-observer-data",
+    ),
 ]

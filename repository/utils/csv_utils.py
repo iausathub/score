@@ -64,7 +64,7 @@ def get_csv_header() -> list[str]:
 
 
 def create_csv(
-    observation_list: list[Observation], satellite_name: str
+    observation_list: list[Observation], prefix: str
 ) -> tuple[io.BytesIO, str]:
     """
     Creates a CSV file from a list of observations and compresses it into a zip file.
@@ -76,7 +76,7 @@ def create_csv(
 
     Args:
         observation_list (List[Observation]): A list of Observation objects.
-
+        prefix (str): A prefix for the zip file name.
     Returns:
         Tuple[io.BytesIO, str]: A tuple containing the compressed zip file and the
         name of the zip file.
@@ -91,6 +91,13 @@ def create_csv(
         all_observations = True
 
     observation_list = observation_list.select_related("satellite_id", "location_id")
+
+    if prefix:
+        file_name = f"{prefix}_observations"
+    elif all_observations:
+        file_name = "satellite_observations_all"
+    else:
+        file_name = "satellite_observations_search_results"
 
     header = get_csv_header()
     logger.info("CSV header retrieved")
@@ -171,17 +178,10 @@ def create_csv(
                 writer.writerows(csv_lines)
 
             # Write the CSV content to the zip file as bytes
-            zip.writestr("observations.csv", csv_file.getvalue().encode("utf-8"))
+            zip.writestr(f"{file_name}.csv", csv_file.getvalue().encode("utf-8"))
 
     zipped_file.seek(0)
-    if satellite_name:
-        zipfile_name = f"{satellite_name}_observations.zip"
-    else:
-        zipfile_name = (
-            "satellite_observations_all.zip"
-            if all_observations
-            else "satellite_observations_search_results.zip"
-        )
+    zipfile_name = f"{file_name}.zip"
 
     logger.info(f"Zipping the CSV file took {time.time() - start_time:.4f} seconds")
     logger.info(

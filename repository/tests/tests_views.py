@@ -99,6 +99,16 @@ class TestViews(TestCase):
         self.assertContains(response, self.satellite.sat_name)
         self.assertContains(response, self.satellite.sat_number)
 
+    def test_observer_obs_list_view(self):
+        response = self.client.get(
+            reverse("observer-view", args=["0123-4567-8910-1112"])
+        )
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "repository/observer_view.html")
+
+        orcid = self.observation.obs_orc_id[0].replace("[", "").replace("]", "")
+        self.assertContains(response, orcid)
+
     def test_last_observer_location_with_observations(self):
         response = self.client.post(
             reverse("last_observer_location"),

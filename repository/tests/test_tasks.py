@@ -10,14 +10,14 @@ def test_process_upload_valid_data(mocker):
     mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
     data = [
         [
-            "PELICAN 3001",
-            "58296",
-            "2020-05-08T21:42:54.572Z",
+            "ACS 3",
+            "59588",
+            "2024-10-03T19:00:27.319Z",
             0.001,
-            6.0418,
-            0.0952,
-            52.01,
-            4.49085,
+            6.6830102,
+            0.096618345,
+            52.15,
+            4.49,
             8,
             10,
             "WATEC 902H2 Supreme + 1.2/85 mm",
@@ -25,12 +25,12 @@ def test_process_upload_valid_data(mocker):
             "CLEAR",
             "test@example.com",
             "0000-0001-6659-9253",
-            185.4465171,
-            25.69768917,
+            342.9184541,
+            16.81681335,
             0,
             0,
             0,
-            571.894,
+            1421.885,
             0,
             0,
             0,
@@ -287,22 +287,22 @@ def test_process_upload_existing_satellite(mocker):
     # Create existing satellite with name
     Satellite.objects.create(
         sat_name="STARLINK-1234",
-        sat_number="58296",
+        sat_number="59588",
         date_added=timezone.now(),
-        intl_designator="2020-001A",
+        intl_designator="2024-001A",
     )
 
     # Test data with same number but no name (archival case)
     data = [
         [
             "",
-            "58296",
-            "2020-05-08T21:42:54.572Z",
+            "59588",
+            "2024-10-03T19:00:27.319Z",
             0.001,
-            6.0418,
-            0.0952,
-            52.01,
-            4.49085,
+            6.6830102,
+            0.096618345,
+            52.15,
+            4.49,
             8,
             10,
             "WATEC 902H2 Supreme + 1.2/85 mm",
@@ -310,12 +310,12 @@ def test_process_upload_existing_satellite(mocker):
             "CLEAR",
             "test@example.com",
             "0000-0001-6659-9253",
-            185.4465171,
-            25.69768917,
+            342.9184541,
+            16.81681335,
             0,
             0,
             0,
-            571.894,
+            1421.885,
             0,
             0,
             0,
@@ -331,9 +331,9 @@ def test_process_upload_existing_satellite(mocker):
     assert Satellite.objects.count() == 1
 
     # Verify existing satellite was used and maintained its data
-    satellite = Satellite.objects.get(sat_number="58296")
+    satellite = Satellite.objects.get(sat_number="59588")
     assert satellite.sat_name == "STARLINK-1234"
-    assert satellite.intl_designator == "2020-001A"
+    assert satellite.intl_designator == "2024-001A"
     assert result["status"] == "success"
 
 
@@ -342,19 +342,19 @@ def test_process_upload_update_empty_name(mocker):
     mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
 
     # Create satellite with empty name
-    Satellite.objects.create(sat_name="", sat_number="58296", date_added=timezone.now())
+    Satellite.objects.create(sat_name="", sat_number="59588", date_added=timezone.now())
 
     # Test data with name for existing number
     data = [
         [
-            "STARLINK-1234",
-            "58296",
-            "2020-05-08T21:42:54.572Z",
+            "ACS 3",
+            "59588",
+            "2024-10-03T19:00:27.319Z",
             0.001,
-            6.0418,
-            0.0952,
-            52.01,
-            4.49085,
+            6.6830102,
+            0.096618345,
+            52.15,
+            4.49,
             8,
             10,
             "WATEC 902H2 Supreme + 1.2/85 mm",
@@ -362,12 +362,12 @@ def test_process_upload_update_empty_name(mocker):
             "CLEAR",
             "test@example.com",
             "0000-0001-6659-9253",
-            185.4465171,
-            25.69768917,
+            342.9184541,
+            16.81681335,
             0,
             0,
             0,
-            571.894,
+            1421.885,
             0,
             0,
             0,
@@ -380,8 +380,8 @@ def test_process_upload_update_empty_name(mocker):
     result = process_upload(data)
 
     # Verify satellite name was updated
-    satellite = Satellite.objects.get(sat_number="58296")
-    assert satellite.sat_name == "STARLINK-1234"
+    satellite = Satellite.objects.get(sat_number="59588")
+    assert satellite.sat_name == "ACS 3"
     assert result["status"] == "success"
 
 
@@ -391,14 +391,14 @@ def test_process_upload_new_satellites(mocker):
 
     data = [
         [
-            "STARLINK-1234",
-            "58295",
-            "2020-05-08T21:42:54.572Z",
+            "ACS 3",
+            "59588",
+            "2024-10-03T19:00:27.319Z",
             0.001,
-            6.0418,
-            0.0952,
-            52.01,
-            4.49085,
+            6.6830102,
+            0.096618345,
+            52.15,
+            4.49,
             8,
             10,
             "WATEC 902H2 Supreme + 1.2/85 mm",
@@ -407,11 +407,11 @@ def test_process_upload_new_satellites(mocker):
             "test@example.com",
             "0000-0001-6659-9253",
             185.4465171,
-            25.69768917,
+            16.81681335,
             0,
             0,
             0,
-            571.894,
+            1421.885,
             0,
             0,
             0,
@@ -424,16 +424,16 @@ def test_process_upload_new_satellites(mocker):
     result = process_upload(data)
 
     # Verify satellite name was updated
-    satellite = Satellite.objects.get(sat_number="58295")
-    assert satellite.sat_name == "STARLINK-1234"
+    satellite = Satellite.objects.get(sat_number="59588")
+    assert satellite.sat_name == "ACS 3"
     assert result["status"] == "success"
 
-    # Archival case - won't have a name
+    # No name
     data = [
         [
             "",
-            "58297",
-            "2020-05-08T21:42:54.572Z",
+            "58296",
+            "2015-05-08T21:42:54.572Z",
             0.001,
             6.0418,
             0.0952,
@@ -446,8 +446,8 @@ def test_process_upload_new_satellites(mocker):
             "CLEAR",
             "test@example.com",
             "0000-0001-6659-9253",
-            185.4465171,
-            25.69768917,
+            185.2311116,
+            26.15498563,
             0,
             0,
             0,
@@ -463,35 +463,35 @@ def test_process_upload_new_satellites(mocker):
     result = process_upload(data)
     assert result["status"] == "success"
     assert Satellite.objects.count() == 2
-    assert Satellite.objects.get(sat_number="58297").sat_name == ""
+    assert Satellite.objects.get(sat_number="58296").sat_name == ""
 
     data = [
         [
             "",
-            "58296",
-            "2024-05-08T21:42:54.572Z",
-            0.001,
-            6.0418,
-            0.0952,
-            52.01,
-            4.49085,
-            8,
-            10,
-            "WATEC 902H2 Supreme + 1.2/85 mm",
-            "CCD",
+            "58013",
+            "2024-05-08T02:22:45.000Z",
+            1,
+            4,
+            0.2,
+            36.062,
+            -91.688,
+            185,
+            0,
+            "none",
+            "VISUAL",
             "CLEAR",
             "test@example.com",
-            "0000-0001-6659-9253",
-            185.4465171,
-            25.69768917,
+            "0009-0001-8403-8334",
+            185.2311116,
+            26.15498563,
             0,
             0,
             0,
-            571.894,
             0,
             0,
             0,
-            "5-frame average; lim mag of instrument",
+            0,
+            "test obs",
             "",
             "",
         ]
@@ -499,4 +499,4 @@ def test_process_upload_new_satellites(mocker):
     result = process_upload(data)
     assert result["status"] == "success"
     assert Satellite.objects.count() == 3
-    assert Satellite.objects.get(sat_number="58296").sat_name == "PELICAN 3001"
+    assert Satellite.objects.get(sat_number="58013").sat_name == "KUIPER-P2"

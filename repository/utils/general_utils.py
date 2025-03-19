@@ -269,6 +269,11 @@ def validate_position(
         Union[str, bool]: An error message if the validation fails.
                           True if the validation is successful.
     """
+    if (
+        response.status_code == 500
+        and "Error: TLE date out of range" in response.json().get("message")
+    ):
+        return "archival data"
     if response.status_code != 200:
         return "Satellite position check failed - verify uploaded data is correct."
     response_data = response.json()

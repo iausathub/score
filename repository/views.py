@@ -192,7 +192,7 @@ def download_all(request) -> HttpResponse:
 
 
 def create_and_return_csv(
-    observations: Union[list[Observation], bool], satellite_name: str
+    observations: Union[list[Observation], bool], prefix: str
 ) -> HttpResponse:
     """
     Create a CSV file from the provided observations and return it as a zipped file
@@ -206,9 +206,8 @@ def create_and_return_csv(
     Args:
         observations (Union[List[Observation], bool]): A list of Observation objects
             or False. If False, all observations will be included in the CSV file.
-        satellite_name (str): The name of the satellite for which the observations
-            are being exported. This name is used to generate the filename for the
-            CSV file.
+        prefix (str): The prefix for the CSV file. This prefix is used to generate the
+            filename for the CSV file.
 
     Returns:
         HttpResponse: An HTTP response containing the zipped CSV file. The Content-Type
@@ -219,7 +218,7 @@ def create_and_return_csv(
         ValueError: If the observations parameter is not a list of Observation objects
             or False.
     """
-    zipped_file, zipfile_name = create_csv(observations, satellite_name)
+    zipped_file, zipfile_name = create_csv(observations, prefix)
 
     response = HttpResponse(zipped_file, content_type="application/zip")
     response["Content-Disposition"] = f"attachment; filename={zipfile_name}"
@@ -421,7 +420,7 @@ def download_results(request):
 
         # Benchmark CSV creation and return
         csv_start = time.time()
-        response = create_and_return_csv(observations, satellite_name=satellite_name)
+        response = create_and_return_csv(observations, prefix=satellite_name)
         csv_end = time.time()
         logger.info(f"CSV creation and return took {csv_end - csv_start:.4f} seconds")
 
@@ -678,6 +677,21 @@ def launch_view(request, launch_number):
         {
             "satellites": satellites,
             "launch_number": launch_number,
+        },
+    )
+
+
+def observer_view(request, orc_id):
+    """
+    View function to display data for a specific observer.
+    """
+    observations = Observation.objects.filter(obs_orc_id__icontains=orc_id)
+    return render(
+        request,
+        "repository/observer_view.html",
+        {
+            "observations": observations,
+            "orc_id": orc_id,
         },
     )
 
@@ -1029,3 +1043,111 @@ def get_observation_by_id(request, observation_id):
     observation = get_object_or_404(Observation, id=observation_id)
     serialized_observation = ObservationSerializer(observation).data
     return JsonResponse(serialized_observation)
+
+
+@csrf_exempt
+def observer_observations(request, orc_id):
+    """
+    Retrieve observations for a specific observer and return them as JSON.
+
+    Args:
+        request (HttpRequest): The request object.
+        orc_id (str): The ORCID of the observer.
+
+    Returns:
+        JsonResponse: The JSON response containing the observations for the observer.
+    """
+    observations = Observation.objects.filter(obs_orc_id__icontains=orc_id)
+
+    # Handle sorting
+    sort = request.GET.get("sort")
+    order = request.GET.get("order", "desc")
+
+    if sort:
+        # Convert table field names to model field names
+        field_mapping = {
+            "satellite_name": "satellite_id__sat_name",
+            "satellite_number": "satellite_id__sat_number",
+            "observed": "obs_time_utc",
+            "apparent_mag": "apparent_mag",
+            "obs_filter": "obs_filter",
+            "obs_mode": "obs_mode",
+            "obs_lat_deg": "location_id__obs_lat_deg",
+            "obs_long_deg": "location_id__obs_long_deg",
+            "obs_alt_m": "location_id__obs_alt_m",
+        }
+
+        sort_field = field_mapping.get(sort, sort)
+        if order == "desc":
+            sort_field = f"-{sort_field}"
+
+        observations = observations.order_by(sort_field)
+
+    limit = int(request.GET.get("limit", 25))
+    offset = int(request.GET.get("offset", 0))
+
+    paginator = Paginator(observations, limit)
+    page_number = offset // limit + 1
+    page_obj = paginator.get_page(page_number)
+
+    observations_data = [
+        {
+            "sat_name": observation.satellite_id.sat_name,
+            "sat_number": observation.satellite_id.sat_number,
+            "obs_time_utc": observation.obs_time_utc.strftime("%b. %d, %Y %I:%M %p"),
+            "observed": observation.obs_time_utc.timestamp(),
+            "apparent_mag": observation.apparent_mag,
+            "apparent_mag_uncert": observation.apparent_mag_uncert,
+            "obs_filter": observation.obs_filter,
+            "obs_lat_deg": round(observation.location_id.obs_lat_deg, 4),
+            "obs_long_deg": round(observation.location_id.obs_long_deg, 4),
+            "obs_alt_m": round(observation.location_id.obs_alt_m, 4),
+            "obs_mode": observation.obs_mode,
+            "observation_id": observation.id,
+        }
+        for observation in page_obj
+    ]
+
+    response_data = {
+        "total": paginator.count,
+        "rows": observations_data,
+        "debug": {
+            "limit": limit,
+            "offset": offset,
+            "page": page_number,
+            "total_pages": paginator.num_pages,
+            "sort": sort,
+            "order": order,
+            "sort_field": sort_field if sort else None,
+        },
+    }
+    return JsonResponse(response_data)
+
+
+@csrf_exempt
+def download_observer_data(request):
+    """
+    Download all observations for a specific observer.
+
+    Args:
+        request (HttpRequest): The HTTP request object containing the ORCID.
+
+    Returns:
+        HttpResponse: A CSV file containing all observations for the observer.
+    """
+    logger.info("Starting download_results function")
+
+    if request.method == "POST":
+        logger.info("POST request received")
+
+        orc_id = request.POST.get("orc_id") if request.POST.get("orc_id") else None
+        logger.info(f"ORCID: {orc_id}")
+
+        observations = Observation.objects.filter(obs_orc_id__icontains=orc_id)
+        logger.info(f"Number of observations retrieved: {observations.count()}")
+
+        response = create_and_return_csv(observations, prefix=orc_id)
+        return response
+
+    logger.info("Non-POST request received, returning empty HttpResponse")
+    return HttpResponse()
