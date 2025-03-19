@@ -38,7 +38,15 @@ function populateModalFields(observation) {
     document.getElementById('observation_id_label').textContent = observation.id;
     document.getElementById('satellite_name').innerHTML = '<a href="' + satelliteDataViewUrl + '">'+ observation.satellite_id.sat_name +'</a>';
     document.getElementById('satellite_number').textContent = observation.satellite_id.sat_number;
-    document.getElementById('intl_designator').textContent = observation.satellite_id.intl_designator;
+
+    // Make the international designator clickable if it exists
+    if (observation.satellite_id.intl_designator) {
+        const baseDesignator = observation.satellite_id.intl_designator.slice(0, 8);
+        document.getElementById('intl_designator').innerHTML = `<a href="/launch/${baseDesignator}/">${observation.satellite_id.intl_designator}</a>`;
+    } else {
+        document.getElementById('intl_designator').textContent = "";
+    }
+
     document.getElementById('obs_time_utc').textContent = observation.obs_time_utc;
     document.getElementById('obs_time_uncert').textContent = observation.obs_time_uncert_sec;
     document.getElementById('date_added_label').textContent = observation.date_added;
@@ -50,7 +58,10 @@ function populateModalFields(observation) {
     document.getElementById('obs_mode').textContent = observation.obs_mode;
     document.getElementById('obs_filter').textContent = observation.obs_filter;
     document.getElementById('obs_instrument').textContent = observation.instrument;
-    document.getElementById('obs_orc_id').innerHTML = observation.obs_orc_id.toString().replace(/,/g, ',<br/>');
+
+    // Add ORCID link
+    var orcId = observation.obs_orc_id.toString().replace(/,/g, ',<br/>');
+    document.getElementById('obs_orc_id').innerHTML = `<a href="/observer/${orcId}/">${orcId}</a>`;
 
     // Populate additional fields
     populateIfExists('obs_comments', observation);
@@ -80,15 +91,6 @@ function populateModalFields(observation) {
         document.getElementById('data_archive_link').innerHTML = '<a href="' + observation.data_archive_link + '">Data link</a>';
     } else {
         document.getElementById('data_archive_link').textContent = "";
-    }
-
-    // Add launch link only if there's an international designator
-    const launchLinkContainer = document.getElementById('launch_link_container');
-    if (observation.satellite_id.intl_designator) {
-        const baseDesignator = observation.satellite_id.intl_designator.slice(0, 8);
-        launchLinkContainer.innerHTML = `<a href="/launch/${baseDesignator}/">View other objects from this launch</a>`;
-    } else {
-        launchLinkContainer.innerHTML = '';
     }
 }
 
