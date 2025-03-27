@@ -19,7 +19,7 @@ crossorigin=""/>
 {% endcompress %}
 
 <head>
-  {% if recaptcha_public_key %}
+  {% if recaptcha_public_key|default:"" %}
   <script src="https://www.google.com/recaptcha/api.js?render={{ recaptcha_public_key }}"></script>
   {% endif %}
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
@@ -234,7 +234,7 @@ crossorigin=""/>
   <script src="{% static 'js/utils/number_formatting.js' %}"></script>
   <script src="{% static 'js/modal_data.js' %}"></script>
 
-  {% if task_id %}
+  {% if task_id|default:"" %}
   <script>
     var progressUrl = "{% url 'celery_progress:task_status' task_id %}";
   </script>
