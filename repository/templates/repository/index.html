@@ -247,7 +247,7 @@
     const errorElement = document.getElementById('progress-bar-message');
 
     function updateStates() {
-        const taskId = '{{ task_id }}';
+        const taskId = '{{ task_id|default:"" }}';
         const isLicenseChecked = licenseCheck.checked;
         const hasError = errorElement && errorElement.textContent.includes('error');
 
