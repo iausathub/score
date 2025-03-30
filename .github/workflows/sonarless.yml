@@ -12,5 +12,8 @@ jobs:
         with:
           sonar-source-path: 'repository'
 
-      - name: Print SonarQube metrics to logs
-        run: cat ./sonar-metrics.json
+      - name: Upload SonarQube results as artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: sonar-metrics
+          path: ./sonar-metrics.json
