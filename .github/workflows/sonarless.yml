@@ -11,3 +11,6 @@ jobs:
         uses: gitricko/sonarless@v1.2
         with:
           sonar-source-path: 'repository'
+
+      - name: Print SonarQube metrics to logs
+        run: cat ./sonar-metrics.json
