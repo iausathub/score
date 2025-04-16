@@ -81,13 +81,21 @@ class TestAPI(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
 
-        self.assertEqual(len(data), 2)
-        self.assertEqual(data[0]["id"], self.observation.id)
+        # Check for paginated response format
+        self.assertIn("items", data)
+        self.assertIn("count", data)
+        self.assertEqual(data["count"], 2)
 
+        # Check observation data in items
+        observation_ids = [obs["id"] for obs in data["items"]]
+        self.assertIn(self.observation.id, observation_ids)
+        self.assertIn(self.observation2.id, observation_ids)
+
+        # Test with invalid satellite
         response = self.client.get("/satellite/-1/observations?offset=1&limit=1")
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(len(data), 0)
+        self.assertEqual(len(data.get("items", [])), 0)
 
     def test_search_observations(self):
         """Test searching observations with filters"""
@@ -97,8 +105,12 @@ class TestAPI(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(len(data), 1)
-        self.assertEqual(data[0]["id"], self.observation.id)
+
+        # Check paginated response format
+        self.assertIn("items", data)
+        self.assertIn("count", data)
+        self.assertEqual(data["count"], 1)
+        self.assertEqual(data["items"][0]["id"], self.observation.id)
 
         # Out of range
         response = self.client.get(
@@ -106,14 +118,16 @@ class TestAPI(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(len(data), 0)
+        self.assertEqual(data["count"], 0)
+        self.assertEqual(len(data["items"]), 0)
 
         response = self.client.get(
             f"/search?satellite_number={self.satellite.sat_number}&min_magnitude={9.0}&max_magnitude={11.0}"
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(len(data), 0)
+        self.assertEqual(data["count"], 0)
+        self.assertEqual(len(data["items"]), 0)
 
     def test_get_satellites(self):
         """Test getting all satellites"""

@@ -110,6 +110,7 @@ def get_all_observations(request):
 
 
 @api.get("/satellite/{satellite_number}/observations", response=list[ObservationSchema])
+@paginate
 def get_observations_for_satellite(request, satellite_number: int):
     """Get Satellite Observations
 
@@ -146,6 +147,7 @@ def get_satellite(request, satellite_number: int):
 
 
 @api.get("/search", response=list[ObservationSchema])
+@paginate
 def search_observations(
     request,
     satellite_number: Optional[int] = None,
@@ -213,7 +215,8 @@ def list_satellites(
 
 
 @api.get("/observations/recent", response=list[ObservationSchema])
-def get_recent_observations(request, limit: int = 10):
+@paginate
+def get_recent_observations(request):
     """Get most recent observations
 
     Parameters
@@ -222,8 +225,8 @@ def get_recent_observations(request, limit: int = 10):
     """
     observations = Observation.objects.select_related(
         "location_id", "satellite_id"
-    ).order_by("-obs_time_utc")[:limit]
-    return observations
+    ).order_by("-obs_time_utc")
+    return observations.all()
 
 
 @api.get("/observations/stats", response=dict)
