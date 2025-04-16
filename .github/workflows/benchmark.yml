@@ -42,7 +42,7 @@ jobs:
       # Run benchmark with pytest-benchmark and store the output
       - name: Run benchmark
         run: |
-          python -m pytest --benchmark-only --benchmark-json output.json || true
+          python -m pytest --ignore=score/settings --benchmark-only --benchmark-json output.json || true
           # keep going even if some tests fail
         env:
             DATABASE_URL: postgresql://postgres:postgres@localhost:5432/score_test
