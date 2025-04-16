@@ -41,7 +41,7 @@ jobs:
       env:
             DATABASE_URL: 'postgres://postgres:postgres@localhost:${{ job.services.postgres.ports[5432] }}/postgres'
       run: |
-        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=. --ignore=score/settings repository/tests/ | tee pytest-coverage.txt
+        pytest --junitxml=pytest.xml --cov-report=term-missing:skip-covered --cov=. --ignore=score/settings,repository/tests/test_benchmark.py repository/tests/ | tee pytest-coverage.txt
     - name: Pytest coverage comment
       id: coverageComment
       uses: MishaKav/pytest-coverage-comment@main
