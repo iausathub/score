@@ -5,9 +5,8 @@ Test Django settings for score project.
 import ast
 from socket import gethostbyname, gethostname
 
+from score.settings.base import *  # noqa: F403
 from score.settings.base import get_secret  # noqa: F403
-
-from .base import *  # noqa: F403
 
 SECRET_KEY = get_secret("score-secret-key")["secret-key"]  # noqa: F405
 SECRET_HEALTH_CHECK_TOKEN = get_secret("score-secret-key")[  # noqa: F405
