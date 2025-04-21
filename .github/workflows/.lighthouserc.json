@@ -1,7 +1,7 @@
 {
   "ci": {
     "collect": {
-      "url": ["https://score.dev.aws.noirlab.edu/"],
+      "url": ["https://score.cps.iau.org/"],
       "numberOfRuns": 3,
       "settings": {
         "preset": "desktop",
