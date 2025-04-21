@@ -144,7 +144,9 @@ def view_data(request) -> HttpResponse:
         HttpResponse: The HttpResponse object with the rendered template.
     """
     # Show the 500 most recent observations
-    observation_list = Observation.objects.order_by("-date_added")[:500]
+    observation_list = Observation.objects.order_by("-date_added")[:500].select_related(
+        "satellite_id", "location_id"
+    )
 
     return render(
         request,
