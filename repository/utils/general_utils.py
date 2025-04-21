@@ -70,7 +70,9 @@ def get_stats():
     observer_count = (
         Observation.objects.values("location_id", "obs_email").distinct().count()
     )
-    latest_obs_list = Observation.objects.order_by("-date_added")[:7]
+    latest_obs_list = Observation.objects.order_by("-date_added")[:7].select_related(
+        "satellite_id", "location_id"
+    )
 
     # Get all observer locations (the latitude and longitude) and a count of how many
     # observations were made at each location
