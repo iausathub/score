@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1745260538377,
+  "lastUpdate": 1746928268978,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -104,6 +104,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.01589213936583098",
             "extra": "mean: 417.5880518000099 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ee25a6f0234916d6e11fc60db2a97396839dcf74",
+          "message": "Merge pull request #94 from iausathub/develop\n\nFix email validation/whitespace issue and extend SatChecker request timeout",
+          "timestamp": "2025-05-10T18:49:45-07:00",
+          "tree_id": "eabc5a187c8bf5693e75cf0537d2b8e06c6ac642",
+          "url": "https://github.com/iausathub/score/commit/ee25a6f0234916d6e11fc60db2a97396839dcf74"
+        },
+        "date": 1746928268628,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 56.78457608423396,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00951796508868403",
+            "extra": "mean: 17.610415872729327 msec\nrounds: 55"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 173.27907904675465,
+            "unit": "iter/sec",
+            "range": "stddev: 0.005992003387583782",
+            "extra": "mean: 5.7710371355919845 msec\nrounds: 59"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 1.0715688087866992,
+            "unit": "iter/sec",
+            "range": "stddev: 0.048446895012090534",
+            "extra": "mean: 933.2111869999892 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 1.0922888066577545,
+            "unit": "iter/sec",
+            "range": "stddev: 0.05085526705609698",
+            "extra": "mean: 915.5087865999974 msec\nrounds: 5"
           }
         ]
       }
