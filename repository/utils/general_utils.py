@@ -70,7 +70,9 @@ def get_stats():
     observer_count = (
         Observation.objects.values("location_id", "obs_email").distinct().count()
     )
-    latest_obs_list = Observation.objects.order_by("-date_added")[:7]
+    latest_obs_list = Observation.objects.order_by("-date_added")[:7].select_related(
+        "satellite_id", "location_id"
+    )
 
     # Get all observer locations (the latitude and longitude) and a count of how many
     # observations were made at each location
@@ -158,7 +160,7 @@ def add_additional_data(
         "min_altitude": -90,
     }
     try:
-        r = requests.get(url, params=params, timeout=10)
+        r = requests.get(url, params=params, timeout=60)
     except requests.exceptions.RequestException:
         return "Satellite position check failed - try again later."
 
@@ -184,7 +186,7 @@ def add_additional_data(
 
         error = None
         try:
-            response = requests.get(url, params=params, timeout=10)
+            response = requests.get(url, params=params, timeout=60)
             if response.status_code != 200:
                 error = "Satellite info check failed - check the input and try again."
                 raise Exception(requests.exceptions.RequestException(error))

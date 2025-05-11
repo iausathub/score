@@ -164,6 +164,10 @@ class Observation(models.Model):
 
     class Meta:
         db_table = "observation"
+        indexes = [
+            models.Index(fields=["satellite_id", "obs_time_utc"]),  # ASC
+            models.Index(fields=["satellite_id", "-obs_time_utc"]),  # DESC
+        ]
 
     def clean(self):
         if self.apparent_mag is not None and self.apparent_mag_uncert is None:

@@ -137,6 +137,10 @@ def process_upload(
                 column[4] = None
                 column[5] = None
 
+            # Remove whitespace
+            observer_email = column[13].strip().lower()
+            observer_email = "".join(observer_email.split())
+
             observation, obs_created = Observation.objects.get_or_create(
                 obs_time_utc=column[2],
                 obs_time_uncert_sec=column[3],
@@ -146,7 +150,7 @@ def process_upload(
                 instrument=column[10],
                 obs_mode=column[11].upper(),
                 obs_filter=column[12],
-                obs_email=column[13],
+                obs_email=observer_email,
                 obs_orc_id=orc_id_list,
                 sat_ra_deg=column[15] if column[15] else None,
                 sat_dec_deg=column[16] if column[16] else None,
@@ -181,7 +185,7 @@ def process_upload(
                     "instrument": column[10],
                     "obs_mode": column[11].upper(),
                     "obs_filter": column[12],
-                    "obs_email": column[13],
+                    "obs_email": observer_email,
                     "obs_orc_id": orc_id_list,
                     "sat_ra_deg": column[15] if column[15] else None,
                     "sat_dec_deg": column[16] if column[16] else None,

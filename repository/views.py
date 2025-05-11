@@ -144,7 +144,9 @@ def view_data(request) -> HttpResponse:
         HttpResponse: The HttpResponse object with the rendered template.
     """
     # Show the 500 most recent observations
-    observation_list = Observation.objects.order_by("-date_added")[:500]
+    observation_list = Observation.objects.order_by("-date_added")[:500].select_related(
+        "satellite_id", "location_id"
+    )
 
     return render(
         request,
@@ -837,7 +839,7 @@ def satellite_pos_lookup(request):
             "min_altitude": -90,
         }
         try:
-            response = requests.get(url, params=params, timeout=10)
+            response = requests.get(url, params=params, timeout=60)
         except requests.exceptions.RequestException:
             return "Satellite position check failed - try again later."
     else:
@@ -851,7 +853,7 @@ def satellite_pos_lookup(request):
             "min_altitude": -90,
         }
         try:
-            response = requests.get(url, params=params, timeout=10)
+            response = requests.get(url, params=params, timeout=60)
         except requests.exceptions.RequestException:
             return "Satellite position check failed - try again later."
 
