@@ -160,7 +160,7 @@ def add_additional_data(
         "min_altitude": -90,
     }
     try:
-        r = requests.get(url, params=params, timeout=10)
+        r = requests.get(url, params=params, timeout=60)
     except requests.exceptions.RequestException:
         return "Satellite position check failed - try again later."
 
@@ -186,7 +186,7 @@ def add_additional_data(
 
         error = None
         try:
-            response = requests.get(url, params=params, timeout=10)
+            response = requests.get(url, params=params, timeout=60)
             if response.status_code != 200:
                 error = "Satellite info check failed - check the input and try again."
                 raise Exception(requests.exceptions.RequestException(error))

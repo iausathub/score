@@ -839,7 +839,7 @@ def satellite_pos_lookup(request):
             "min_altitude": -90,
         }
         try:
-            response = requests.get(url, params=params, timeout=10)
+            response = requests.get(url, params=params, timeout=60)
         except requests.exceptions.RequestException:
             return "Satellite position check failed - try again later."
     else:
@@ -853,7 +853,7 @@ def satellite_pos_lookup(request):
             "min_altitude": -90,
         }
         try:
-            response = requests.get(url, params=params, timeout=10)
+            response = requests.get(url, params=params, timeout=60)
         except requests.exceptions.RequestException:
             return "Satellite position check failed - try again later."
 
