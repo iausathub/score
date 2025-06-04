@@ -69,8 +69,11 @@ def process_upload(
                 float(column[8]),
             )
 
+            # This gives the format
+            # Observation x/y: satellite_name sat_number obs_time_utc
             obs_error_reference = (
-                "Observation: " + column[0] + " " + str(column[1]) + " " + column[2]
+                f"Observation {obs_num + 1}/{observation_count}: "
+                f"{column[0]} {str(column[1])} {column[2]}"
             )
 
             if isinstance(additional_data, str):
@@ -258,10 +261,11 @@ def process_upload(
                 raise UploadError(e.messages[0]) from e
 
     except Exception as e:
-        if obs_error_reference:
+        if obs_error_reference and obs_error_reference not in str(e):
+            print(f"obs_error_reference: {obs_error_reference}")
             raise UploadError(str(e) + " - " + obs_error_reference) from e
         else:
-            raise UploadError(e) from e
+            raise UploadError(str(e)) from e
 
     send_confirmation_email(obs_ids, confirmation_email)
 

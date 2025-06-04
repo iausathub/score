@@ -140,7 +140,7 @@ def add_additional_data(
         missing_fields.append("latitude")
     if not longitude or not (-180 <= longitude <= 180):
         missing_fields.append("longitude")
-    if altitude is None:
+    if not altitude:
         missing_fields.append("altitude")
 
     if missing_fields:
@@ -192,7 +192,7 @@ def add_additional_data(
                 raise Exception(requests.exceptions.RequestException(error))
             response_json = response.json()
             if not response_json or response_json[0] == []:
-                error = "No satellite found for the provided NORAD ID."
+                error = f"No satellite found for the provided NORAD ID ({sat_number})."
                 raise Exception(requests.exceptions.RequestException(error))
             else:
                 satellite_found = any(
@@ -293,7 +293,10 @@ def validate_position(
     if satellite_name and satellite_info[0] != satellite_name:
         return "Satellite name and number do not match"
     if float(satellite_info[9]) < -5:
-        return "Satellite below horizon at this time and location"
+        return (
+            f"Satellite below horizon at this time and location "
+            f"({float(satellite_info[9]):.2f}°)"
+        )
 
     return True
 
