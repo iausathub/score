@@ -98,13 +98,18 @@ def process_upload(
             # First try to get existing satellite by number
             try:
                 satellite = Satellite.objects.get(sat_number=column[1])
-                # If satellite exists but has no name and new data has a name, update it
-                if not satellite.sat_name and (
-                    column[0] != "" or additional_data.satellite_name
+                # Get the new name from either column[0] or additional_data
+                new_name = (
+                    column[0] if column[0] != "" else additional_data.satellite_name
+                )
+
+                # Update name if:
+                # 1. Satellite has no name and new data has a name, OR
+                # 2. New data has a name that's different from current satellite name
+                if (not satellite.sat_name and new_name) or (
+                    new_name and new_name != satellite.sat_name
                 ):
-                    satellite.sat_name = (
-                        column[0] if column[0] != "" else additional_data.satellite_name
-                    )
+                    satellite.sat_name = new_name
                     satellite.save()
 
                 # If satellite exists but has no intl_designator, update it
