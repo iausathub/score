@@ -19,12 +19,13 @@ class LocationAdmin(admin.ModelAdmin):
 
 @admin.register(Observation)
 class ObservationAdmin(admin.ModelAdmin):
-    search_fields = ["satellite_id__sat_name", "obs_email", "obs_mode"]
+    search_fields = ["satellite_id__sat_name", "obs_email", "obs_mode", "date_added"]
     list_display = [
         "satellite_id",
         "obs_time_utc",
         "obs_email",
         "obs_mode",
         "apparent_mag",
+        "date_added",
     ]
-    list_filter = ["obs_time_utc", "obs_mode"]
+    list_filter = ["obs_time_utc", "obs_mode", "date_added"]
