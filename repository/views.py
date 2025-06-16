@@ -193,6 +193,21 @@ def download_all(request) -> HttpResponse:
         return create_and_return_csv(False, None)
 
 
+def api_access(request) -> HttpResponse:
+    """
+    Render the 'repository/api-access.html' template.
+
+    Args:
+        request (HttpRequest): The request object.
+
+    Returns:
+        HttpResponse: The HttpResponse object with the zipped CSV file.
+    """
+    template = loader.get_template("repository/api-access.html")
+    context = {"": ""}
+    return HttpResponse(template.render(context, request))
+
+
 def create_and_return_csv(
     observations: Union[list[Observation], bool], prefix: str
 ) -> HttpResponse:

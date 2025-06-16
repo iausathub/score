@@ -286,7 +286,7 @@ def test_process_upload_existing_satellite(mocker):
 
     # Create existing satellite with name
     Satellite.objects.create(
-        sat_name="STARLINK-1234",
+        sat_name="ACS3",
         sat_number="59588",
         date_added=timezone.now(),
         intl_designator="2024-001A",
@@ -332,7 +332,7 @@ def test_process_upload_existing_satellite(mocker):
 
     # Verify existing satellite was used and maintained its data
     satellite = Satellite.objects.get(sat_number="59588")
-    assert satellite.sat_name == "STARLINK-1234"
+    assert satellite.sat_name == "ACS3"
     assert satellite.intl_designator == "2024-001A"
     assert result["status"] == "success"
 
