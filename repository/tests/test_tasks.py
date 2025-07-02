@@ -1,7 +1,7 @@
 import pytest
 from django.utils import timezone
 
-from repository.models import Satellite
+from repository.models import Observation, Satellite
 from repository.tasks import UploadError, process_upload
 
 
@@ -500,3 +500,255 @@ def test_process_upload_new_satellites(mocker):
     assert result["status"] == "success"
     assert Satellite.objects.count() == 3
     assert Satellite.objects.get(sat_number="58013").sat_name == "KUIPER-P2"
+
+
+@pytest.mark.django_db
+def test_process_upload_discrepant_flag_low_altitude(mocker):
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+
+    mock_satchecker_data = mocker.Mock()
+    mock_satchecker_data.alt_deg = -5.0
+    mock_satchecker_data.illuminated = True
+    mock_satchecker_data.phase_angle = 15.0
+    mock_satchecker_data.range_to_sat = 500.0
+    mock_satchecker_data.range_rate = 0.1
+    mock_satchecker_data.sat_ra_deg = 180.0
+    mock_satchecker_data.sat_dec_deg = 45.0
+    mock_satchecker_data.ddec_deg_s = 0.01
+    mock_satchecker_data.dra_cosdec_deg_s = 0.02
+    mock_satchecker_data.az_deg = 270.0
+    mock_satchecker_data.satellite_name = "TEST SAT"
+    mock_satchecker_data.intl_designator = "2024-001A"
+
+    mocker.patch(
+        "repository.tasks.add_additional_data", return_value=mock_satchecker_data
+    )
+
+    data = [
+        [
+            "TEST SAT",
+            "99999",
+            "2024-10-03T19:00:27.319Z",
+            0.001,
+            6.6830102,
+            0.096618345,
+            52.15,
+            4.49,
+            8,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            342.9184541,
+            16.81681335,
+            0,
+            0,
+            0,
+            1421.885,
+            0,
+            0,
+            0,
+            "5-frame average; lim mag of instrument",
+            "",
+            "",
+        ]
+    ]
+
+    result = process_upload(data)
+    assert result["status"] == "success"
+
+    observation = Observation.objects.get(satellite_id__sat_number="99999")
+    assert observation.potentially_discrepant is True
+    assert observation.alt_deg_satchecker == -5.0
+    assert observation.illuminated is True
+
+
+@pytest.mark.django_db
+def test_process_upload_discrepant_flag_not_illuminated(mocker):
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+
+    mock_satchecker_data = mocker.Mock()
+    mock_satchecker_data.alt_deg = 10.0
+    mock_satchecker_data.illuminated = False
+    mock_satchecker_data.phase_angle = 15.0
+    mock_satchecker_data.range_to_sat = 500.0
+    mock_satchecker_data.range_rate = 0.1
+    mock_satchecker_data.sat_ra_deg = 180.0
+    mock_satchecker_data.sat_dec_deg = 45.0
+    mock_satchecker_data.ddec_deg_s = 0.01
+    mock_satchecker_data.dra_cosdec_deg_s = 0.02
+    mock_satchecker_data.az_deg = 270.0
+    mock_satchecker_data.satellite_name = "TEST SAT 2"
+    mock_satchecker_data.intl_designator = "2024-002A"
+
+    mocker.patch(
+        "repository.tasks.add_additional_data", return_value=mock_satchecker_data
+    )
+
+    data = [
+        [
+            "TEST SAT 2",
+            "99998",
+            "2024-10-03T19:00:27.319Z",
+            0.001,
+            6.6830102,
+            0.096618345,
+            52.15,
+            4.49,
+            8,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            342.9184541,
+            16.81681335,
+            0,
+            0,
+            0,
+            1421.885,
+            0,
+            0,
+            0,
+            "5-frame average; lim mag of instrument",
+            "",
+            "",
+        ]
+    ]
+
+    result = process_upload(data)
+    assert result["status"] == "success"
+
+    observation = Observation.objects.get(satellite_id__sat_number="99998")
+    assert observation.potentially_discrepant is True
+    assert observation.alt_deg_satchecker == 10.0
+    assert observation.illuminated is False
+
+
+@pytest.mark.django_db
+def test_process_upload_discrepant_flag_both_conditions(mocker):
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+
+    mock_satchecker_data = mocker.Mock()
+    mock_satchecker_data.alt_deg = -8.0
+    mock_satchecker_data.illuminated = False
+    mock_satchecker_data.phase_angle = 15.0
+    mock_satchecker_data.range_to_sat = 500.0
+    mock_satchecker_data.range_rate = 0.1
+    mock_satchecker_data.sat_ra_deg = 180.0
+    mock_satchecker_data.sat_dec_deg = 45.0
+    mock_satchecker_data.ddec_deg_s = 0.01
+    mock_satchecker_data.dra_cosdec_deg_s = 0.02
+    mock_satchecker_data.az_deg = 270.0
+    mock_satchecker_data.satellite_name = "TEST SAT 3"
+    mock_satchecker_data.intl_designator = "2024-003A"
+
+    mocker.patch(
+        "repository.tasks.add_additional_data", return_value=mock_satchecker_data
+    )
+
+    data = [
+        [
+            "TEST SAT 3",
+            "99997",
+            "2024-10-03T19:00:27.319Z",
+            0.001,
+            6.6830102,
+            0.096618345,
+            52.15,
+            4.49,
+            8,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            342.9184541,
+            16.81681335,
+            0,
+            0,
+            0,
+            1421.885,
+            0,
+            0,
+            0,
+            "5-frame average; lim mag of instrument",
+            "",
+            "",
+        ]
+    ]
+
+    result = process_upload(data)
+    assert result["status"] == "success"
+
+    observation = Observation.objects.get(satellite_id__sat_number="99997")
+    assert observation.potentially_discrepant is True
+    assert observation.alt_deg_satchecker == -8.0
+    assert observation.illuminated is False
+
+
+@pytest.mark.django_db
+def test_process_upload_discrepant_flag_false(mocker):
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+
+    mock_satchecker_data = mocker.Mock()
+    mock_satchecker_data.alt_deg = 15.0
+    mock_satchecker_data.illuminated = True
+    mock_satchecker_data.phase_angle = 15.0
+    mock_satchecker_data.range_to_sat = 500.0
+    mock_satchecker_data.range_rate = 0.1
+    mock_satchecker_data.sat_ra_deg = 180.0
+    mock_satchecker_data.sat_dec_deg = 45.0
+    mock_satchecker_data.ddec_deg_s = 0.01
+    mock_satchecker_data.dra_cosdec_deg_s = 0.02
+    mock_satchecker_data.az_deg = 270.0
+    mock_satchecker_data.satellite_name = "TEST SAT 4"
+    mock_satchecker_data.intl_designator = "2024-004A"
+
+    mocker.patch(
+        "repository.tasks.add_additional_data", return_value=mock_satchecker_data
+    )
+
+    data = [
+        [
+            "TEST SAT 4",
+            "99996",
+            "2024-10-03T19:00:27.319Z",
+            0.001,
+            6.6830102,
+            0.096618345,
+            52.15,
+            4.49,
+            8,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            342.9184541,
+            16.81681335,
+            0,
+            0,
+            0,
+            1421.885,
+            0,
+            0,
+            0,
+            "5-frame average; lim mag of instrument",
+            "",
+            "",
+        ]
+    ]
+
+    result = process_upload(data)
+    assert result["status"] == "success"
+
+    observation = Observation.objects.get(satellite_id__sat_number="99996")
+    assert observation.potentially_discrepant is False
+    assert observation.alt_deg_satchecker == 15.0
+    assert observation.illuminated is True
