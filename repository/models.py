@@ -130,7 +130,7 @@ class Observation(models.Model):
     range_rate_sat_uncert_km_s = models.FloatField(default=0, null=True, blank=True)
     comments = models.TextField(null=True, blank=True)
     data_archive_link = models.URLField(null=True, blank=True)
-    flag = models.CharField(max_length=100, null=True, blank=True)
+    potentially_discrepant = models.BooleanField(default=False, null=True, blank=True)
     phase_angle = models.FloatField(null=True, blank=True)
     range_to_sat_km_satchecker = models.FloatField(null=True, blank=True)
     range_rate_sat_km_s_satchecker = models.FloatField(null=True, blank=True)
@@ -143,6 +143,7 @@ class Observation(models.Model):
     illuminated = models.BooleanField(null=True, blank=True)
     limiting_magnitude = models.FloatField(null=True, blank=True)
     mpc_code = models.CharField(max_length=10, null=True, blank=True)
+
     satellite_id = models.ForeignKey(
         Satellite, on_delete=models.CASCADE, related_name="observations"
     )
