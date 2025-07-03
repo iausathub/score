@@ -43,7 +43,7 @@ class ObservationSerializer(serializers.ModelSerializer):
             "comments",
             "data_archive_link",
             "mpc_code",
-            "flag",
+            "potentially_discrepant",
             "satellite_id",
             "location_id",
             "date_added",

@@ -69,6 +69,13 @@ def process_upload(
                 float(column[8]),
             )
 
+            potentially_discrepant = False
+
+            if additional_data.alt_deg is not None and (
+                additional_data.alt_deg < -3 or additional_data.illuminated is False
+            ):
+                potentially_discrepant = True
+
             # This gives the format
             # Observation x/y: satellite_name sat_number obs_time_utc
             obs_error_reference = (
@@ -182,6 +189,7 @@ def process_upload(
                 alt_deg_satchecker=additional_data.alt_deg,
                 az_deg_satchecker=additional_data.az_deg,
                 illuminated=additional_data.illuminated,
+                potentially_discrepant=potentially_discrepant,
                 satellite_id=satellite,
                 location_id=location,
                 defaults={
@@ -217,7 +225,7 @@ def process_upload(
                     "alt_deg_satchecker": additional_data.alt_deg,
                     "az_deg_satchecker": additional_data.az_deg,
                     "illuminated": additional_data.illuminated,
-                    "flag": None,
+                    "potentially_discrepant": potentially_discrepant,
                     "satellite_id": satellite,
                     "location_id": location,
                     "date_added": timezone.now(),

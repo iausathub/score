@@ -59,6 +59,7 @@ def get_csv_header() -> list[str]:
         "az_deg_satchecker",
         "illuminated",
         "international_designator",
+        "potentially_discrepant",
     ]
     return header
 
@@ -171,6 +172,7 @@ def create_csv(
                             observation.az_deg_satchecker,
                             observation.illuminated,
                             observation.satellite_id.intl_designator,
+                            observation.potentially_discrepant,
                         ]
                     )
 
