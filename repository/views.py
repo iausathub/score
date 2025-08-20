@@ -400,7 +400,11 @@ def search(request):
                 },
             )
         else:
-            return render(request, "repository/search.html", {"form": form})
+            return render(
+                request,
+                "repository/search.html",
+                {"error": "No observations found.", "form": form},
+            )
 
     return render(request, "repository/search.html", {"form": SearchForm()})
 
