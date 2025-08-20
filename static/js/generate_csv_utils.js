@@ -171,9 +171,15 @@ $('[data-toggle="tooltip"]').tooltip();
                 }
                 break;
             case 'observer_orcid':
-                if (value && !/^\d{4}-\d{4}-\d{4}-\d{4}$/.test(value)) {
+                if (value && !/^\d{4}-\d{4}-\d{4}-\d{3}[0-9Xx]$/.test(value)) {
                     isValid = false;
                     errorMessage = 'Invalid ORCID format.';
+                } else if (value) {
+                    // Normalize ORCID by converting to uppercase
+                    var normalizedValue = value.toUpperCase();
+                    if (normalizedValue !== value) {
+                        $(field).val(normalizedValue);
+                    }
                 }
                 break;
             case 'sat_number':

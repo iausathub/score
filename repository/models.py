@@ -9,7 +9,7 @@ from django.utils import timezone
 
 
 def validate_orcid(value):
-    pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{4}$")
+    pattern = re.compile(r"^\d{4}-\d{4}-\d{4}-\d{3}[0-9Xx]$")
     for orc_id in value:
         if not pattern.match(orc_id):
             raise ValidationError(f"{orc_id} is not a valid ORCID")
@@ -188,6 +188,12 @@ class Observation(models.Model):
             )
         if self.obs_orc_id and self.obs_orc_id[0] == "":
             raise ValidationError("ORCID cannot be empty.")
+
+        # Normalize ORCIDs
+        if self.obs_orc_id:
+            self.obs_orc_id = [
+                orc_id.upper() if orc_id else orc_id for orc_id in self.obs_orc_id
+            ]
 
     def save(self, *args, **kwargs):
         self.full_clean()

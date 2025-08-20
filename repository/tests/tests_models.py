@@ -325,3 +325,29 @@ class ObservationTest(TestCase):
         # valid values successful
         obs = self.create_observation()
         obs.full_clean()
+
+    def test_orcid_validation_with_lowercase_x(self):
+        obs = self.create_observation(obs_orc_id=["1234-5678-1234-567x"], sat_number=20)
+        obs.full_clean()
+        # Check that the ORCID was normalized to uppercase
+        self.assertEqual(obs.obs_orc_id, ["1234-5678-1234-567X"])
+
+    def test_orcid_validation_with_uppercase_x(self):
+        obs = self.create_observation(obs_orc_id=["1234-5678-1234-567X"], sat_number=21)
+        obs.full_clean()
+        self.assertEqual(obs.obs_orc_id, ["1234-5678-1234-567X"])
+
+    def test_orcid_validation_multiple_orcids_mixed_case(self):
+        obs = self.create_observation(
+            obs_orc_id=["1234-5678-1234-567x", "9876-5432-1098-765X"], sat_number=22
+        )
+        obs.full_clean()
+        self.assertEqual(obs.obs_orc_id, ["1234-5678-1234-567X", "9876-5432-1098-765X"])
+
+    def test_orcid_validation_with_invalid_character(self):
+        with self.assertRaises(ValidationError) as error:
+            obs = self.create_observation(
+                obs_orc_id=["1234-5678-1234-567Y"], sat_number=23
+            )
+            obs.full_clean()
+        self.assertIn("not a valid ORCID", str(error.exception))

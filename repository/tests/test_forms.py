@@ -178,3 +178,142 @@ class GenerateCSVFormTest(TestCase):
             },
         )
         self.assertFalse(response.context["form"].is_valid())
+
+    def test_orcid_validation_with_lowercase_x(self):
+        form = GenerateCSVForm(
+            {
+                "sat_number": 12345,
+                "obs_date_year": 2024,
+                "obs_date_month": 1,
+                "obs_date_day": 2,
+                "obs_date_hour": 23,
+                "obs_date_min": 59,
+                "obs_date_sec": 59,
+                "obs_date_uncert": 0.01,
+                "apparent_mag": 8.1,
+                "apparent_mag_uncert": 0.01,
+                "limiting_magnitude": 10,
+                "observer_latitude_deg": 33,
+                "observer_longitude_deg": -117,
+                "observer_altitude_m": 100,
+                "obs_mode": "VISUAL",
+                "filter": "CLEAR",
+                "instrument": "n/a",
+                "observer_email": "abc@123.com",
+                "observer_orcid": "1234-5678-1234-567x",
+            }
+        )
+        self.assertTrue(form.is_valid())
+        # Check that the ORCID was normalized to uppercase
+        self.assertEqual(form.cleaned_data["observer_orcid"], "1234-5678-1234-567X")
+
+    def test_orcid_validation_with_uppercase_x(self):
+        form = GenerateCSVForm(
+            {
+                "sat_number": 12345,
+                "obs_date_year": 2024,
+                "obs_date_month": 1,
+                "obs_date_day": 2,
+                "obs_date_hour": 23,
+                "obs_date_min": 59,
+                "obs_date_sec": 59,
+                "obs_date_uncert": 0.01,
+                "apparent_mag": 8.1,
+                "apparent_mag_uncert": 0.01,
+                "limiting_magnitude": 10,
+                "observer_latitude_deg": 33,
+                "observer_longitude_deg": -117,
+                "observer_altitude_m": 100,
+                "obs_mode": "VISUAL",
+                "filter": "CLEAR",
+                "instrument": "n/a",
+                "observer_email": "abc@123.com",
+                "observer_orcid": "1234-5678-1234-567X",
+            }
+        )
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["observer_orcid"], "1234-5678-1234-567X")
+
+    def test_orcid_validation_multiple_orcids_mixed_case(self):
+        form = GenerateCSVForm(
+            {
+                "sat_number": 12345,
+                "obs_date_year": 2024,
+                "obs_date_month": 1,
+                "obs_date_day": 2,
+                "obs_date_hour": 23,
+                "obs_date_min": 59,
+                "obs_date_sec": 59,
+                "obs_date_uncert": 0.01,
+                "apparent_mag": 8.1,
+                "apparent_mag_uncert": 0.01,
+                "limiting_magnitude": 10,
+                "observer_latitude_deg": 33,
+                "observer_longitude_deg": -117,
+                "observer_altitude_m": 100,
+                "obs_mode": "VISUAL",
+                "filter": "CLEAR",
+                "instrument": "n/a",
+                "observer_email": "abc@123.com",
+                "observer_orcid": "1234-5678-1234-567x, 9876-5432-1098-765X",
+            }
+        )
+        self.assertTrue(form.is_valid())
+        self.assertEqual(
+            form.cleaned_data["observer_orcid"],
+            "1234-5678-1234-567X, 9876-5432-1098-765X",
+        )
+
+    def test_orcid_validation_with_invalid_character(self):
+        form = GenerateCSVForm(
+            {
+                "sat_number": 12345,
+                "obs_date_year": 2024,
+                "obs_date_month": 1,
+                "obs_date_day": 2,
+                "obs_date_hour": 23,
+                "obs_date_min": 59,
+                "obs_date_sec": 59,
+                "obs_date_uncert": 0.01,
+                "apparent_mag": 8.1,
+                "apparent_mag_uncert": 0.01,
+                "limiting_magnitude": 10,
+                "observer_latitude_deg": 33,
+                "observer_longitude_deg": -117,
+                "observer_altitude_m": 100,
+                "obs_mode": "VISUAL",
+                "filter": "CLEAR",
+                "instrument": "n/a",
+                "observer_email": "abc@123.com",
+                "observer_orcid": "1234-5678-1234-567Y",
+            }
+        )
+        self.assertFalse(form.is_valid())
+        self.assertIn("observer_orcid", form.errors)
+        self.assertEqual(form.errors["observer_orcid"], ["Invalid ORCID."])
+
+    def test_search_form_orcid_validation_with_lowercase_x(self):
+        from repository.forms import SearchForm
+
+        form = SearchForm({"observer_orcid": "1234-5678-1234-567x"})
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["observer_orcid"], "1234-5678-1234-567X")
+
+    def test_search_form_orcid_validation_with_uppercase_x(self):
+        from repository.forms import SearchForm
+
+        form = SearchForm({"observer_orcid": "1234-5678-1234-567X"})
+        self.assertTrue(form.is_valid())
+        self.assertEqual(form.cleaned_data["observer_orcid"], "1234-5678-1234-567X")
+
+    def test_search_form_orcid_validation_multiple_orcids_with_mixed_case(self):
+        from repository.forms import SearchForm
+
+        form = SearchForm(
+            {"observer_orcid": "1234-5678-1234-567x, 9876-5432-1098-765X"}
+        )
+        self.assertTrue(form.is_valid())
+        self.assertEqual(
+            form.cleaned_data["observer_orcid"],
+            "1234-5678-1234-567X, 9876-5432-1098-765X",
+        )
