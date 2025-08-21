@@ -28,7 +28,7 @@ def validate_orcid(value: str) -> None:
     """
     orc_id_list = value.split(",")
     for orc_id in orc_id_list:
-        if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{4}$", orc_id.strip()):
+        if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{3}[0-9Xx]$", orc_id.strip()):
             raise forms.ValidationError("Invalid ORCID.")
 
 
@@ -150,6 +150,11 @@ class SearchForm(Form):
                     "If any of latitude, longitude, or radius "
                     "is provided, all three must be specified for observer location."
                 )
+
+        # Normalize ORCID if provided
+        observer_orcid = cleaned_data.get("observer_orcid")
+        if observer_orcid:
+            cleaned_data["observer_orcid"] = observer_orcid.upper()
 
         return cleaned_data
 
@@ -490,6 +495,12 @@ class GenerateCSVForm(Form):
                 "apparent magnitude uncertainty is provided."
             )
         # fmt: on
+
+        # Normalize ORCID if provided
+        observer_orcid = cleaned_data.get("observer_orcid")
+        if observer_orcid:
+            cleaned_data["observer_orcid"] = observer_orcid.upper()
+
         if errors:
             raise forms.ValidationError(errors)
 
