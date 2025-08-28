@@ -677,6 +677,7 @@ def satellite_data_view(request, satellite_number):
         "intl_designator": (
             metadata.get("international_designator") if metadata else None
         ),
+        "generation": metadata.get("generation") if metadata else None,
         "obs_ids": [observation.id for observation in observations],
     }
 
