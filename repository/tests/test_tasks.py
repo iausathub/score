@@ -519,6 +519,9 @@ def test_process_upload_discrepant_flag_low_altitude(mocker):
     mock_satchecker_data.az_deg = 270.0
     mock_satchecker_data.satellite_name = "TEST SAT"
     mock_satchecker_data.intl_designator = "2024-001A"
+    mock_satchecker_data.sat_altitude_km = 400.0
+    mock_satchecker_data.solar_elevation_deg = -10.0
+    mock_satchecker_data.solar_azimuth_deg = 180.0
 
     mocker.patch(
         "repository.tasks.add_additional_data", return_value=mock_satchecker_data
@@ -582,6 +585,9 @@ def test_process_upload_discrepant_flag_not_illuminated(mocker):
     mock_satchecker_data.az_deg = 270.0
     mock_satchecker_data.satellite_name = "TEST SAT 2"
     mock_satchecker_data.intl_designator = "2024-002A"
+    mock_satchecker_data.sat_altitude_km = 400.0
+    mock_satchecker_data.solar_elevation_deg = -10.0
+    mock_satchecker_data.solar_azimuth_deg = 180.0
 
     mocker.patch(
         "repository.tasks.add_additional_data", return_value=mock_satchecker_data
@@ -645,6 +651,9 @@ def test_process_upload_discrepant_flag_both_conditions(mocker):
     mock_satchecker_data.az_deg = 270.0
     mock_satchecker_data.satellite_name = "TEST SAT 3"
     mock_satchecker_data.intl_designator = "2024-003A"
+    mock_satchecker_data.sat_altitude_km = 400.0
+    mock_satchecker_data.solar_elevation_deg = -10.0
+    mock_satchecker_data.solar_azimuth_deg = 180.0
 
     mocker.patch(
         "repository.tasks.add_additional_data", return_value=mock_satchecker_data
@@ -708,6 +717,9 @@ def test_process_upload_discrepant_flag_false(mocker):
     mock_satchecker_data.az_deg = 270.0
     mock_satchecker_data.satellite_name = "TEST SAT 4"
     mock_satchecker_data.intl_designator = "2024-004A"
+    mock_satchecker_data.sat_altitude_km = 400.0
+    mock_satchecker_data.solar_elevation_deg = -10.0
+    mock_satchecker_data.solar_azimuth_deg = 180.0
 
     mocker.patch(
         "repository.tasks.add_additional_data", return_value=mock_satchecker_data
