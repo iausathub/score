@@ -188,6 +188,9 @@ def process_upload(
                 dra_cosdec_deg_s_satchecker=additional_data.dra_cosdec_deg_s,
                 alt_deg_satchecker=additional_data.alt_deg,
                 az_deg_satchecker=additional_data.az_deg,
+                sat_altitude_km_satchecker=(additional_data.sat_altitude_km),
+                solar_elevation_deg_satchecker=additional_data.solar_elevation_deg,
+                solar_azimuth_deg_satchecker=additional_data.solar_azimuth_deg,
                 illuminated=additional_data.illuminated,
                 potentially_discrepant=potentially_discrepant,
                 satellite_id=satellite,
@@ -224,6 +227,11 @@ def process_upload(
                     "dra_cosdec_deg_s_satchecker": additional_data.dra_cosdec_deg_s,
                     "alt_deg_satchecker": additional_data.alt_deg,
                     "az_deg_satchecker": additional_data.az_deg,
+                    "sat_altitude_km_satchecker": (additional_data.sat_altitude_km),
+                    "solar_elevation_deg_satchecker": (
+                        additional_data.solar_elevation_deg
+                    ),
+                    "solar_azimuth_deg_satchecker": additional_data.solar_azimuth_deg,
                     "illuminated": additional_data.illuminated,
                     "potentially_discrepant": potentially_discrepant,
                     "satellite_id": satellite,
