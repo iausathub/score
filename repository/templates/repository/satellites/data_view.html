@@ -57,6 +57,7 @@
                   <p><strong>NORAD ID:</strong> <span id="norad_id">{{ satellite.sat_number }}</span></p>
                   <p><strong>COSPAR ID:</strong> <span id="sat_intl_designator">{{ intl_designator|default:"N/A" }}</span><br />
                   <a href="{% url 'launch-view' intl_designator|slice:":8" %}">View other objects from this launch</a></p>
+                  <p><strong>Generation:</strong> <span id="generation">{{ generation|default:"N/A" }}</span></p>
                 </div>
                 <div class="col-md-4">
                   <p>

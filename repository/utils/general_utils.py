@@ -443,6 +443,7 @@ def get_satellite_metadata(satellite_number: str) -> Optional[dict[str, Optional
                 "name": metadata.get("name"),
                 "norad_id": metadata.get("norad_id"),
                 "international_designator": metadata.get("international_designator"),
+                "generation": metadata.get("generation"),
             }
         else:
             logger.warning(f"No metadata found for satellite {satellite_number}")
