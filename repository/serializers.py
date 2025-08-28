@@ -56,6 +56,9 @@ class ObservationSerializer(serializers.ModelSerializer):
             "dra_cosdec_deg_s_satchecker",
             "alt_deg_satchecker",
             "az_deg_satchecker",
+            "sat_altitude_km_satchecker",
+            "solar_elevation_deg_satchecker",
+            "solar_azimuth_deg_satchecker",
             "illuminated",
             "limiting_magnitude",
         )
