@@ -137,6 +137,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
+                "score.context_processors.score_settings",
             ],
         },
     },
@@ -246,5 +247,18 @@ JAZZMIN_SETTINGS = {
     "site_header": "SCORE Admin",
     "site_brand": "SCORE",
 }
+
+# Centralized text content
+SCORE_ACKNOWLEDGMENT_TEXT = (
+    "This research made use of data and/or services provided by the "
+    "International Astronomical Union Centre for the Protection of the Dark and "
+    "Quiet Sky from Satellite Constellation Interference (IAU CPS) SatHub. "
+    "The development of SCORE has been supported by the National Science "
+    "Foundation (NSF) under grant number: AST 2332736. SCORE is hosted at the "
+    "NSF NOIRLab. Any opinions, findings, and conclusions or recommendations "
+    "expressed in this material are those of the author(s) and do not necessarily "
+    "reflect the views of the NSF NOIRLab, the SKAO, the IAU, or any host or "
+    "member institution of the IAU CPS."
+)
 
 NINJA_PAGINATION_PER_PAGE = 1000

@@ -86,6 +86,9 @@ function populateModalFields(observation) {
     populateIfExists('alt_deg_satchecker', observation);
     populateIfExists('az_deg_satchecker', observation);
     populateIfExists('illuminated', observation);
+    populateIfExists('solar_elevation_deg_satchecker', observation);
+    populateIfExists('solar_azimuth_deg_satchecker', observation);
+    populateIfExists('sat_altitude_km_satchecker', observation);
 
     if (observation.data_archive_link && observation.data_archive_link !== "") {
         document.getElementById('data_archive_link').innerHTML = '<a href="' + observation.data_archive_link + '">Data link</a>';

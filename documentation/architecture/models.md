@@ -49,6 +49,9 @@ classDiagram
         +FloatField dra_cosdec_deg_s_satchecker
         +FloatField alt_deg_satchecker
         +FloatField az_deg_satchecker
+        +FloatField sat_altitude_km_satchecker
+        +FloatField solar_elevation_deg_satchecker
+        +FloatField solar_azimuth_deg_satchecker
         +BooleanField illuminated
         +FloatField limiting_magnitude
         +CharField mpc_code

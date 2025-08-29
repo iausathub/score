@@ -27,6 +27,9 @@ SatCheckerData = namedtuple(
         "sat_ra_deg",
         "satellite_name",
         "intl_designator",
+        "sat_altitude_km",
+        "solar_elevation_deg",
+        "solar_azimuth_deg",
     ],
 )
 
@@ -229,6 +232,9 @@ def add_additional_data(
                 None,
                 satellite_name,
                 None,
+                None,
+                None,
+                None,
             )
         return is_valid
 
@@ -251,6 +257,9 @@ def add_additional_data(
             sat_ra_deg=round(data_dict.get("right_ascension_deg", 0), 7),
             satellite_name=updated_satellite_name or data_dict.get("name"),
             intl_designator=data_dict.get("international_designator"),
+            sat_altitude_km=round(data_dict.get("sat_altitude_km", 0), 7),
+            solar_elevation_deg=round(data_dict.get("solar_elevation_deg", 0), 7),
+            solar_azimuth_deg=round(data_dict.get("solar_azimuth_deg", 0), 7),
         )
         return satellite_data
 
@@ -286,7 +295,7 @@ def validate_position(
     obs_time = Time(obs_time, format="isot")
 
     # use tle_epoch, not tle_date (that is the date it was collected)
-    date_str = satellite_info[18].replace(" UTC", "")
+    date_str = satellite_info[21].replace(" UTC", "")
     tle_date = Time(date_str, format="iso", scale="utc")
     if (tle_date - obs_time).jd > 14:
         return "archival data"
@@ -443,6 +452,7 @@ def get_satellite_metadata(satellite_number: str) -> Optional[dict[str, Optional
                 "name": metadata.get("name"),
                 "norad_id": metadata.get("norad_id"),
                 "international_designator": metadata.get("international_designator"),
+                "generation": metadata.get("generation"),
             }
         else:
             logger.warning(f"No metadata found for satellite {satellite_number}")

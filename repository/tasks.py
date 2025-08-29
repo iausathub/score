@@ -69,13 +69,6 @@ def process_upload(
                 float(column[8]),
             )
 
-            potentially_discrepant = False
-
-            if additional_data.alt_deg is not None and (
-                additional_data.alt_deg < -3 or additional_data.illuminated is False
-            ):
-                potentially_discrepant = True
-
             # This gives the format
             # Observation x/y: satellite_name sat_number obs_time_utc
             obs_error_reference = (
@@ -85,6 +78,13 @@ def process_upload(
 
             if isinstance(additional_data, str):
                 raise UploadError(additional_data + " - " + obs_error_reference)
+
+            potentially_discrepant = False
+
+            if additional_data.alt_deg is not None and (
+                additional_data.alt_deg < -3 or additional_data.illuminated is False
+            ):
+                potentially_discrepant = True
 
             # Special error message cases
             if column[4] == "" and column[5] != "":
@@ -188,6 +188,9 @@ def process_upload(
                 dra_cosdec_deg_s_satchecker=additional_data.dra_cosdec_deg_s,
                 alt_deg_satchecker=additional_data.alt_deg,
                 az_deg_satchecker=additional_data.az_deg,
+                sat_altitude_km_satchecker=(additional_data.sat_altitude_km),
+                solar_elevation_deg_satchecker=additional_data.solar_elevation_deg,
+                solar_azimuth_deg_satchecker=additional_data.solar_azimuth_deg,
                 illuminated=additional_data.illuminated,
                 potentially_discrepant=potentially_discrepant,
                 satellite_id=satellite,
@@ -224,6 +227,11 @@ def process_upload(
                     "dra_cosdec_deg_s_satchecker": additional_data.dra_cosdec_deg_s,
                     "alt_deg_satchecker": additional_data.alt_deg,
                     "az_deg_satchecker": additional_data.az_deg,
+                    "sat_altitude_km_satchecker": (additional_data.sat_altitude_km),
+                    "solar_elevation_deg_satchecker": (
+                        additional_data.solar_elevation_deg
+                    ),
+                    "solar_azimuth_deg_satchecker": additional_data.solar_azimuth_deg,
                     "illuminated": additional_data.illuminated,
                     "potentially_discrepant": potentially_discrepant,
                     "satellite_id": satellite,
