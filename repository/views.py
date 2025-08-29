@@ -57,6 +57,7 @@ def index(request):
         "observer_count": stats.observer_count,
         "latest_obs_list": stats.latest_obs_list,
         "observer_locations": stats.observer_locations,
+        "task_id": None,
     }
 
     # Make sure that the progress bar is shown only if the page was redirected
@@ -69,6 +70,10 @@ def index(request):
             context["task_id"] = request.session["task_id"]
             del request.session["task_id"]
         del request.session["recent"]
+
+    # Ensure task_id is always in context to prevent template errors
+    if "task_id" not in context:
+        context["task_id"] = None
 
     if request.method == "POST" and not request.FILES:
         context["error"] = "Please select a file to upload."
@@ -118,6 +123,7 @@ def index(request):
             # If the task is complete, delete the task ID from the session
             del request.session["task_id"]
             del request.session["date_added"]
+            context["task_id"] = None
         else:
             # If the task is not complete, pass the task ID to the context
             context["task_id"] = task_id
