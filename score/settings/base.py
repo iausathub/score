@@ -137,7 +137,7 @@ TEMPLATES = [
                 "django.template.context_processors.request",
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
-                "repository.context_processors.score_settings",
+                "score.context_processors.score_settings",
             ],
         },
     },
