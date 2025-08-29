@@ -257,9 +257,9 @@ def add_additional_data(
             sat_ra_deg=round(data_dict.get("right_ascension_deg", 0), 7),
             satellite_name=updated_satellite_name or data_dict.get("name"),
             intl_designator=data_dict.get("international_designator"),
-            sat_altitude_km=data_dict.get("sat_altitude_km"),
-            solar_elevation_deg=data_dict.get("solar_elevation_deg"),
-            solar_azimuth_deg=data_dict.get("solar_azimuth_deg"),
+            sat_altitude_km=round(data_dict.get("sat_altitude_km", 0), 7),
+            solar_elevation_deg=round(data_dict.get("solar_elevation_deg", 0), 7),
+            solar_azimuth_deg=round(data_dict.get("solar_azimuth_deg", 0), 7),
         )
         return satellite_data
 
