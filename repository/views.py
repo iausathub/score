@@ -58,6 +58,8 @@ def index(request):
         "latest_obs_list": stats.latest_obs_list,
         "observer_locations": stats.observer_locations,
         "task_id": None,
+        "error": None,
+        "recaptcha_public_key": settings.RECAPTCHA_PUBLIC_KEY,
     }
 
     # Make sure that the progress bar is shown only if the page was redirected
