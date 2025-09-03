@@ -47,6 +47,47 @@ def test_process_upload_valid_data(mocker):
 
 
 @pytest.mark.django_db
+def test_process_upload_valid_data_zero_altitude(mocker):
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+    data = [
+        [
+            "ACS 3",
+            "59588",
+            "2024-10-03T19:00:27.319Z",
+            0.001,
+            6.6830102,
+            0.096618345,
+            52.15,
+            4.49,
+            0,
+            10,
+            "WATEC 902H2 Supreme + 1.2/85 mm",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0001-6659-9253",
+            342.9184541,
+            16.81681335,
+            0,
+            0,
+            0,
+            1421.885,
+            0,
+            0,
+            0,
+            "5-frame average; lim mag of instrument",
+            "",
+            "",
+        ]
+    ]
+    result = process_upload(data)
+    assert result["status"] == "success"
+    assert isinstance(result["obs_ids"], list)
+    assert isinstance(result["date_added"], str)
+    assert isinstance(result["email"], str)
+
+
+@pytest.mark.django_db
 def test_process_upload_sample_data(mocker):
     mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
     data = [

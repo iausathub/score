@@ -139,11 +139,11 @@ def add_additional_data(
         missing_fields.append("sat_number")
     if not observation_time:
         missing_fields.append("observation_time")
-    if not latitude or not (-90 <= latitude <= 90):
+    if latitude is None or not (-90 <= latitude <= 90):
         missing_fields.append("latitude")
-    if not longitude or not (-180 <= longitude <= 180):
+    if longitude is None or not (-180 <= longitude <= 180):
         missing_fields.append("longitude")
-    if not altitude:
+    if altitude is None:
         missing_fields.append("altitude")
 
     if missing_fields:
