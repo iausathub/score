@@ -1,6 +1,6 @@
 # Guide to contributing to SCORE
 
-Welcome to the SCORE contributing guide! SCORE is the satellite brightness/position observation repository developed by the IAU Centre for the Protection of the Dark and Quiet Sky from Satellite Constellation Interference (IAU CPS) SatHub group. Observation data submitted here can be used to study the effects of satellite constellations on astronomical observations.
+Welcome to the SCORE contributing guide! SCORE is the satellite brightness/position observation repository developed by the IAU Centre for the Protection of the Dark and Quiet Sky (IAU CPS) SatHub group. Observation data submitted here can be used to study the effects of satellite constellations on astronomical observations.
 
 Bug report/fixes, feature requests, and other contributions are welcome, and all issues and pull requests will be reviewed by a repo maintainer to ensure consistency with the project's scope and other guidelines.
 
@@ -14,7 +14,7 @@ For any questions not answered here please email sathub@cps.iau.org or open an i
 
 ## Code Quality
 * Please review the IAU CPS SatHub general guidelines [here](https://github.com/iausathub/.github/blob/main/CONTRIBUTING.md)
-  
+
 * The project has Ruff and Black set up to run as part of pull requests and commits to branches in this repository, and info on the rules used for those can be found in the README [here](https://github.com/iausathub/score).
 
 * Pytest is used for testing.
