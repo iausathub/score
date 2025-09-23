@@ -252,7 +252,7 @@ JAZZMIN_SETTINGS = {
 SCORE_ACKNOWLEDGMENT_TEXT = (
     "This research made use of data and/or services provided by the "
     "International Astronomical Union Centre for the Protection of the Dark and "
-    "Quiet Sky from Satellite Constellation Interference (IAU CPS) SatHub. "
+    "Quiet Sky (IAU CPS) SatHub. "
     "The development of SCORE has been supported by the National Science "
     "Foundation (NSF) under grant number: AST 2332736. SCORE is hosted at the "
     "NSF NOIRLab. Any opinions, findings, and conclusions or recommendations "
