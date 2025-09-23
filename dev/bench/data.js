@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1756492204868,
+  "lastUpdate": 1758602849736,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -468,6 +468,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.03431786604414582",
             "extra": "mean: 766.4799646000063 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "2f70eff8f5b461c0aef17a81de45c00f599577d5",
+          "message": "Merge pull request #105 from iausathub/develop\n\nFix bug when observer altitude is zero; update IAU CPS to shorter name",
+          "timestamp": "2025-09-22T21:46:07-07:00",
+          "tree_id": "1123a149564f15fa203680c17b9676da178108d4",
+          "url": "https://github.com/iausathub/score/commit/2f70eff8f5b461c0aef17a81de45c00f599577d5"
+        },
+        "date": 1758602849394,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 54.65432125098914,
+            "unit": "iter/sec",
+            "range": "stddev: 0.009492393682944956",
+            "extra": "mean: 18.296814910713064 msec\nrounds: 56"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 196.34662174095294,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00013164527664385017",
+            "extra": "mean: 5.09303389655125 msec\nrounds: 58"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 1.0878643315167027,
+            "unit": "iter/sec",
+            "range": "stddev: 0.05088220396626306",
+            "extra": "mean: 919.2322710000042 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 1.0973784204999464,
+            "unit": "iter/sec",
+            "range": "stddev: 0.025396376125370844",
+            "extra": "mean: 911.2626796000029 msec\nrounds: 5"
           }
         ]
       }
