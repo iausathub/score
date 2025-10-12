@@ -1,5 +1,4 @@
 from datetime import datetime
-from typing import Optional
 
 from django.db.models import Avg, Count, Max, Min
 from django.shortcuts import get_object_or_404
@@ -150,11 +149,11 @@ def get_satellite(request, satellite_number: int):
 @paginate
 def search_observations(
     request,
-    satellite_number: Optional[int] = None,
-    start_date: Optional[datetime] = None,
-    end_date: Optional[datetime] = None,
-    min_magnitude: Optional[float] = None,
-    max_magnitude: Optional[float] = None,
+    satellite_number: int | None = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
+    min_magnitude: float | None = None,
+    max_magnitude: float | None = None,
 ):
     """Search Observations
 
@@ -199,7 +198,7 @@ def search_observations(
 @api.get("/satellites", response=list[SatelliteSchema])
 def list_satellites(
     request,
-    name: Optional[str] = None,
+    name: str | None = None,
 ):
     """List all satellites with optional name filter
 
