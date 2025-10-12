@@ -4,7 +4,6 @@ import io
 import logging
 import time
 import zipfile
-from typing import Union
 
 import requests
 from astropy.time import Time
@@ -217,7 +216,7 @@ def api_access(request) -> HttpResponse:
 
 
 def create_and_return_csv(
-    observations: Union[list[Observation], bool], prefix: str
+    observations: list[Observation] | bool, prefix: str
 ) -> HttpResponse:
     """
     Create a CSV file from the provided observations and return it as a zipped file
@@ -652,6 +651,10 @@ def satellite_data_view(request, satellite_number):
             "magnitude": observation.apparent_mag,
             "phase_angle": observation.phase_angle,
             "magnitude_uncertainty": observation.apparent_mag_uncert,
+            "sat_altitude_km_satchecker": observation.sat_altitude_km_satchecker,
+            "solar_elevation_deg_satchecker": (
+                observation.solar_elevation_deg_satchecker
+            ),
         }
         for observation in observations
     ]
@@ -901,7 +904,7 @@ def satellite_pos_lookup(request):
     fields = response_json.get("fields", [])
 
     # Mapping fields to their values for easier access
-    data_dict = dict(zip(fields, satellite_data))
+    data_dict = dict(zip(fields, satellite_data, strict=True))
 
     name = data_dict.get("name")
     id = data_dict.get("catalog_id")
