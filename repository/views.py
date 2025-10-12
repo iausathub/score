@@ -652,6 +652,10 @@ def satellite_data_view(request, satellite_number):
             "magnitude": observation.apparent_mag,
             "phase_angle": observation.phase_angle,
             "magnitude_uncertainty": observation.apparent_mag_uncert,
+            "sat_altitude_km_satchecker": observation.sat_altitude_km_satchecker,
+            "solar_elevation_deg_satchecker": (
+                observation.solar_elevation_deg_satchecker
+            ),
         }
         for observation in observations
     ]

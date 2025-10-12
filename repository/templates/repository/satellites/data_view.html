@@ -168,22 +168,48 @@
 
         <div class="row pt-4 mb-4">
             <div class="col-md-6">
-            <div class="chart-container" style="position: relative; height:40vh; width:100%">
-                <canvas id="brightness_chart"></canvas>
-                <button class="btn btn-sm btn-primary m-2" id="reset_zoom_brightness">Reset Chart</button>
-            </div>
+              <div class="chart-container" style="position: relative; height:40vh; width:100%">
+                  <canvas id="brightness_chart"></canvas>
+                  <button class="btn btn-sm btn-primary m-2" id="reset_zoom_brightness">Reset Chart</button>
+              </div>
             </div>
             <div class="col-md-6">
-            <div class="chart-container" style="position: relative; height:40vh; width:100%">
-                <canvas id="phase_angle_chart"></canvas>
-                <button class="btn btn-sm btn-primary m-2" id="reset_zoom_phase">Reset Chart</button>
-                <label>
-                  <input type="checkbox" id="toggle_data_range" />
-                  Use Data Range
-              </label>
-            </div>
+              <div class="chart-container" style="position: relative; height:40vh; width:100%">
+                  <canvas id="phase_angle_chart"></canvas>
+                  <button class="btn btn-sm btn-primary m-2" id="reset_zoom_phase">Reset Chart</button>
+                  <label>
+                    <input type="checkbox" id="toggle_data_range" />
+                    Use Data Range
+                </label>
+              </div>
             </div>
         </div>
+        <div class="row">
+          <hr />
+        </div>
+        <div class="row pt-4 mb-4">
+          <div class="col-md-6">
+            <div class="chart-container" style="position: relative; height:40vh; width:100%">
+                <canvas id="sat_elevation_chart"></canvas>
+                <button class="btn btn-sm btn-primary m-2" id="reset_zoom_sat_elevation">Reset Chart</button>
+                <label class="ms-2">
+                  <input type="checkbox" id="toggle_binned_sat_elevation" />
+                  Show Binned Data
+                </label>
+            </div>
+          </div>
+          <div class="col-md-6">
+            <div class="chart-container" style="position: relative; height:40vh; width:100%">
+                <canvas id="solar_elevation_chart"></canvas>
+                <button class="btn btn-sm btn-primary m-2" id="reset_zoom_solar_elevation">Reset Chart</button>
+                <label class="ms-2">
+                  <input type="checkbox" id="toggle_binned_solar_elevation" />
+                  Show Binned Data
+                </label>
+            </div>
+          </div>
+        </div>
+
         </div>
     </div>
   </div>
