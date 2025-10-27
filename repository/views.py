@@ -10,7 +10,7 @@ from astropy.time import Time
 from celery.result import AsyncResult
 from django.conf import settings
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Avg, Count, Q
+from django.db.models import Avg, Count, Max, Min, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template import loader
@@ -714,6 +714,152 @@ def launch_view(request, launch_number):
     )
 
 
+def _get_constellation_id(sat_name):
+    """Helper to determine constellation from satellite name."""
+    sat_name_upper = (sat_name or "").upper()
+    if "STARLINK" in sat_name_upper:
+        return "starlink"
+    elif "KUIPER" in sat_name_upper:
+        return "kuiper"
+    elif "QIANFAN" in sat_name_upper:
+        return "qianfan"
+    elif "SPACEMOBILE" in sat_name_upper:
+        return "spacemobile"
+    elif "ONEWEB" in sat_name_upper:
+        return "oneweb"
+    return "other"
+
+
+def _get_constellation_filter(const_id):
+    """Helper to get Q filter for constellation."""
+    if const_id == "starlink":
+        return Q(satellite_id__sat_name__icontains="STARLINK")
+    elif const_id == "kuiper":
+        return Q(satellite_id__sat_name__icontains="KUIPER")
+    elif const_id == "qianfan":
+        return Q(satellite_id__sat_name__icontains="QIANFAN")
+    elif const_id == "spacemobile":
+        return Q(satellite_id__sat_name__icontains="SPACEMOBILE")
+    elif const_id == "oneweb":
+        return Q(satellite_id__sat_name__icontains="ONEWEB")
+    else:  # other
+        return (
+            ~Q(satellite_id__sat_name__icontains="STARLINK")
+            & ~Q(satellite_id__sat_name__icontains="KUIPER")
+            & ~Q(satellite_id__sat_name__icontains="QIANFAN")
+            & ~Q(satellite_id__sat_name__icontains="SPACEMOBILE")
+            & ~Q(satellite_id__sat_name__icontains="ONEWEB")
+        )
+
+
+def visualization_view(request):
+    """Landing page with constellation stats and magnitude histogram."""
+    # Constellation definitions
+    constellations_config = {
+        "starlink": {"name": "Starlink", "color": "#4d85ff"},
+        "kuiper": {"name": "Kuiper", "color": "#ff6b6b"},
+        "qianfan": {"name": "Qianfan", "color": "#ffa500"},
+        "spacemobile": {"name": "AST SpaceMobile", "color": "#9b59b6"},
+        "oneweb": {"name": "OneWeb", "color": "#c0392b"},
+        #'other': {'name': 'Other', 'color': '#95a5a6'},
+    }
+
+    # Get actual magnitude range from data
+    mag_stats = Observation.objects.aggregate(
+        min_mag=Min("apparent_mag"), max_mag=Max("apparent_mag")
+    )
+    min_mag = int(mag_stats["min_mag"]) if mag_stats["min_mag"] else 0
+    max_mag = int(mag_stats["max_mag"]) + 1 if mag_stats["max_mag"] else 12
+
+    # Calculate stats for each constellation using database queries
+    constellation_stats = []
+    magnitude_bins = {i: {} for i in range(min_mag, max_mag + 1)}
+
+    for const_id, const_info in constellations_config.items():
+        filter_q = _get_constellation_filter(const_id)
+
+        # Get stats for this constellation
+        obs_qs = Observation.objects.filter(filter_q)
+        obs_count = obs_qs.count()
+        sat_count = Satellite.objects.filter(observations__in=obs_qs).distinct().count()
+        avg_mag = obs_qs.aggregate(Avg("apparent_mag"))["apparent_mag__avg"]
+
+        constellation_stats.append(
+            {
+                "id": const_id,
+                "name": const_info["name"],
+                "satellite_count": sat_count,
+                "observation_count": obs_count,
+                "avg_magnitude": round(avg_mag, 2) if avg_mag else None,
+                "color": const_info["color"],
+            }
+        )
+
+        # Get magnitude distribution using database aggregation
+        for mag_bin in range(min_mag, max_mag + 1):
+            count = obs_qs.filter(
+                apparent_mag__gte=mag_bin, apparent_mag__lt=mag_bin + 1
+            ).count()
+            magnitude_bins[mag_bin][const_id] = count
+
+    # Sort by observation count, but keep "Other" at the end
+    constellation_stats.sort(key=lambda x: (-x["observation_count"]))
+
+    # Get all observations for the all-sky plot
+    # Only fetch minimal fields since tooltips are disabled
+    observations = [
+        {
+            "alt_deg_satchecker": obs["alt_deg_satchecker"],
+            "az_deg_satchecker": obs["az_deg_satchecker"],
+            "magnitude": obs["apparent_mag"],
+        }
+        for obs in Observation.objects.filter(
+            alt_deg_satchecker__isnull=False,
+            az_deg_satchecker__isnull=False,
+            apparent_mag__isnull=False,
+        ).values("alt_deg_satchecker", "az_deg_satchecker", "apparent_mag")
+        # Uncomment to limit for performance: [:10000]
+    ]
+
+    return render(
+        request,
+        "repository/data_visualization.html",
+        {
+            "constellation_stats": constellation_stats,
+            "magnitude_bins": magnitude_bins,
+            "observations": observations,
+        },
+    )
+
+
+def graphs_view(request):
+    """
+    View function to display data for the graphs page.
+    """
+
+    return render(
+        request,
+        "repository/visualization/graphs.html",
+        {
+            "": "",
+        },
+    )
+
+
+def plots_view(request):
+    """
+    View function to display data for the plots page.
+    """
+
+    return render(
+        request,
+        "repository/visualization/plots.html",
+        {
+            "": "",
+        },
+    )
+
+
 def observer_view(request, orc_id):
     """
     View function to display data for a specific observer.
@@ -1184,3 +1330,233 @@ def download_observer_data(request):
 
     logger.info("Non-POST request received, returning empty HttpResponse")
     return HttpResponse()
+
+
+@csrf_exempt
+def get_satellite_data(request):
+    """
+    Endpoint to get satellite data for the visualizations page
+    """
+    try:
+        satellites_with_observations = (
+            Satellite.objects.filter(observations__isnull=False)
+            .distinct()
+            .select_related()
+        )
+
+        constellations = {}
+
+        for satellite in satellites_with_observations:
+            sat_name = satellite.sat_name or ""
+
+            # Determine constellation based on satellite name patterns
+            constellation_id = "other"
+
+            if "STARLINK" in sat_name.upper() or "STARLINK" in str(
+                satellite.sat_number
+            ):
+                constellation_id = "starlink"
+            elif "KUIPER" in sat_name.upper() or "KUIPER" in str(satellite.sat_number):
+                constellation_id = "kuiper"
+            elif "QIANFAN" in sat_name.upper():
+                constellation_id = "qianfan"
+            elif "SPACEMOBILE" in sat_name.upper():
+                constellation_id = "spacemobile"
+            elif "ONEWEB" in sat_name.upper():
+                constellation_id = "oneweb"
+
+            if constellation_id not in constellations:
+                constellations[constellation_id] = {"count": 0, "satellites": []}
+
+            constellations[constellation_id]["satellites"].append(sat_name)
+            constellations[constellation_id]["count"] += 1
+
+        # Format expected by satellite_selector.js
+        result = {}
+        for const_id, data in constellations.items():
+            result[const_id] = {
+                "count": data["count"],
+                "satellites": data["satellites"][:100],  # limited for performance
+                "total_available": data["count"],
+            }
+
+        return JsonResponse({"success": True, "constellations": result})
+
+    except Exception as e:
+        logger.error(f"Error getting satellite data: {str(e)}")
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
+
+
+@csrf_exempt
+def get_observations_for_satellites(request):
+    """
+    API endpoint to get observations for selected satellites
+    """
+    from django.db.models import Q
+
+    try:
+        # Get selected satellites from request
+        selected_satellites = request.GET.getlist("satellites[]")
+        selected_constellations = request.GET.getlist("constellations[]")
+
+        # Build query for observations
+        observations_query = Observation.objects.select_related(
+            "satellite_id", "location_id"
+        )
+
+        # Build combined filter using Q objects for OR logic
+        combined_filters = Q()
+
+        # Add individual satellite filters
+        if selected_satellites:
+            combined_filters |= Q(satellite_id__sat_name__in=selected_satellites)
+
+        # Add constellation filters
+        if selected_constellations:
+            for constellation in selected_constellations:
+                if constellation == "starlink":
+                    combined_filters |= Q(satellite_id__sat_name__icontains="STARLINK")
+                elif constellation == "kuiper":
+                    combined_filters |= Q(satellite_id__sat_name__icontains="KUIPER")
+                elif constellation == "qianfan":
+                    combined_filters |= Q(satellite_id__sat_name__icontains="QIANFAN")
+                elif constellation == "spacemobile":
+                    combined_filters |= Q(
+                        satellite_id__sat_name__icontains="SPACEMOBILE"
+                    )
+                elif constellation == "oneweb":
+                    combined_filters |= Q(satellite_id__sat_name__icontains="ONEWEB")
+                elif constellation == "other":
+                    # "Other" means anything that's NOT the known constellations
+                    combined_filters |= (
+                        ~Q(satellite_id__sat_name__icontains="STARLINK")
+                        & ~Q(satellite_id__sat_name__icontains="KUIPER")
+                        & ~Q(satellite_id__sat_name__icontains="QIANFAN")
+                        & ~Q(satellite_id__sat_name__icontains="SPACEMOBILE")
+                        & ~Q(satellite_id__sat_name__icontains="ONEWEB")
+                    )
+
+        # Apply the combined filter only if satellites/constellations are selected
+        if combined_filters:
+            observations_query = observations_query.filter(combined_filters)
+
+        # Apply additional filters
+        # Date range filters (UTC only)
+        start_date = request.GET.get("start_date")
+        end_date = request.GET.get("end_date")
+        if start_date:
+            # Filter by date (inclusive, start of day UTC)
+            observations_query = observations_query.filter(
+                obs_time_utc__date__gte=start_date
+            )
+        if end_date:
+            # Filter by date (inclusive, entire day UTC)
+            observations_query = observations_query.filter(
+                obs_time_utc__date__lte=end_date
+            )
+
+        # Magnitude filters
+        min_mag = request.GET.get("min_mag")
+        max_mag = request.GET.get("max_mag")
+        if min_mag:
+            observations_query = observations_query.filter(
+                apparent_mag__gte=float(min_mag)
+            )
+        if max_mag:
+            observations_query = observations_query.filter(
+                apparent_mag__lte=float(max_mag)
+            )
+
+        # Satellite elevation filters (altitude in km)
+        min_sat_elev = request.GET.get("min_sat_elev")
+        max_sat_elev = request.GET.get("max_sat_elev")
+        if min_sat_elev:
+            observations_query = observations_query.filter(
+                sat_altitude_km_satchecker__gte=float(min_sat_elev)
+            )
+        if max_sat_elev:
+            observations_query = observations_query.filter(
+                sat_altitude_km_satchecker__lte=float(max_sat_elev)
+            )
+
+        # Solar elevation filters
+        min_solar_elev = request.GET.get("min_solar_elev")
+        max_solar_elev = request.GET.get("max_solar_elev")
+        if min_solar_elev:
+            observations_query = observations_query.filter(
+                solar_elevation_deg_satchecker__gte=float(min_solar_elev)
+            )
+        if max_solar_elev:
+            observations_query = observations_query.filter(
+                solar_elevation_deg_satchecker__lte=float(max_solar_elev)
+            )
+
+        # Get observations data
+        observations = observations_query.values(
+            "obs_time_utc",
+            "apparent_mag",
+            "apparent_mag_uncert",
+            "sat_ra_deg",
+            "sat_dec_deg",
+            "phase_angle",
+            "sat_altitude_km_satchecker",
+            "solar_elevation_deg_satchecker",
+            "alt_deg_satchecker",
+            "az_deg_satchecker",
+            "satellite_id__sat_name",
+            "location_id__obs_lat_deg",
+            "location_id__obs_long_deg",
+            "location_id__obs_alt_m",
+        ).order_by("obs_time_utc")
+
+        # Convert to format expected by charts
+        chart_data = []
+        for obs in observations:
+            sat_name = obs["satellite_id__sat_name"] or ""
+
+            # Determine constellation ID for color mapping
+            constellation_id = "other"
+            if "STARLINK" in sat_name.upper():
+                constellation_id = "starlink"
+            elif "KUIPER" in sat_name.upper():
+                constellation_id = "kuiper"
+            elif "QIANFAN" in sat_name.upper():
+                constellation_id = "qianfan"
+            elif "SPACEMOBILE" in sat_name.upper():
+                constellation_id = "spacemobile"
+            elif "ONEWEB" in sat_name.upper():
+                constellation_id = "oneweb"
+
+            chart_data.append(
+                {
+                    "date": obs["obs_time_utc"].isoformat(),
+                    "magnitude": obs["apparent_mag"],
+                    "magnitude_uncertainty": obs["apparent_mag_uncert"],
+                    "phase_angle": obs["phase_angle"],
+                    "sat_altitude_km_satchecker": obs["sat_altitude_km_satchecker"],
+                    "solar_elevation_deg_satchecker": (
+                        obs["solar_elevation_deg_satchecker"]
+                    ),
+                    "alt_deg_satchecker": obs["alt_deg_satchecker"],
+                    "az_deg_satchecker": obs["az_deg_satchecker"],
+                    "satellite": sat_name,
+                    "constellation": constellation_id,
+                    "location": (
+                        f"{obs['location_id__obs_lat_deg']:.3f}, "
+                        f"{obs['location_id__obs_long_deg']:.3f}"
+                    ),
+                    "ra": obs["sat_ra_deg"],
+                    "dec": obs["sat_dec_deg"],
+                    "lat": obs["location_id__obs_lat_deg"],
+                    "lon": obs["location_id__obs_long_deg"],
+                    "alt": obs["location_id__obs_alt_m"],
+                }
+            )
+
+        return JsonResponse(
+            {"success": True, "observations": chart_data, "count": len(chart_data)}
+        )
+
+    except Exception as e:
+        logger.error(f"Error getting observations for satellites: {str(e)}")
+        return JsonResponse({"success": False, "error": str(e)}, status=500)
