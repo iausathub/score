@@ -210,6 +210,36 @@ function createTrace(obs, constellation, color, enableTooltip = true, showColorb
     const isDark = theme === 'dark';
     const textColor = isDark ? '#ccc' : '#666';
 
+    // Calculate magnitude range
+    const magnitudes = obs.map(o => o.magnitude);
+    const minMag = Math.min(...magnitudes);
+    const maxMag = Math.max(...magnitudes);
+    const range = maxMag - minMag;
+
+    // Mimic Plotly's automatic tick selection using "nice" intervals
+    // This is needed to get the magnitude to show the brighter
+    // objects at the top of the colorbar
+    const niceIntervals = [0.1, 0.2, 0.25, 0.5, 1, 2, 2.5, 5, 10];
+    const targetTicks = 6;
+    const roughInterval = range / targetTicks;
+
+    // Find the closest "nice" interval
+    let tickInterval = niceIntervals[0];
+    for (const interval of niceIntervals) {
+        if (interval >= roughInterval) {
+            tickInterval = interval;
+            break;
+        }
+        tickInterval = interval;
+    }
+
+    // Generate tick values
+    const tickVals = [];
+    const start = Math.ceil(minMag / tickInterval) * tickInterval;
+    for (let tick = start; tick <= maxMag; tick += tickInterval) {
+        tickVals.push(Math.round(tick / tickInterval) * tickInterval);
+    }
+
     const trace = {
         type: 'scatterpolar',
         r: obs.map(o => 90 - o.alt_deg_satchecker),
@@ -220,9 +250,9 @@ function createTrace(obs, constellation, color, enableTooltip = true, showColorb
         marker: {
             size: markerSize,
             symbol: CONSTELLATION_SYMBOLS[constellation] || 'circle',
-            color: obs.map(o => -o.magnitude),  // Negate so lower mag = higher value
+            color: obs.map(o => -o.magnitude),  // Negate for reversed colorbar positioning
             colorscale: PLOT_CONFIG.colorscales[theme],
-            reversescale: true,  // Brighter objects = darker colorscale colors
+            reversescale: true,  // Lower magnitude (brighter) gets warmer colors
             showscale: showColorbar,
             colorbar: {
                 title: 'Magnitude',
@@ -232,6 +262,9 @@ function createTrace(obs, constellation, color, enableTooltip = true, showColorb
                 tickfont: { color: textColor, size: 10 },
                 titlefont: { color: textColor, size: 11 },
                 x: 1.02,
+                tickmode: 'array',
+                tickvals: tickVals.map(v => -v),  // Negate for positioning
+                ticktext: tickVals.map(v => v.toFixed(tickInterval < 1 ? 1 : 0))  // Format based on interval
             },
             opacity: 0.85
         }

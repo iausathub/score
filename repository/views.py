@@ -756,12 +756,12 @@ def visualization_view(request):
     """Landing page with constellation stats and magnitude histogram."""
     # Constellation definitions
     constellations_config = {
-        "starlink": {"name": "Starlink", "color": "#4d85ff"},
-        "kuiper": {"name": "Kuiper", "color": "#ff6b6b"},
-        "qianfan": {"name": "Qianfan", "color": "#ffa500"},
-        "spacemobile": {"name": "AST SpaceMobile", "color": "#9b59b6"},
-        "oneweb": {"name": "OneWeb", "color": "#c0392b"},
-        #'other': {'name': 'Other', 'color': '#95a5a6'},
+        "starlink": {"name": "Starlink"},
+        "kuiper": {"name": "Kuiper"},
+        "qianfan": {"name": "Qianfan"},
+        "spacemobile": {"name": "AST SpaceMobile"},
+        "oneweb": {"name": "OneWeb"},
+        # 'other': {'name': 'Other'},
     }
 
     # Get actual magnitude range from data
@@ -791,7 +791,6 @@ def visualization_view(request):
                 "satellite_count": sat_count,
                 "observation_count": obs_count,
                 "avg_magnitude": round(avg_mag, 2) if avg_mag else None,
-                "color": const_info["color"],
             }
         )
 

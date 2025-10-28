@@ -65,7 +65,7 @@
                 <div class="row g-2 mb-4">
                     {% for constellation in constellation_stats %}
                     <div class="col-lg col-md-4 col-sm-6 d-flex">
-                        <div class="simple-stat-box w-100" style="border-left: 5px solid {{ constellation.color }};">
+                        <div class="simple-stat-box w-100 constellation-stat-box" data-constellation-id="{{ constellation.id }}" style="border-left: 5px solid transparent;">
                             <div class="stat-header">{{ constellation.name }}</div>
                             <div class="stat-details">
                                 <span class="stat-item"><strong>{{ constellation.satellite_count }}</strong> satellites</span>
