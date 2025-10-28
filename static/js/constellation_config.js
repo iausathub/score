@@ -20,23 +20,4 @@ window.ConstellationConfig = {
 
     getName: (id) => window.ConstellationConfig.names[id] || window.ConstellationConfig.names.other,
 
-    // Color utilities for gradients
-    lighten: (color, factor) => {
-        const rgb = window.ConstellationConfig.parseColor(color);
-        return `rgb(${rgb.map(c => Math.round(c + (255 - c) * factor)).join(',')})`;
-    },
-
-    darken: (color, factor) => {
-        const rgb = window.ConstellationConfig.parseColor(color);
-        return `rgb(${rgb.map(c => Math.round(c * (1 - factor))).join(',')})`;
-    },
-
-    parseColor: (color) => {
-        if (color.startsWith('#')) {
-            const hex = color.slice(1);
-            return [0, 2, 4].map(i => parseInt(hex.substr(i, 2), 16));
-        }
-        const match = color.match(/\d+/g);
-        return match && match.length >= 3 ? match.slice(0, 3).map(Number) : [0, 0, 0];
-    }
 };
