@@ -694,3 +694,203 @@ class LaunchViewTests(TestCase):
         counts = {s.sat_number: s.num_observations for s in satellites}
         self.assertEqual(counts[self.satellite1.sat_number], 2)
         self.assertEqual(counts[self.satellite2.sat_number], 1)
+
+
+class VisualizationViewsTest(TestCase):
+    def setUp(self):
+        self.client = Client()
+        self.obs_date = timezone.now()
+        self.location = Location.objects.create(
+            obs_lat_deg=33,
+            obs_long_deg=-117,
+            obs_alt_m=100,
+            date_added=timezone.now(),
+        )
+        # Create satellites from different constellations
+        self.starlink_sat = Satellite.objects.create(
+            sat_name="STARLINK-12345", sat_number=50001
+        )
+        self.oneweb_sat = Satellite.objects.create(
+            sat_name="ONEWEB-0001", sat_number=50002
+        )
+        self.other_sat = Satellite.objects.create(
+            sat_name="RANDOM-SAT", sat_number=50003
+        )
+
+        # Create observations with satchecker data for visualization
+        self.starlink_obs = Observation.objects.create(
+            satellite_id=self.starlink_sat,
+            obs_time_utc=self.obs_date,
+            obs_time_uncert_sec=1.0,
+            apparent_mag=5.5,
+            apparent_mag_uncert=0.1,
+            instrument="none",
+            obs_mode="VISUAL",
+            obs_filter="CLEAR",
+            obs_email="test@example.com",
+            obs_orc_id=["0000-0000-0000-0000"],
+            location_id=self.location,
+            alt_deg_satchecker=45.0,
+            az_deg_satchecker=180.0,
+            sat_altitude_km_satchecker=550.0,
+            solar_elevation_deg_satchecker=-15.0,
+        )
+        self.oneweb_obs = Observation.objects.create(
+            satellite_id=self.oneweb_sat,
+            obs_time_utc=self.obs_date,
+            obs_time_uncert_sec=1.0,
+            apparent_mag=6.0,
+            apparent_mag_uncert=0.1,
+            instrument="none",
+            obs_mode="VISUAL",
+            obs_filter="CLEAR",
+            obs_email="test@example.com",
+            obs_orc_id=["0000-0000-0000-0000"],
+            location_id=self.location,
+            alt_deg_satchecker=30.0,
+            az_deg_satchecker=90.0,
+            sat_altitude_km_satchecker=600.0,
+            solar_elevation_deg_satchecker=-20.0,
+        )
+
+    def test_visualization_view_basic(self):
+        response = self.client.get(reverse("data-visualization"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "repository/data_visualization.html")
+
+    def test_visualization_view_context_data(self):
+        response = self.client.get(reverse("data-visualization"))
+        self.assertEqual(response.status_code, 200)
+
+        # Check that constellation stats are present
+        self.assertIn("constellation_stats", response.context)
+        self.assertIn("magnitude_bins", response.context)
+        self.assertIn("observations", response.context)
+
+        # Check that at least starlink and oneweb appear in the stats
+        constellation_stats = response.context["constellation_stats"]
+        constellation_names = [stat["name"] for stat in constellation_stats]
+        self.assertIn("Starlink", constellation_names)
+        self.assertIn("OneWeb", constellation_names)
+
+    def test_visualization_view_observations_data(self):
+        response = self.client.get(reverse("data-visualization"))
+        observations = response.context["observations"]
+
+        # Should have at least our 2 test observations
+        self.assertGreaterEqual(len(observations), 2)
+
+        # Check observation data structure
+        for obs in observations:
+            self.assertIn("alt_deg_satchecker", obs)
+            self.assertIn("az_deg_satchecker", obs)
+            self.assertIn("magnitude", obs)
+
+    def test_graphs_view(self):
+        response = self.client.get(reverse("graphs"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "repository/visualization/graphs.html")
+
+    def test_plots_view(self):
+        response = self.client.get(reverse("plots"))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "repository/visualization/plots.html")
+
+    def test_get_satellite_data_endpoint(self):
+        response = self.client.get(reverse("satellite-data"))
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data["success"])
+        self.assertIn("constellations", data)
+
+        # Check that starlink constellation exists in the response
+        constellations = data["constellations"]
+        self.assertIn("starlink", constellations)
+        self.assertGreater(constellations["starlink"]["count"], 0)
+
+    def test_get_observations_for_satellites_no_filters(self):
+        response = self.client.get(reverse("observations-for-satellites"))
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data["success"])
+        self.assertIn("observations", data)
+        self.assertIn("count", data)
+
+    def test_get_observations_for_satellites_with_constellation_filter(self):
+        response = self.client.get(
+            reverse("observations-for-satellites"), {"constellations[]": ["starlink"]}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data["success"])
+        observations = data["observations"]
+
+        # All observations should be from Starlink
+        for obs in observations:
+            self.assertEqual(obs["constellation"], "starlink")
+
+    def test_get_observations_for_satellites_with_magnitude_filter(self):
+        response = self.client.get(
+            reverse("observations-for-satellites"), {"min_mag": "5.0", "max_mag": "5.6"}
+        )
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data["success"])
+        observations = data["observations"]
+
+        # All observations should be within magnitude range
+        for obs in observations:
+            self.assertGreaterEqual(obs["magnitude"], 5.0)
+            self.assertLessEqual(obs["magnitude"], 5.6)
+
+    def test_get_observations_for_satellites_with_satellite_elevation_filter(self):
+        response = self.client.get(
+            reverse("observations-for-satellites"),
+            {"min_sat_elev": "540", "max_sat_elev": "560"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data["success"])
+        observations = data["observations"]
+
+        # All observations should be within satellite elevation range
+        for obs in observations:
+            if obs["sat_altitude_km_satchecker"] is not None:
+                self.assertGreaterEqual(obs["sat_altitude_km_satchecker"], 540)
+                self.assertLessEqual(obs["sat_altitude_km_satchecker"], 560)
+
+    def test_get_observations_for_satellites_with_solar_elevation_filter(self):
+        response = self.client.get(
+            reverse("observations-for-satellites"),
+            {"min_solar_elev": "-20", "max_solar_elev": "-10"},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data["success"])
+        observations = data["observations"]
+
+        # All observations should be within solar elevation range
+        for obs in observations:
+            if obs["solar_elevation_deg_satchecker"] is not None:
+                self.assertGreaterEqual(obs["solar_elevation_deg_satchecker"], -20)
+                self.assertLessEqual(obs["solar_elevation_deg_satchecker"], -10)
+
+    def test_get_observations_for_satellites_with_date_filter(self):
+        start_date = (self.obs_date - timezone.timedelta(days=1)).strftime("%Y-%m-%d")
+        end_date = (self.obs_date + timezone.timedelta(days=1)).strftime("%Y-%m-%d")
+
+        response = self.client.get(
+            reverse("observations-for-satellites"),
+            {"start_date": start_date, "end_date": end_date},
+        )
+        self.assertEqual(response.status_code, 200)
+
+        data = response.json()
+        self.assertTrue(data["success"])
+        self.assertGreater(data["count"], 0)
