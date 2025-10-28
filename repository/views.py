@@ -1557,5 +1557,5 @@ def get_observations_for_satellites(request):
         )
 
     except Exception as e:
-        logger.error(f"Error getting observations for satellites: {str(e)}")
-        return JsonResponse({"success": False, "error": str(e)}, status=500)
+        logger.exception("Error getting observations for satellites")
+        return JsonResponse({"success": False, "error": "Error getting observations for satellites."}, status=500)
