@@ -1,93 +1,80 @@
 document.addEventListener('DOMContentLoaded', function() {
-  // Cache DOM elements for performance
-  const DOM_CACHE = {
-    observationsData: document.getElementById('observations-data'),
-    brightnessChart: document.getElementById('brightness_chart'),
-    phaseAngleChart: document.getElementById('phase_angle_chart'),
-    satElevationChart: document.getElementById('sat_elevation_chart'),
-    solarElevationChart: document.getElementById('solar_elevation_chart'),
-    toggleBinnedSatElevation: document.getElementById('toggle_binned_sat_elevation'),
-    toggleBinnedSolarElevation: document.getElementById('toggle_binned_solar_elevation'),
-    toggleDataRange: document.getElementById('toggle_data_range'),
-    resetZoomBrightness: document.getElementById('reset_zoom_brightness'),
-    resetZoomPhase: document.getElementById('reset_zoom_phase'),
-    resetZoomSatElevation: document.getElementById('reset_zoom_sat_elevation'),
-    resetZoomSolarElevation: document.getElementById('reset_zoom_solar_elevation')
-  };
-
-  if (!DOM_CACHE.observationsData) {
-    return;
-  }
-
-  // parse data from the page/context
-  let observationData;
-  try {
-    observationData = JSON.parse(DOM_CACHE.observationsData.textContent);
-  } catch (error) {
-    console.error('Error parsing observations data:', error);
-    return;
-  }
-
-  // Performance constants
-  const PERFORMANCE_CONFIG = {
-    BIN_SIZE: {
-      SATELLITE_ALTITUDE: 1, // km
-      SOLAR_ELEVATION: 0.25  // degrees
+  // Chart element IDs
+  const ELEMENTS = {
+    observationsData: 'observations-data',
+    charts: {
+      brightness: 'brightness_chart',
+      phaseAngle: 'phase_angle_chart',
+      satElevation: 'sat_elevation_chart',
+      solarElevation: 'solar_elevation_chart'
     },
-    POINT_SIZE: {
-      MIN: 3,
-      MAX: 15,
-      DENSITY_DIVISOR: 10
+    toggles: {
+      binnedSatElevation: 'toggle_binned_sat_elevation',
+      binnedSolarElevation: 'toggle_binned_solar_elevation',
+      dataRange: 'toggle_data_range'
+    },
+    resetButtons: {
+      brightness: 'reset_zoom_brightness',
+      phaseAngle: 'reset_zoom_phase',
+      satElevation: 'reset_zoom_sat_elevation',
+      solarElevation: 'reset_zoom_solar_elevation'
     }
   };
 
-  // Chart configuration constants
-  const CHART_CONFIG = {
-    DEBOUNCE_DELAY: 150, // milliseconds
-  };
+  // Parse initial observation data from the page
+  let observationData = [];
+  const observationsDataElement = document.getElementById(ELEMENTS.observationsData);
 
-  // Error bar configuration constants
-  const ERROR_BAR_CONFIG = {
-    WIDTH: 3,
-    WHISKER_SIZE: 5
-  };
+  if (observationsDataElement) {
+    try {
+      observationData = JSON.parse(observationsDataElement.textContent);
+    } catch (error) {
+      console.error('Error parsing observations data:', error);
+      observationData = [];
+    }
+  }
 
-  // Phase angle chart constants
-  const PHASE_ANGLE_CONFIG = {
-    MIN_DEGREES: 0,
-    MAX_DEGREES: 180,
-    PADDING: 5
-  };
-
-  // Solar elevation chart constants
-  const SOLAR_ELEVATION_CONFIG = {
-    MIN_DEGREES: -90,
-    MAX_DEGREES: 90,
-    PADDING: 5
-  };
-
-  // Satellite altitude chart constants
-  const SATELLITE_ALTITUDE_CONFIG = {
-    MIN_KM: 0,
-    MAX_KM: 1000,
-    PADDING: 5
-  };
-
-  // Binning calculation constants
-  const BINNING_CONFIG = {
-    DENSITY_DIVISOR: 5,
-    HOVER_RADIUS_MIN: 5,
-    HOVER_RADIUS_MAX: 20
-  };
-
-  // Zoom and interaction constants
-  const ZOOM_CONFIG = {
-    DRAG_BORDER_WIDTH: 2,
-    TOOLTIP_PRECISION: {
-      SINGLE_DECIMAL: 1,
-      DOUBLE_DECIMAL: 2
+  // Consolidated configuration
+  const CONFIG = {
+    binSize: {
+      satelliteAltitude: 1, // km
+      solarElevation: 0.25  // degrees
+    },
+    pointSize: {
+      min: 3,
+      max: 15,
+      densityDivisor: 10
+    },
+    errorBar: {
+      width: 3,
+      whiskerSize: 5
+    },
+    charts: {
+      phaseAngle: { min: 0, max: 180, padding: 5 },
+      solarElevation: { min: -90, max: 90, padding: 5 },
+      satelliteAltitude: { min: 0, max: 1000, padding: 5 }
+    },
+    binning: {
+      densityDivisor: 5,
+      hoverRadiusMin: 5,
+      hoverRadiusMax: 20
+    },
+    zoom: {
+      dragBorderWidth: 2
     }
   };
+
+  // Get constellation color using shared configuration
+  function getConstellationColor(constellationId) {
+    const theme = window.ConstellationConfig.getCurrentTheme();
+
+    // If no constellation ID (e.g., single satellite view), use default theme colors
+    if (!constellationId) {
+      return theme === 'dark' ? 'rgba(255, 193, 7, 1)' : 'rgba(20, 41, 67, 1)';
+    }
+
+    return window.ConstellationConfig.getColor(constellationId, theme);
+  }
 
   // Optimized data processing - single pass through data
   function processAllChartData(observationData) {
@@ -100,19 +87,23 @@ document.addEventListener('DOMContentLoaded', function() {
     for (const item of observationData) {
       if (item.magnitude === null || item.magnitude_uncertainty === null) continue;
 
+      // Cache constellation color (avoid calling twice)
+      const color = getConstellationColor(item.constellation);
+
       const baseItem = {
         y: item.magnitude,
         uncertainty: item.magnitude_uncertainty,
-        date: new Date(item.date)
+        date: new Date(item.date),
+        backgroundColor: color,
+        borderColor: color,
+        constellation: item.constellation // Preserve constellation info
       };
 
       // Brightness data (time-based)
-      if (item.magnitude !== null && item.magnitude_uncertainty !== null) {
-        brightnessData.push({
-          ...baseItem,
-          x: new Date(item.date)
-        });
-      }
+      brightnessData.push({
+        ...baseItem,
+        x: new Date(item.date)
+      });
 
       // Phase angle data
       if (item.phase_angle !== null) {
@@ -155,10 +146,24 @@ document.addEventListener('DOMContentLoaded', function() {
 
   // Set up data for all charts using optimized single-pass processing
   const chartData = processAllChartData(observationData);
-  const brightness_data = chartData.brightness;
-  const phase_angle_data = chartData.phaseAngle;
-  const sat_elevation_data = chartData.satElevation;
-  const solar_elevation_data = chartData.solarElevation;
+  let brightness_data = chartData.brightness;
+  let phase_angle_data = chartData.phaseAngle;
+  let sat_elevation_data = chartData.satElevation;
+  let solar_elevation_data = chartData.solarElevation;
+
+  // Chart instances
+  let brightnessChartInstance;
+  let phaseAngleChartInstance;
+  let satElevationChartInstance;
+  let solarElevationChartInstance;
+
+  // Chart data bounds (calculated dynamically based on data)
+  let phaseAngleDataMin = null;
+  let phaseAngleDataMax = null;
+  let satElevationDataMin = null;
+  let satElevationDataMax = null;
+  let solarElevationDataMin = null;
+  let solarElevationDataMax = null;
 
   // Check for data availability
   if (sat_elevation_data.length === 0) {
@@ -166,27 +171,6 @@ document.addEventListener('DOMContentLoaded', function() {
   }
   if (solar_elevation_data.length === 0) {
     console.warn('No solar elevation data available');
-  }
-
-  /**
-   * Creates a chart configuration object
-   * @param {string} title - Chart title
-   * @param {string} xLabel - X-axis label
-   * @param {string} yLabel - Y-axis label
-   * @param {string} xAxisType - X-axis type ('linear' or 'time')
-   * @param {number|null} xMin - Minimum X value
-   * @param {number|null} xMax - Maximum X value
-   * @returns {Object} Chart configuration object
-   */
-  function createChartConfig(title, xLabel, yLabel, xAxisType = 'linear', xMin = null, xMax = null) {
-    return {
-      title,
-      xLabel,
-      yLabel,
-      xAxisType,
-      xMin,
-      xMax
-    };
   }
 
   /**
@@ -199,6 +183,7 @@ document.addEventListener('DOMContentLoaded', function() {
   function createCommonChartOptions(config, colors, chartType = 'default') {
     return {
       responsive: true,
+      maintainAspectRatio: false,
       scales: {
         x: {
           type: config.xAxisType,
@@ -234,6 +219,10 @@ document.addEventListener('DOMContentLoaded', function() {
           titleFont: { weight: "normal" }
         },
         zoom: {
+          limits: {
+            x: { min: 'original', max: 'original', minRange: 0 },
+            y: { min: 'original', max: 'original', minRange: 0 }
+          },
           zoom: {
             wheel: { enabled: true },
             pinch: { enabled: true },
@@ -242,11 +231,16 @@ document.addEventListener('DOMContentLoaded', function() {
               modifierKey: 'meta',
               backgroundColor: colors.dragBoxBackground || 'rgba(20, 41, 67, 0.1)',
               borderColor: colors.dragBoxBorder || 'rgba(20, 41, 67, 0.8)',
-              borderWidth: ZOOM_CONFIG.DRAG_BORDER_WIDTH
+              borderWidth: CONFIG.zoom.dragBorderWidth
             },
-            mode: 'xy'
+            mode: 'xy',
+            scaleMode: 'xy'
           },
-          pan: { enabled: true, mode: 'xy' }
+          pan: {
+            enabled: true,
+            mode: 'xy',
+            scaleMode: 'xy'
+          }
         }
       }
     };
@@ -260,6 +254,13 @@ document.addEventListener('DOMContentLoaded', function() {
    * @returns {Object} Chart.js dataset object
    */
   function createDataset(data, colors, chartType = 'scatter') {
+    // Extract colors from data points if available, otherwise use default colors
+    const backgroundColors = data.map(row => row.backgroundColor || colors.backgroundColor);
+    const borderColors = data.map(row => row.borderColor || colors.borderColor);
+
+    // Use the same colors for error bars to match the constellation colors
+    const errorBarColors = data.map(row => row.borderColor || colors.errorBarColor);
+
     const baseDataset = {
       data: data.map(row => ({
         x: row.x || row.date,
@@ -269,41 +270,26 @@ document.addEventListener('DOMContentLoaded', function() {
         date: row.date,
         uncertainty: row.uncertainty
       })),
-      backgroundColor: colors.backgroundColor,
-      borderColor: colors.borderColor,
-      errorBarColor: colors.errorBarColor,
-      errorBarWidth: ERROR_BAR_CONFIG.WIDTH,
-      errorBarWhiskerColor: colors.errorBarColor,
-      errorBarWhiskerSize: ERROR_BAR_CONFIG.WHISKER_SIZE
+      backgroundColor: backgroundColors,
+      borderColor: borderColors,
+      errorBarColor: errorBarColors,
+      errorBarWidth: CONFIG.errorBar.width,
+      errorBarWhiskerColor: errorBarColors,
+      errorBarWhiskerSize: CONFIG.errorBar.whiskerSize
     };
 
     if (chartType === 'line') {
       baseDataset.borderDash = [1, 1];
-      baseDataset.pointRadius = PERFORMANCE_CONFIG.POINT_SIZE.MIN;
+      baseDataset.pointRadius = CONFIG.pointSize.min;
       baseDataset.borderWidth = 1;
     }
 
     return baseDataset;
   }
 
-  // Elevation chart creation helper (for satellite/solar elevation charts)
-  function createElevationChart(elementId, datasets, config, colors, chartType) {
-    const options = createCommonChartOptions(config, colors, chartType);
-
-    // Add min/max for elevation charts
-    options.scales.x.min = config.xMin;
-    options.scales.x.max = config.xMax;
-
-    return new Chart(elementId, {
-      type: 'scatterWithErrorBars',
-      data: { datasets },
-      options
-    });
-  }
-
-  // Complete chart creation helper
+  // Unified chart creation helper
   function createChart(elementId, data, config, colors, chartType = 'scatterWithErrorBars') {
-    const options = createCommonChartOptions(config, colors, 'default');
+    const options = createCommonChartOptions(config, colors, chartType);
 
     // Add time-specific config
     if (config.xAxisType === 'time') {
@@ -314,60 +300,76 @@ document.addEventListener('DOMContentLoaded', function() {
     if (config.xMin !== null) options.scales.x.min = config.xMin;
     if (config.xMax !== null) options.scales.x.max = config.xMax;
 
+    // Handle multiple datasets (for binned elevation charts) or single dataset
+    const datasets = Array.isArray(data[0]) || (data[0] && data[0].data)
+      ? data
+      : [createDataset(data, colors, chartType.includes('line') ? 'line' : 'scatter')];
+
     return new Chart(elementId, {
-      type: chartType,
-      data: { datasets: [createDataset(data, colors, chartType.includes('line') ? 'line' : 'scatter')] },
+      type: chartType === 'elevation' ? 'scatterWithErrorBars' : chartType,
+      data: { datasets },
       options
     });
   }
 
-  // Common tooltip helper
+  /**
+   * Format tooltip for binned data points
+   */
+  function formatBinnedTooltip(tooltipItem, xLabel) {
+    const unit = xLabel.includes('degrees') ? '°' : '';
+    const xValue = tooltipItem.parsed.x.toFixed(1);
+    const pointCount = tooltipItem.raw.pointCount;
+
+    return [
+      `${xLabel}: ${xValue}${unit}`,
+      `Bin represents ${pointCount} observations`
+    ];
+  }
+
+  /**
+   * Format tooltip for individual scatter points
+   */
+  function formatScatterTooltip(tooltipItem, xLabel, uncertainty) {
+    const lines = [`Uncertainty: ${uncertainty}`];
+
+    // Add x-axis value for non-time charts
+    if (xLabel !== 'Date') {
+      const xValue = tooltipItem.parsed.x.toFixed(2);
+      const unit = xLabel.includes('degrees') ? '°' : '';
+      lines.push(`${xLabel}: ${xValue}${unit}`);
+    }
+
+    // Add observation date
+    const date = tooltipItem.raw.date ? tooltipItem.raw.date.toLocaleDateString() : 'N/A';
+    lines.push(`Date: ${date}`);
+
+    return lines;
+  }
+
+  /**
+   * Create tooltip callbacks for charts
+   */
   function createTooltipCallbacks(chartType, xLabel = 'Date') {
     return {
       title: function(tooltipItems) {
         const uncertainty = window.NumberFormatting.roundUncertainty(tooltipItems[0].raw.uncertainty);
-        return `Magnitude: ${window.NumberFormatting.roundMagnitude(tooltipItems[0].parsed.y, uncertainty)}`;
+        const magnitude = window.NumberFormatting.roundMagnitude(tooltipItems[0].parsed.y, uncertainty);
+        return `Magnitude: ${magnitude}`;
       },
       afterTitle: function(tooltipItems) {
-        const uncertainty = window.NumberFormatting.roundUncertainty(tooltipItems[0].raw.uncertainty);
-        const pointCount = tooltipItems[0].raw.pointCount || 1;
-        const isBinned = pointCount > 1;
+        const item = tooltipItems[0];
+        const uncertainty = window.NumberFormatting.roundUncertainty(item.raw.uncertainty);
+        const isBinned = (item.raw.pointCount || 1) > 1;
 
-        if (isBinned) {
-          return [
-            `${xLabel}: ${tooltipItems[0].parsed.x.toFixed(ZOOM_CONFIG.TOOLTIP_PRECISION.SINGLE_DECIMAL)}${xLabel.includes('degrees') ? '°' : ''}`,
-            `Bin represents ${pointCount} observations`
-          ];
-        } else {
-          // Build tooltip lines
-          const tooltipLines = [`Uncertainty: ${uncertainty}`];
-
-          // Add x-axis value for non-time charts
-          if (xLabel !== 'Date') {
-            const xValue = tooltipItems[0].parsed.x.toFixed(ZOOM_CONFIG.TOOLTIP_PRECISION.DOUBLE_DECIMAL);
-            const unit = xLabel.includes('degrees') ? '°' : '';
-            tooltipLines.push(`${xLabel}: ${xValue}${unit}`);
-          }
-
-          // Add observation date for all charts
-          const date = tooltipItems[0].raw.date ? tooltipItems[0].raw.date.toLocaleDateString() : 'N/A';
-          tooltipLines.push(`Date: ${date}`);
-
-          tooltipLines.push(`Number of points: ${tooltipItems.length}`);
-          return tooltipLines;
-        }
+        return isBinned
+          ? formatBinnedTooltip(item, xLabel)
+          : formatScatterTooltip(item, xLabel, uncertainty);
       },
       label: function(context) {
-        return null; // This removes individual point labels
+        return null; // Remove individual point labels
       },
     };
   }
-
-  // Chart instances with proper cleanup
-  let brightnessChartInstance;
-  let phaseAngleChartInstance;
-  let satElevationChartInstance;
-  let solarElevationChartInstance;
 
   // Chart cleanup utility
   function destroyChart(chart) {
@@ -385,20 +387,22 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   function createBrightnessChart() {
-    const theme = getCurrentTheme();
-    const colors = colorSchemes[theme];
+    const theme = window.ConstellationConfig.getCurrentTheme();
+    const colors = getColorScheme(theme);
 
     destroyChart(brightnessChartInstance);
 
-    const config = createChartConfig(
-      'Satellite Brightness Over Time',
-      'Date',
-      'Magnitude',
-      'time'
-    );
+    const config = {
+      title: 'Satellite Brightness Over Time',
+      xLabel: 'Date',
+      yLabel: 'Magnitude',
+      xAxisType: 'time',
+      xMin: null,
+      xMax: null
+    };
 
     brightnessChartInstance = createChart(
-      document.getElementById('brightness_chart'),
+      document.getElementById(ELEMENTS.charts.brightness),
       brightness_data,
       config,
       colors
@@ -408,117 +412,159 @@ document.addEventListener('DOMContentLoaded', function() {
   }
 
   // Phase Angle vs Brightness chart
-  let phaseAngleDataMin = null; // To store the minimum value of phase angle data
-  let phaseAngleDataMax = null; // To store the maximum value of phase angle data
-
   function createPhaseAngleChart() {
-    const theme = getCurrentTheme();
-    const colors = colorSchemes[theme];
+    const theme = window.ConstellationConfig.getCurrentTheme();
+    const colors = getColorScheme(theme);
 
     destroyChart(phaseAngleChartInstance);
 
     // Calculate the min and max values from the data
-    phaseAngleDataMin = Math.floor(Math.min(...phase_angle_data.map(item => item.x))) - PHASE_ANGLE_CONFIG.PADDING;
-    phaseAngleDataMax = Math.floor(Math.max(...phase_angle_data.map(item => item.x))) + PHASE_ANGLE_CONFIG.PADDING;
+    phaseAngleDataMin = Math.floor(Math.min(...phase_angle_data.map(item => item.x))) - CONFIG.charts.phaseAngle.padding;
+    phaseAngleDataMax = Math.floor(Math.max(...phase_angle_data.map(item => item.x))) + CONFIG.charts.phaseAngle.padding;
 
-    const config = createChartConfig(
-      'Satellite Brightness vs Phase Angle',
-      'Phase Angle (degrees)',
-      'Magnitude',
-      'linear',
-      PHASE_ANGLE_CONFIG.MIN_DEGREES,
-      PHASE_ANGLE_CONFIG.MAX_DEGREES
+    // For line charts, group by constellation to get correct line colors
+    const byConstellation = {};
+    phase_angle_data.forEach(item => {
+      const key = item.constellation || 'default';
+      if (!byConstellation[key]) byConstellation[key] = [];
+      byConstellation[key].push(item);
+    });
+
+    // Create dataset per constellation for proper line colors
+    const datasets = Object.values(byConstellation).map(data =>
+      createDataset(data, colors, 'line')
     );
 
+    const config = {
+      title: 'Satellite Brightness vs Phase Angle',
+      xLabel: 'Phase Angle (degrees)',
+      yLabel: 'Magnitude',
+      xAxisType: 'linear',
+      xMin: CONFIG.charts.phaseAngle.min,
+      xMax: CONFIG.charts.phaseAngle.max
+    };
+
     phaseAngleChartInstance = createChart(
-      document.getElementById('phase_angle_chart'),
-      phase_angle_data,
+      document.getElementById(ELEMENTS.charts.phaseAngle),
+      datasets,
       config,
       colors,
       'lineWithErrorBars'
     );
 
-
     return phaseAngleChartInstance;
   }
-
-  // Satellite Elevation chart
-  let satElevationDataMin = null;
-  let satElevationDataMax = null;
-
-  function createSatElevationChart() {
-    const theme = getCurrentTheme();
-    const colors = colorSchemes[theme];
-
-    destroyChart(satElevationChartInstance);
-
-    // Calculate min/max for satellite altitude
-    const satRange = calculateDataRange(sat_elevation_data, SATELLITE_ALTITUDE_CONFIG.MIN_KM, SATELLITE_ALTITUDE_CONFIG.MAX_KM);
-    satElevationDataMin = satRange.min;
-    satElevationDataMax = satRange.max;
-
-    if (sat_elevation_data.length === 0) {
-      console.warn('No satellite elevation data available for chart');
-    }
-
-    // Check if binned data toggle is enabled
-    const useBinnedData = document.getElementById('toggle_binned_sat_elevation')?.checked || false;
-
-    let datasets;
-    if (useBinnedData && sat_elevation_data.length > 0) {
-      // Create binned data for better visualization of dense clusters
-      const binnedDatasets = createBinnedData(sat_elevation_data, PERFORMANCE_CONFIG.BIN_SIZE.SATELLITE_ALTITUDE);
-      datasets = binnedDatasets.map(binData => ({
-        ...binData,
-        backgroundColor: colors.backgroundColor,
-        borderColor: colors.borderColor,
-        errorBarColor: colors.errorBarColor,
-        errorBarWidth: ERROR_BAR_CONFIG.WIDTH,
-        errorBarWhiskerColor: colors.errorBarColor,
-        errorBarWhiskerSize: ERROR_BAR_CONFIG.WHISKER_SIZE
-      }));
-    } else {
-      // Use raw data
-      datasets = [createDataset(sat_elevation_data, colors, 'scatter')];
-    }
-
-    const config = createChartConfig(
-      sat_elevation_data.length > 0 ?
-        (useBinnedData ? `Satellite Brightness vs Altitude (Binned by Density, ${PERFORMANCE_CONFIG.BIN_SIZE.SATELLITE_ALTITUDE}km bins)` : 'Satellite Brightness vs Altitude') :
-        'Satellite Brightness vs Altitude (No Data Available)',
-      'Satellite Altitude (km)',
-      'Magnitude',
-      'linear',
-      satElevationDataMin,
-      satElevationDataMax
-    );
-
-    // Create chart with custom datasets using the existing helper
-    satElevationChartInstance = createElevationChart(
-      document.getElementById('sat_elevation_chart'),
-      datasets,
-      config,
-      colors,
-      'satElevation'
-    );
-
-    return satElevationChartInstance;
-  }
-
-  // Solar Elevation chart
-  let solarElevationDataMin = null;
-  let solarElevationDataMax = null;
 
   // Generic min/max calculation helper
   function calculateDataRange(data, defaultMin = 0, defaultMax = 100) {
     if (data.length > 0) {
+      const padding = 5;
       return {
-        min: Math.floor(Math.min(...data.map(item => item.x))) - PHASE_ANGLE_CONFIG.PADDING,
-        max: Math.ceil(Math.max(...data.map(item => item.x))) + PHASE_ANGLE_CONFIG.PADDING
+        min: Math.floor(Math.min(...data.map(item => item.x))) - padding,
+        max: Math.ceil(Math.max(...data.map(item => item.x))) + padding
       };
     } else {
       return { min: defaultMin, max: defaultMax };
     }
+  }
+
+  // Generic elevation chart creator (used for both satellite and solar elevation)
+  function createElevationChart(chartType) {
+    const theme = window.ConstellationConfig.getCurrentTheme();
+    const colors = getColorScheme(theme);
+
+    // Map chart type to configuration
+    const chartConfig = {
+      satellite: {
+        data: sat_elevation_data,
+        instance: satElevationChartInstance,
+        toggleId: ELEMENTS.toggles.binnedSatElevation,
+        elementId: ELEMENTS.charts.satElevation,
+        binSize: CONFIG.binSize.satelliteAltitude,
+        chartRange: CONFIG.charts.satelliteAltitude,
+        title: 'Satellite Brightness vs Altitude',
+        titleBinned: `Satellite Brightness vs Altitude (Binned by Density, ${CONFIG.binSize.satelliteAltitude}km bins)`,
+        xLabel: 'Satellite Altitude (km)',
+        setDataMin: (val) => { satElevationDataMin = val; },
+        setDataMax: (val) => { satElevationDataMax = val; },
+        getDataMin: () => satElevationDataMin,
+        getDataMax: () => satElevationDataMax
+      },
+      solar: {
+        data: solar_elevation_data,
+        instance: solarElevationChartInstance,
+        toggleId: ELEMENTS.toggles.binnedSolarElevation,
+        elementId: ELEMENTS.charts.solarElevation,
+        binSize: CONFIG.binSize.solarElevation,
+        chartRange: CONFIG.charts.solarElevation,
+        title: 'Satellite Brightness vs Solar Elevation',
+        titleBinned: `Satellite Brightness vs Solar Elevation (Binned by Density, ${CONFIG.binSize.solarElevation}° bins)`,
+        xLabel: 'Solar Elevation (degrees)',
+        setDataMin: (val) => { solarElevationDataMin = val; },
+        setDataMax: (val) => { solarElevationDataMax = val; },
+        getDataMin: () => solarElevationDataMin,
+        getDataMax: () => solarElevationDataMax
+      }
+    }[chartType];
+
+    destroyChart(chartConfig.instance);
+
+    // Calculate min/max
+    const range = calculateDataRange(chartConfig.data, chartConfig.chartRange.min, chartConfig.chartRange.max);
+    chartConfig.setDataMin(range.min);
+    chartConfig.setDataMax(range.max);
+
+    if (chartConfig.data.length === 0) {
+      console.warn(`No ${chartType} elevation data available for chart`);
+    }
+
+    // Check if binned data toggle is enabled
+    const useBinnedData = document.getElementById(chartConfig.toggleId)?.checked || false;
+
+    let datasets;
+    if (useBinnedData && chartConfig.data.length > 0) {
+      const binnedDatasets = createBinnedData(chartConfig.data, chartConfig.binSize);
+      datasets = binnedDatasets.map(binData => ({
+        ...binData,
+        errorBarWidth: CONFIG.errorBar.width,
+        errorBarWhiskerSize: CONFIG.errorBar.whiskerSize
+      }));
+    } else {
+      datasets = [createDataset(chartConfig.data, colors, 'scatter')];
+    }
+
+    const config = {
+      title: chartConfig.data.length > 0 ?
+        (useBinnedData ? chartConfig.titleBinned : chartConfig.title) :
+        `${chartConfig.title} (No Data Available)`,
+      xLabel: chartConfig.xLabel,
+      yLabel: 'Magnitude',
+      xAxisType: 'linear',
+      xMin: chartConfig.getDataMin(),
+      xMax: chartConfig.getDataMax()
+    };
+
+    const instance = createChart(
+      document.getElementById(chartConfig.elementId),
+      datasets,
+      config,
+      colors,
+      'scatterWithErrorBars'
+    );
+
+    // Update the instance variable
+    if (chartType === 'satellite') {
+      satElevationChartInstance = instance;
+    } else {
+      solarElevationChartInstance = instance;
+    }
+
+    return instance;
+  }
+
+  // Satellite Elevation chart wrapper
+  function createSatElevationChart() {
+    return createElevationChart('satellite');
   }
 
   // Binning functionality for dense data visualization
@@ -539,6 +585,22 @@ document.addEventListener('DOMContentLoaded', function() {
       const avgMagnitude = points.reduce((sum, p) => sum + p.y, 0) / points.length;
       const avgUncertainty = points.reduce((sum, p) => sum + p.uncertainty, 0) / points.length;
 
+      // Determine the dominant constellation color in this bin
+      // Count occurrences of each color
+      const colorCounts = {};
+      points.forEach(p => {
+        const color = p.backgroundColor || p.borderColor;
+        if (color) {
+          colorCounts[color] = (colorCounts[color] || 0) + 1;
+        }
+      });
+
+      // Find the most common color (or use first point's color as fallback)
+      const dominantColor = Object.keys(colorCounts).reduce((a, b) =>
+        colorCounts[a] > colorCounts[b] ? a : b,
+        points[0]?.backgroundColor || points[0]?.borderColor
+      );
+
       return {
         data: [{
           x: parseFloat(binCenter),
@@ -550,138 +612,67 @@ document.addEventListener('DOMContentLoaded', function() {
           dates: points.map(p => p.date),
           uncertainties: points.map(p => p.uncertainty)
         }],
-        pointRadius: Math.min(Math.max(density / PERFORMANCE_CONFIG.POINT_SIZE.DENSITY_DIVISOR, PERFORMANCE_CONFIG.POINT_SIZE.MIN), PERFORMANCE_CONFIG.POINT_SIZE.MAX),
-        pointHoverRadius: Math.min(Math.max(density / BINNING_CONFIG.DENSITY_DIVISOR, BINNING_CONFIG.HOVER_RADIUS_MIN), BINNING_CONFIG.HOVER_RADIUS_MAX)
+        backgroundColor: dominantColor,
+        borderColor: dominantColor,
+        errorBarColor: dominantColor,
+        errorBarWhiskerColor: dominantColor,
+        pointRadius: Math.min(Math.max(density / CONFIG.pointSize.densityDivisor, CONFIG.pointSize.min), CONFIG.pointSize.max),
+        pointHoverRadius: Math.min(Math.max(density / CONFIG.binning.densityDivisor, CONFIG.binning.hoverRadiusMin), CONFIG.binning.hoverRadiusMax)
       };
     });
   }
 
+  // Solar Elevation chart wrapper
   function createSolarElevationChart() {
-    const theme = getCurrentTheme();
-    const colors = colorSchemes[theme];
-
-    destroyChart(solarElevationChartInstance);
-
-    // Calculate min/max for solar elevation
-    const solarRange = calculateDataRange(solar_elevation_data, SOLAR_ELEVATION_CONFIG.MIN_DEGREES, SOLAR_ELEVATION_CONFIG.MAX_DEGREES);
-    solarElevationDataMin = solarRange.min;
-    solarElevationDataMax = solarRange.max;
-
-    if (solar_elevation_data.length === 0) {
-      console.warn('No solar elevation data available for chart');
-    }
-
-    // Check if binned data toggle is enabled
-    const useBinnedData = document.getElementById('toggle_binned_solar_elevation')?.checked || false;
-
-    let datasets;
-    if (useBinnedData && solar_elevation_data.length > 0) {
-      // Create binned data for better visualization of dense clusters
-      const binnedDatasets = createBinnedData(solar_elevation_data, PERFORMANCE_CONFIG.BIN_SIZE.SOLAR_ELEVATION);
-      datasets = binnedDatasets.map(binData => ({
-        ...binData,
-        backgroundColor: colors.backgroundColor,
-        borderColor: colors.borderColor,
-        errorBarColor: colors.errorBarColor,
-        errorBarWidth: ERROR_BAR_CONFIG.WIDTH,
-        errorBarWhiskerColor: colors.errorBarColor,
-        errorBarWhiskerSize: ERROR_BAR_CONFIG.WHISKER_SIZE
-      }));
-    } else {
-      // Use raw data
-      datasets = [createDataset(solar_elevation_data, colors, 'scatter')];
-    }
-
-    const config = createChartConfig(
-      solar_elevation_data.length > 0 ?
-        (useBinnedData ? `Satellite Brightness vs Solar Elevation (Binned by Density, ${PERFORMANCE_CONFIG.BIN_SIZE.SOLAR_ELEVATION}° bins)` : 'Satellite Brightness vs Solar Elevation') :
-        'Satellite Brightness vs Solar Elevation (No Data Available)',
-      'Solar Elevation (degrees)',
-      'Magnitude',
-      'linear',
-      solarElevationDataMin,
-      solarElevationDataMax
-    );
-
-    // Create chart with custom datasets using the existing helper
-    solarElevationChartInstance = createElevationChart(
-      document.getElementById('solar_elevation_chart'),
-      datasets,
-      config,
-      colors,
-      'solarElevation'
-    );
-
-    return solarElevationChartInstance;
+    return createElevationChart('solar');
   }
 
-  // Debouncing utility for performance
-  function debounce(func, wait) {
-    let timeout;
-    return function executedFunction(...args) {
-      const later = () => {
-        clearTimeout(timeout);
-        func(...args);
-      };
-      clearTimeout(timeout);
-      timeout = setTimeout(later, wait);
-    };
-  }
+  function updateCharts() {
+    try {
+      // Re-read observation data from the DOM element
+      const observationsDataElement = document.getElementById(ELEMENTS.observationsData);
+      let freshObservationData = [];
 
-  // Chart update with debouncing and requestAnimationFrame for smooth updates
-  const debouncedUpdateCharts = debounce(() => {
-    requestAnimationFrame(() => {
+      if (observationsDataElement) {
+        try {
+          freshObservationData = JSON.parse(observationsDataElement.textContent);
+        } catch (error) {
+          console.error('Error parsing fresh observation data:', error);
+        }
+      }
+
+      // Re-process the data for charts
+      const freshChartData = processAllChartData(freshObservationData);
+
+      // Update the module-level data variables
+      brightness_data = freshChartData.brightness;
+      phase_angle_data = freshChartData.phaseAngle;
+      sat_elevation_data = freshChartData.satElevation;
+      solar_elevation_data = freshChartData.solarElevation;
+
+      // Create charts with new data (each create function handles cleanup)
       brightnessChartInstance = createBrightnessChart();
       phaseAngleChartInstance = createPhaseAngleChart();
       satElevationChartInstance = createSatElevationChart();
       solarElevationChartInstance = createSolarElevationChart();
-    });
-  }, CHART_CONFIG.DEBOUNCE_DELAY); // debounce delay
-
-  function updateCharts() {
-    // Create charts immediately on first call
-    brightnessChartInstance = createBrightnessChart();
-    phaseAngleChartInstance = createPhaseAngleChart();
-    satElevationChartInstance = createSatElevationChart();
-    solarElevationChartInstance = createSolarElevationChart();
+    } catch (error) {
+      console.error('Error in updateCharts():', error);
+    }
   }
 
-  // Chart registry for reset button management
-  const chartRegistry = {
-    brightness: () => brightnessChartInstance,
-    phaseAngle: () => phaseAngleChartInstance,
-    satElevation: () => satElevationChartInstance,
-    solarElevation: () => solarElevationChartInstance
-  };
-
-  // Generic reset button setup using event delegation
+  // Reset button handler using event delegation
   function setupResetButtons() {
-    // Use event delegation for better performance and automatic cleanup
     document.addEventListener('click', (event) => {
-      const target = event.target;
+      const { id } = event.target;
 
-      // Handle brightness chart reset
-      if (target.id === 'reset_zoom_brightness' && chartRegistry.brightness()) {
-        chartRegistry.brightness().resetZoom();
-        return;
-      }
-
-      // Handle phase angle chart reset
-      if (target.id === 'reset_zoom_phase' && chartRegistry.phaseAngle()) {
-        chartRegistry.phaseAngle().resetZoom();
-        return;
-      }
-
-      // Handle satellite elevation chart reset
-      if (target.id === 'reset_zoom_sat_elevation' && chartRegistry.satElevation()) {
-        chartRegistry.satElevation().resetZoom();
-        return;
-      }
-
-      // Handle solar elevation chart reset
-      if (target.id === 'reset_zoom_solar_elevation' && chartRegistry.solarElevation()) {
-        chartRegistry.solarElevation().resetZoom();
-        return;
+      if (id === ELEMENTS.resetButtons.brightness && brightnessChartInstance) {
+        brightnessChartInstance.resetZoom();
+      } else if (id === ELEMENTS.resetButtons.phaseAngle && phaseAngleChartInstance) {
+        phaseAngleChartInstance.resetZoom();
+      } else if (id === ELEMENTS.resetButtons.satElevation && satElevationChartInstance) {
+        satElevationChartInstance.resetZoom();
+      } else if (id === ELEMENTS.resetButtons.solarElevation && solarElevationChartInstance) {
+        solarElevationChartInstance.resetZoom();
       }
     });
   }
@@ -692,15 +683,10 @@ document.addEventListener('DOMContentLoaded', function() {
   // Setup reset buttons once after initial chart creation
   setupResetButtons();
 
-  // Optimized theme change handling
-  document.querySelectorAll('[data-bs-theme-value]').forEach(toggle => {
-    toggle.addEventListener('click', () => {
-      // Use debounced updates for theme changes
-      debouncedUpdateCharts();
-    });
-  });
+  // Expose updateCharts globally for external access (used by satellite_selector.js)
+  window.updateCharts = updateCharts;
 
-  document.getElementById('toggle_data_range').addEventListener('change', function() {
+  document.getElementById(ELEMENTS.toggles.dataRange).addEventListener('change', function() {
     const useDataRange = this.checked;
 
     if (useDataRange) {
@@ -709,8 +695,8 @@ document.addEventListener('DOMContentLoaded', function() {
       phaseAngleChartInstance.options.scales.x.max = phaseAngleDataMax;
     } else {
       // default
-      phaseAngleChartInstance.options.scales.x.min = PHASE_ANGLE_CONFIG.MIN_DEGREES;
-      phaseAngleChartInstance.options.scales.x.max = PHASE_ANGLE_CONFIG.MAX_DEGREES;
+      phaseAngleChartInstance.options.scales.x.min = CONFIG.charts.phaseAngle.min;
+      phaseAngleChartInstance.options.scales.x.max = CONFIG.charts.phaseAngle.max;
     }
 
     phaseAngleChartInstance.update();
@@ -731,17 +717,14 @@ document.addEventListener('DOMContentLoaded', function() {
   window.addEventListener('beforeunload', cleanupAllCharts);
 });
 
-function getCurrentTheme() {
-  return document.documentElement.getAttribute('data-bs-theme') || 'light';
-}
-
+// Chart.js theme color schemes
 const colorSchemes = {
   light: {
     backgroundColor: 'rgba(20, 41, 67, 1)',
     borderColor: 'rgba(20, 41, 67, 1)',
     gridColor: 'rgba(0, 0, 0, 0.1)',
     textColor: '#666',
-    errorBarColor: 'rgba(20, 41, 67, .5)',  // primary color with 50% opacity
+    errorBarColor: 'rgba(20, 41, 67, .5)',
     dragBoxBackground: 'rgba(20, 41, 67, 0.1)',
     dragBoxBorder: 'rgba(20, 41, 67, 0.8)'
   },
@@ -750,22 +733,28 @@ const colorSchemes = {
     borderColor: 'rgba(255, 193, 7, 1)',
     gridColor: 'rgba(255, 255, 255, 0.1)',
     textColor: '#ccc',
-    errorBarColor: 'rgba(255, 193, 7, .5)',  // primary color with 50% opacity
+    errorBarColor: 'rgba(255, 193, 7, .5)',
     dragBoxBackground: 'rgba(255, 193, 7, 0.1)',
     dragBoxBorder: 'rgba(255, 193, 7, 0.8)'
   }
 };
 
-// Listen for theme changes
-const observer = new MutationObserver((mutations) => {
-  mutations.forEach((mutation) => {
-    if (mutation.type === 'attributes' && mutation.attributeName === 'data-bs-theme') {
-      debouncedUpdateCharts();
+/**
+ * Get color scheme for theme
+ * @param {string} theme - 'light' or 'dark'
+ * @returns {Object} Color scheme
+ */
+function getColorScheme(theme) {
+  return colorSchemes[theme || window.ConstellationConfig.getCurrentTheme()];
+}
+
+// Subscribe to theme changes via centralized ThemeManager
+if (window.ThemeManager) {
+  ThemeManager.subscribe((theme) => {
+    console.log('Updating charts for theme:', theme);
+    // Call the globally exposed updateCharts function
+    if (typeof window.updateCharts === 'function') {
+      window.updateCharts();
     }
   });
-});
-
-observer.observe(document.documentElement, {
-  attributes: true,
-  attributeFilter: ['data-bs-theme']
-});
+}

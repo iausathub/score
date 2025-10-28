@@ -1,0 +1,67 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block title %}All-Sky Plots - SCORE{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-3">
+    <h2 class="text-center p-2 pb-4">All-Sky Plots</h2>
+
+        <div class="row">
+            <!-- Left Panel for Parameters -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Parameters</h5>
+                    </div>
+                    <div class="card-body">
+                        {% include "repository/includes/satellite_selector_panel.html" %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel for Graph -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Plots</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Hidden data element for charts -->
+                        <div id="observations-data" class="d-none">[]</div>
+
+                        <!-- Chart containers (hidden until apply is clicked) -->
+                        <div id="plots-container" class="d-none">
+                            <!-- All-Sky Plot -->
+                            <div id="allsky-plot" style="width: 100%; height: 600px;"></div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel for Satellite Names -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Satellite Names</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="satellite-names" id="satellite-names">
+                            <!-- in satellite_selector.js -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Load dependencies in correct order -->
+<script src="https://cdn.plot.ly/plotly-2.27.0.min.js" charset="utf-8"></script>
+<script src="{% static 'js/theme_manager.js' %}"></script>
+<script src="{% static 'js/constellation_config.js' %}"></script>
+<script src="{% static 'js/satellite_plots.js' %}"></script>
+<script src="{% static 'js/satellite_selector.js' %}"></script>
+{% endblock %}

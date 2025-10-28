@@ -1,0 +1,126 @@
+<!-- Satellite Selector Control -->
+<div class="satellite-selector">
+    <!-- Header -->
+    <div class="mb-4">
+        <h6 class="card-title mb-2">Select Satellites</h6>
+        <p class="text-muted small mb-0">
+            <span id="selection-text">Choose constellations or specific satellites</span>
+        </p>
+    </div>
+
+    <!-- Mode Toggle -->
+    <div class="mode-tabs mb-4">
+        <button class="mode-tab active" data-mode="constellations">
+            Constellations
+        </button>
+        <button class="mode-tab" data-mode="custom">
+            Custom Selection
+        </button>
+    </div>
+
+    <!-- Constellation with satellite observations in SCORE -->
+    <div class="mode-content" id="constellations-mode">
+        <div class="space-y-2" id="constellations-list">
+            <!-- Populated by satellite_selector.js -->
+        </div>
+    </div>
+
+    <!-- Custom Mode -->
+    <div class="mode-content d-none" id="custom-mode">
+        <!-- Search -->
+        <div class="search-box mb-3">
+            <i class="fas fa-search"></i>
+            <input
+                type="text"
+                id="search-input"
+                class="form-control form-control-sm"
+                placeholder="Search satellites... (e.g., STARLINK-100)"
+            >
+        </div>
+
+        <!-- List of satellites with observations in SCORE -->
+        <div class="custom-mode-list" id="custom-list">
+            <!-- Populated by satellite_selector.js -->
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <div class="border-top pt-3 mt-4">
+        <small class="text-muted d-block mb-2">Selections will be used to generate the brightness graph</small>
+        <div class="row g-2">
+            <div class="col-6">
+                <button class="btn btn-sm btn-outline-secondary w-100" id="clear-selections">Clear Selections</button>
+            </div>
+            <div class="col-6">
+                <button class="btn btn-sm btn-primary w-100" id="apply-selection">Apply</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Observation Filters -->
+<div class="mt-4">
+    <h6 class="card-title mb-3">Observation Filters <small class="text-muted">(optional)</small></h6>
+
+    <!-- Date Range -->
+    <div class="mb-3">
+        <label class="form-label small mb-1">Date Range</label>
+        <div class="row g-2">
+            <div class="col-6">
+                <input type="date" class="form-control form-control-sm" id="filter-start-date" placeholder="Start">
+            </div>
+            <div class="col-6">
+                <input type="date" class="form-control form-control-sm" id="filter-end-date" placeholder="End">
+            </div>
+        </div>
+    </div>
+
+    <!-- Magnitude Range -->
+    <div class="mb-3">
+        <label class="form-label small mb-1">Magnitude Range</label>
+        <div class="row g-2">
+            <div class="col-6">
+                <input type="number" step="0.1" class="form-control form-control-sm" id="filter-min-mag" placeholder="Min">
+            </div>
+            <div class="col-6">
+                <input type="number" step="0.1" class="form-control form-control-sm" id="filter-max-mag" placeholder="Max">
+            </div>
+        </div>
+    </div>
+
+    <!-- Satellite Elevation Range -->
+    <div class="mb-3">
+        <label class="form-label small mb-1">Satellite Elevation (km)</label>
+        <div class="row g-2">
+            <div class="col-6">
+                <input type="number" step="10" class="form-control form-control-sm" id="filter-min-sat-elev" placeholder="Min">
+            </div>
+            <div class="col-6">
+                <input type="number" step="10" class="form-control form-control-sm" id="filter-max-sat-elev" placeholder="Max">
+            </div>
+        </div>
+    </div>
+
+    <!-- Solar Elevation Range -->
+    <div class="mb-3">
+        <label class="form-label small mb-1">Solar Elevation (degrees)</label>
+        <div class="row g-2">
+            <div class="col-6">
+                <input type="number" step="1" class="form-control form-control-sm" id="filter-min-solar-elev" placeholder="Min">
+            </div>
+            <div class="col-6">
+                <input type="number" step="1" class="form-control form-control-sm" id="filter-max-solar-elev" placeholder="Max">
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="row g-2">
+        <div class="col-6">
+            <button class="btn btn-sm btn-outline-secondary w-100" id="clear-filters">Clear Filters</button>
+        </div>
+        <div class="col-6">
+            <button class="btn btn-sm btn-primary w-100" id="apply-selection-filters">Apply</button>
+        </div>
+    </div>
+</div>

@@ -39,6 +39,7 @@ crossorigin=""/>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-chart-error-bars@4.4.1/build/index.umd.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js" integrity="sha512-UXumZrZNiOwnTcZSHLOfcTs0aos2MzBWHXOHOuB0J/R44QB0dwY5JgfbvljXcklVf65Gc4El6RjZ+lnwd2az2g==" crossorigin="anonymous"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-zoom"></script>
+  <script src="{% static 'js/constellation_config.js' %}"></script>
   <script src="{% static 'js/theme_switcher.js' %}"></script>
   <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
   <title>{% block title %}Satellite Constellation Observation Repository{% endblock %}</title>
@@ -110,6 +111,19 @@ crossorigin=""/>
                     request</a></li>
               </ul>
             </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                Data Visualizations
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'data-visualization' %}">Overview</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'plots' %}">All-Sky Plots</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'graphs' %}">Interactive Graphs</a></li>
+              </ul>
+            </li>
+
             <li class="nav-item">
               <a class="nav-link" href="{% url 'tools' %}">Tools</a>
             </li>
@@ -187,6 +201,7 @@ crossorigin=""/>
             <p><a href="{% url 'search' %}" class="text-white">Search Observations</a></p>
             <p><a href="{% url 'view-data' %}" class="text-white">Recent Observations</a></p>
             <p><a href="{% url 'data-change' %}" class="text-white">Request Data Change</a></p>
+            <p><a href="{% url 'data-visualization' %}" class="text-white">Data Visualizations</a></p>
           </div>
 
           <div class="col-md-3 mx-auto mb-4">
@@ -254,7 +269,6 @@ crossorigin=""/>
   {% endif %}
 
   <script src="{% static 'js/tools.js' %}"></script>
-  <script src="{% static 'js/satellite_charts.js' %}"></script>
   <script src="{% static 'js/generate_csv_utils.js' %}"></script>
 
   {% block extra_js %}

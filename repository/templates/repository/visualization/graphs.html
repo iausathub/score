@@ -1,0 +1,125 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block title %}Interactive Graphs - SCORE{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-3">
+    <h2 class="text-center p-2 pb-4">Interactive Graphs</h2>
+
+        <div class="row">
+            <!-- Left Panel for Parameters -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Parameters</h5>
+                    </div>
+                    <div class="card-body">
+                        {% include "repository/includes/satellite_selector_panel.html" %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Center Panel for Graph -->
+            <div class="col-md-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Graphs</h5>
+                    </div>
+                    <div class="card-body">
+                        <!-- Hidden data element for charts -->
+                        <div id="observations-data" class="d-none">[]</div>
+
+                        <!-- Chart containers (hidden until apply is clicked) -->
+                        <div id="charts-container" class="d-none">
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <button class="btn btn-sm btn-outline-secondary mb-2" id="reset_zoom_brightness">Reset Chart</button>
+                                    <div style="position: relative; height:400px; width:100%;">
+                                        <canvas id="brightness_chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-4">
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <button class="btn btn-sm btn-outline-secondary me-3" id="reset_zoom_phase">Reset Chart</button>
+                                        <div class="form-check mb-0">
+                                            <input class="form-check-input" type="checkbox" id="toggle_data_range">
+                                            <label class="form-check-label" for="toggle_data_range">
+                                                Use Data Range
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div style="position: relative; height:400px; width:100%;">
+                                        <canvas id="phase_angle_chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-4">
+
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <button class="btn btn-sm btn-outline-secondary me-3" id="reset_zoom_sat_elevation">Reset Chart</button>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="toggle_binned_sat_elevation">
+                                            <label class="form-check-label" for="toggle_binned_sat_elevation">
+                                                Bin Satellite Altitude
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div style="position: relative; height:400px; width:100%;">
+                                        <canvas id="sat_elevation_chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                            <hr class="my-4">
+
+
+                            <div class="row mb-4">
+                                <div class="col-12">
+                                    <div class="d-flex align-items-center mb-2">
+                                        <button class="btn btn-sm btn-outline-secondary me-3" id="reset_zoom_solar_elevation">Reset Chart</button>
+                                        <div class="form-check">
+                                            <input class="form-check-input" type="checkbox" id="toggle_binned_solar_elevation">
+                                            <label class="form-check-label" for="toggle_binned_solar_elevation">
+                                                Bin Solar Elevation
+                                            </label>
+                                        </div>
+                                    </div>
+                                    <div style="position: relative; height:400px; width:100%;">
+                                        <canvas id="solar_elevation_chart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- Right Panel for Satellite Names -->
+            <div class="col-md-3">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="card-title mb-0">Satellite Names</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="satellite-names" id="satellite-names">
+                            <!-- in satellite_selector.js -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{% static 'js/theme_manager.js' %}"></script>
+<script src="{% static 'js/constellation_config.js' %}"></script>
+<script src="{% static 'js/satellite_selector.js' %}"></script>
+<script src="{% static 'js/satellite_charts.js' %}"></script>
+{% endblock %}
