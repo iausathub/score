@@ -1381,9 +1381,12 @@ def get_satellite_data(request):
 
         return JsonResponse({"success": True, "constellations": result})
 
-    except Exception as e:
-        logger.error(f"Error getting satellite data: {str(e)}")
-        return JsonResponse({"success": False, "error": str(e)}, status=500)
+    except Exception:
+        logger.exception("Error getting satellite data")
+        return JsonResponse(
+            {"success": False, "error": "Error getting satellite data."},
+            status=500,
+        )
 
 
 @csrf_exempt
@@ -1556,6 +1559,9 @@ def get_observations_for_satellites(request):
             {"success": True, "observations": chart_data, "count": len(chart_data)}
         )
 
-    except Exception as e:
+    except Exception:
         logger.exception("Error getting observations for satellites")
-        return JsonResponse({"success": False, "error": "Error getting observations for satellites."}, status=500)
+        return JsonResponse(
+            {"success": False, "error": "Error getting observations for satellites."},
+            status=500,
+        )
