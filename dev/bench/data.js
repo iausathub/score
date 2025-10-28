@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1758602849736,
+  "lastUpdate": 1761670180228,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -520,6 +520,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.025396376125370844",
             "extra": "mean: 911.2626796000029 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "017a74652c703e34a6f0584de2e23d8291f01bf2",
+          "message": "Merge pull request #109 from iausathub/develop\n\nAdd data visualization page and filterable all-sky plot and graphs",
+          "timestamp": "2025-10-28T09:48:13-07:00",
+          "tree_id": "e842d42cb66473fae627adb2417330b60aa634e8",
+          "url": "https://github.com/iausathub/score/commit/017a74652c703e34a6f0584de2e23d8291f01bf2"
+        },
+        "date": 1761670179689,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 56.76889978622002,
+            "unit": "iter/sec",
+            "range": "stddev: 0.008025303787123792",
+            "extra": "mean: 17.615278854545252 msec\nrounds: 55"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 186.20654879488595,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00008083372450296064",
+            "extra": "mean: 5.370380400001615 msec\nrounds: 55"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 1.2240961374925048,
+            "unit": "iter/sec",
+            "range": "stddev: 0.036485198509882716",
+            "extra": "mean: 816.9292994000017 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 1.334660528660765,
+            "unit": "iter/sec",
+            "range": "stddev: 0.07362720320488689",
+            "extra": "mean: 749.2541950000032 msec\nrounds: 5"
           }
         ]
       }
