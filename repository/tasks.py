@@ -1,4 +1,4 @@
-from typing import Any, Union
+from typing import Any
 
 from celery import shared_task
 from celery_progress.backend import ProgressRecorder
@@ -15,9 +15,7 @@ class UploadError(Exception):
 
 
 @shared_task(bind=True)
-def process_upload(
-    self, data: list[list[Any]]
-) -> dict[str, Union[str, list[int], bool]]:
+def process_upload(self, data: list[list[Any]]) -> dict[str, str | list[int] | bool]:
     """
     Processes the uploaded CSV data and creates or updates the corresponding Satellite,
     Location, and Observation objects.

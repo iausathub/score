@@ -1,12 +1,10 @@
-from typing import Union
-
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
 from repository.utils.general_utils import get_observation_list
 
 
-def send_confirmation_email(obs_ids: list[int], email_address: Union[str, bool]):
+def send_confirmation_email(obs_ids: list[int], email_address: str | bool):
     """
     Sends a confirmation email with observation IDs for reference.
 

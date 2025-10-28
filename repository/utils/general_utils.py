@@ -1,7 +1,6 @@
 import json
 import logging
 from collections import namedtuple
-from typing import Optional, Union
 
 import requests
 from astropy.time import Time
@@ -103,11 +102,11 @@ def get_stats():
 def add_additional_data(
     satellite_name: str,
     sat_number: int,
-    observation_time: Union[str, Time],
+    observation_time: str | Time,
     latitude: float,
     longitude: float,
     altitude: float,
-) -> Union[SatCheckerData, str, bool]:
+) -> SatCheckerData | str | bool:
     """
     Validates if a satellite is above the horizon at a given time and location and
     returns additional data.
@@ -243,7 +242,7 @@ def add_additional_data(
         fields = r.json().get("fields", [])
 
         # Mapping fields to their values for easier access
-        data_dict = dict(zip(fields, satellite_data))
+        data_dict = dict(zip(fields, satellite_data, strict=True))
         satellite_data = SatCheckerData(
             phase_angle=round(data_dict.get("phase_angle_deg", 0), 7),
             range_to_sat=round(data_dict.get("range_km", 0), 7),
@@ -267,8 +266,8 @@ def add_additional_data(
 
 
 def validate_position(
-    response: Response, satellite_name: str, obs_time: Union[str, Time]
-) -> Union[str, bool]:
+    response: Response, satellite_name: str, obs_time: str | Time
+) -> str | bool:
     """
     Validates the position of a satellite based on the response from an API call.
 
@@ -424,7 +423,7 @@ def get_norad_id(satellite_name):
 
 
 # Query SatChecker API for satellite metadata
-def get_satellite_metadata(satellite_number: str) -> Optional[dict[str, Optional[str]]]:
+def get_satellite_metadata(satellite_number: str) -> dict[str, str | None] | None:
     """
     Query SatChecker API for satellite metadata.
 

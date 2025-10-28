@@ -1,0 +1,128 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block title %}Data Visualizations - SCORE{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-3">
+    <h2 class="text-center p-2 pb-4">Data Visualizations</h2>
+
+        <!-- Introduction Section -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <p class="lead text-center">
+                    Explore satellite observation data through interactive visualizations.
+                    View brightness patterns, phase angles, and altitude relationships across different satellite constellations.
+                </p>
+            </div>
+        </div>
+
+        <!-- Visualization Pages Links -->
+        <div class="row justify-content-center mb-5">
+            <div class="col-lg-5 col-md-6 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="fas fa-chart-line text-primary"></i> Interactive Graphs
+                        </h4>
+                        <p class="card-text">
+                            Explore interactive scatter plots revealing relationships between satellite brightness,
+                            altitude, solar elevation, and phase angle. Pan, zoom, and dynamically filter data
+                            by constellation or individual satellite to uncover patterns in observation data.
+                        </p>
+                        <a href="{% url 'graphs' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-right"></i> Explore Graphs
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-5 col-md-6 mb-3">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body">
+                        <h4 class="card-title">
+                            <i class="fas fa-record-vinyl text-primary"></i> All-Sky Plot
+                        </h4>
+                        <p class="card-text">
+                            Visualize the spatial distribution of satellite observations across the sky.
+                            Filter by constellation, brightness, time period, and other parameters to generate
+                            customized all-sky plots showing where satellites appear from SCORE data.
+                        </p>
+                        <a href="{% url 'plots' %}" class="btn btn-primary">
+                            <i class="fas fa-arrow-right"></i> Explore Plots
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Constellation Statistics Section -->
+        <div class="row justify-content-center mb-4">
+            <div class="col-lg-10">
+                <h3 class="text-center mb-4">Constellation Statistics</h3>
+
+                <!-- Statistics Cards -->
+                <div class="row g-2 mb-4">
+                    {% for constellation in constellation_stats %}
+                    <div class="col-lg col-md-4 col-sm-6 d-flex">
+                        <div class="simple-stat-box w-100 constellation-stat-box" data-constellation-id="{{ constellation.id }}" style="border-left: 5px solid transparent;">
+                            <div class="stat-header">{{ constellation.name }}</div>
+                            <div class="stat-details">
+                                <span class="stat-item"><strong>{{ constellation.satellite_count }}</strong> satellites</span>
+                                <span class="stat-divider">•</span>
+                                <span class="stat-item"><strong>{{ constellation.observation_count }}</strong> obs</span>
+                                {% if constellation.avg_magnitude %}
+                                <span class="stat-divider">•</span>
+                                <span class="stat-item">Avg: <strong>{{ constellation.avg_magnitude }}</strong> mag</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+
+                <!-- Stacked Magnitude Histogram -->
+                <div class="row g-2">
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Observations by Apparent Magnitude</h5>
+                            </div>
+                            <div class="card-body">
+                                {{ constellation_stats|json_script:"constellation-data" }}
+                                {{ magnitude_bins|json_script:"magnitude-bins-data" }}
+
+                                <div style="position: relative; height:350px; width:100%;">
+                                    <canvas id="magnitude_distribution"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- All Observations Plot -->
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">All Observations</h5>
+                            </div>
+                            <div class="card-body">
+                                {{ observations|json_script:"observations-data" }}
+
+                                <div id="allsky-plot" style="width: 100%; height: 350px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<!-- Load dependencies in correct order -->
+<script src="https://cdn.plot.ly/plotly-2.24.1.min.js"></script>
+<script src="{% static 'js/theme_manager.js' %}"></script>
+<script src="{% static 'js/constellation_config.js' %}"></script>
+<script src="{% static 'js/satellite_plots.js' %}"></script>
+<script src="{% static 'js/data_visualization.js' %}"></script>
+{% endblock %}

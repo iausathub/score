@@ -22,6 +22,9 @@ urlpatterns = [
     path("about", views.about, name="about"),
     path("download", views.download_data, name="download-data"),
     path("policy", views.policy, name="policy"),
+    path("visualization", views.visualization_view, name="data-visualization"),
+    path("visualization/graphs", views.graphs_view, name="graphs"),
+    path("visualization/plots", views.plots_view, name="plots"),
     path(
         "last_observer_location/",
         views.last_observer_location,
@@ -63,5 +66,15 @@ urlpatterns = [
         "download-observer-data/",
         views.download_observer_data,
         name="download-observer-data",
+    ),
+    path(
+        "api/satellite-data/",
+        views.get_satellite_data,
+        name="satellite-data",
+    ),
+    path(
+        "api/observations/",
+        views.get_observations_for_satellites,
+        name="observations-for-satellites",
     ),
 ]
