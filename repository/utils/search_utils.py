@@ -56,7 +56,8 @@ def filter_observations(form_data):
     # Apply remaining filters
     for field, condition in filters.items():
         value = form_data.get(field)
-        if value:
+        # Only apply filter if value exists and is not empty
+        if value is not None and value != "":
             observations = observations.filter(**{condition: value})
 
     if form_data.get("has_position_data"):
