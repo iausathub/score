@@ -340,9 +340,17 @@ def search(request):
                 # Get total count before pagination
                 total = observations.count()
 
+                # Get all observation IDs for download
+                if isinstance(observations, list):
+                    all_obs_ids = [o.id for o in observations]
+                else:
+                    all_obs_ids = list(observations.values_list("id", flat=True))
+
                 # Return early if no results
                 if total == 0:
-                    return JsonResponse({"total": 0, "rows": [], "total_results": 0})
+                    return JsonResponse(
+                        {"total": 0, "rows": [], "total_results": 0, "obs_ids": []}
+                    )
 
                 # Paginate
                 paginator = Paginator(observations, limit)
@@ -384,11 +392,20 @@ def search(request):
                         "total": total,  # For bootstrap-table pagination
                         "total_results": total,  # For our custom message
                         "rows": rows,
+                        "obs_ids": all_obs_ids,  # For download button
                     }
                 )
 
             # Handle regular form submission
-            if len(observations) == 0:
+            # Check if observations is a list (from location filtering) or QuerySet
+            if isinstance(observations, list):
+                obs_count = len(observations)
+                obs_ids_list = [o.id for o in observations]
+            else:
+                obs_count = observations.count()
+                obs_ids_list = list(observations.values_list("id", flat=True))
+
+            if obs_count == 0:
                 return render(
                     request,
                     "repository/search.html",
@@ -400,10 +417,10 @@ def search(request):
                 request,
                 "repository/search.html",
                 {
-                    "observations": observations[:25],  # Initial page
-                    "obs_ids": [o.id for o in observations],
+                    "observations": observations[:25],
+                    "obs_ids": obs_ids_list,
                     "form": form,
-                    "total_results": observations.count(),
+                    "total_results": obs_count,
                 },
             )
         else:
@@ -423,14 +440,21 @@ def download_results(request):
     if request.method == "POST":
         logger.info("POST request received")
 
-        # Benchmark parsing observation IDs
+        # Parse observation IDs from POST data
         parse_start = time.time()
-        observation_ids = request.POST.get("obs_ids").split(", ")
-        observation_ids = [int(i.strip("[]")) for i in observation_ids if i.strip("[]")]
+        obs_ids_str = request.POST.get("obs_ids", "")
+        if obs_ids_str:
+            observation_ids = obs_ids_str.split(", ")
+            observation_ids = [
+                int(i.strip("[]")) for i in observation_ids if i.strip("[]")
+            ]
+        else:
+            observation_ids = []
         parse_end = time.time()
         logger.info(
             f"Parsing observation IDs took {parse_end - parse_start:.4f} seconds"
         )
+        logger.info(f"Using {len(observation_ids)} observation IDs for download")
 
         satellite_name = (
             request.POST.get("satellite_name")
