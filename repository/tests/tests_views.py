@@ -1,3 +1,4 @@
+from datetime import timedelta
 from unittest.mock import patch
 
 import pytest
@@ -252,6 +253,65 @@ class SearchViewTest(TestCase):
         data = response.json()
         self.assertTrue(len(data["rows"]) > 0)
         self.assertEqual(data["rows"][0]["satellite_name"], "STARLINK-123")
+        self.assertIn("obs_ids", data)
+        self.assertIsInstance(data["obs_ids"], list)
+        self.assertTrue(len(data["obs_ids"]) > 0)
+
+    def test_search_with_date_filter_updates_obs_ids(self):
+        """Test search with date filters returns correct obs_ids"""
+        # Create observations on different dates
+        base_date = timezone.now()
+        old_obs = Observation.objects.create(
+            satellite_id=self.satellite,
+            location_id=self.location,
+            obs_time_utc=base_date - timedelta(days=30),
+            obs_time_uncert_sec=1.0,
+            instrument="Test",
+            obs_mode="VISUAL",
+            obs_filter="CLEAR",
+            obs_email="test@example.com",
+            obs_orc_id=["0000-0000-0000-0000"],
+        )
+        recent_obs = Observation.objects.create(
+            satellite_id=self.satellite,
+            location_id=self.location,
+            obs_time_utc=base_date - timedelta(days=5),
+            obs_time_uncert_sec=1.0,
+            instrument="Test",
+            obs_mode="VISUAL",
+            obs_filter="CLEAR",
+            obs_email="test@example.com",
+            obs_orc_id=["0000-0000-0000-0000"],
+        )
+
+        # Search with date filter (last 10 days)
+        start_date = (base_date - timedelta(days=10)).date()
+        response = self.client.post(
+            reverse("search"),
+            {
+                "sat_name": "",
+                "sat_number": "",
+                "obs_mode": "",
+                "start_date_range": start_date.isoformat(),
+                "end_date_range": "",
+                "observation_id": "",
+                "observer_orcid": "",
+                "instrument": "",
+                "limit": "25",
+                "offset": "0",
+                "sort": "date_added",
+                "order": "desc",
+            },
+            HTTP_X_REQUESTED_WITH="XMLHttpRequest",
+        )
+
+        self.assertEqual(response.status_code, 200)
+        data = response.json()
+
+        # Verify obs_ids contains only recent observation, not old one
+        self.assertIn("obs_ids", data)
+        self.assertIn(recent_obs.id, data["obs_ids"])
+        self.assertNotIn(old_obs.id, data["obs_ids"])
 
     def test_custom_404(self):
         # Test the custom 404 handler

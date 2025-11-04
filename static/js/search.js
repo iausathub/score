@@ -109,6 +109,12 @@ function onLoadSuccess(data) {
     } else {
         $('#totalResultsMessage').empty();
     }
+
+    // Update the hidden obs_ids field for download
+    if (data.obs_ids) {
+        const obsIdsStr = data.obs_ids.join(', ');
+        $('input[name="obs_ids"]').val(obsIdsStr);
+    }
 }
 
 function onLoadError(status, res) {
