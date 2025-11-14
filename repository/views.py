@@ -23,7 +23,7 @@ from repository.forms import (
 )
 from repository.models import Observation, Satellite
 from repository.serializers import ObservationSerializer
-from repository.tasks import process_upload
+from repository.tasks import process_upload_csv
 from repository.utils.csv_utils import create_csv
 from repository.utils.email_utils import send_data_change_email
 from repository.utils.general_utils import (
@@ -98,7 +98,7 @@ def index(request):
         obs = list(read_data)
 
         # Create Task
-        upload_task = process_upload.delay(obs)
+        upload_task = process_upload_csv.delay(obs)
         task_id = upload_task.task_id
 
         # This prevents the file from being re-uploaded if the page is refreshed
