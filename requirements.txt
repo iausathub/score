@@ -37,6 +37,8 @@ django-recaptcha==4.0.0
 django-storages==1.14.3
 django-upgrade==1.20.0
 djangorestframework==3.14.0
+dnspython==2.8.0
+email-validator==2.3.0
 filelock==3.13.1
 gunicorn==21.2.0
 identify==2.5.33
