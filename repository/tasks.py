@@ -549,6 +549,10 @@ def process_upload_api(
         )
 
         obs_ids.append(observation.id)
+        if obs_created:
+            summary["created"] += 1
+        else:
+            summary["duplicates"] += 1
 
         # Update progress for new observation
         self.update_state(

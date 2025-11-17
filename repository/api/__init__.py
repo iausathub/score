@@ -14,8 +14,15 @@ def validation_error_handler(request, exc: ValidationError):
     for error in exc.errors:
         # Create user-friendly error message
 
+        # path parameter error (e.g., /observations/{observation_id})
+        if len(error["loc"]) == 2:
+            error_detail = {
+                "field": error["loc"][1],
+                "message": error["msg"],
+                "type": error["type"],
+            }
         # top level error
-        if len(error["loc"]) == 3:
+        elif len(error["loc"]) == 3:
             error_detail = {
                 "field": error["loc"][2],
                 "message": error["msg"],

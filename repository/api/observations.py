@@ -11,32 +11,6 @@ from .schemas import ObservationSchema
 router = Router()
 
 
-@router.get("/{observation_id}", response=ObservationSchema)
-def get_observation(request, observation_id: int):
-    """Get Observation Details
-
-    Retrieve detailed information about a specific observation by its ID.
-
-    ### Parameters
-    - **observation_id**: The unique identifier of the observation
-
-    ### Returns
-    ObservationSchema containing:
-    - Basic observation details (time, uncertainties)
-    - Position measurements (RA, Dec, range, range rate)
-    - Observer information (instrument, mode, filter)
-    - Location data (latitude, longitude, altitude)
-    - Associated satellite information
-
-    ### Raises
-    - **404**: Observation not found
-    """
-    return get_object_or_404(
-        Observation.objects.select_related("location_id", "satellite_id"),
-        id=observation_id,
-    )
-
-
 @router.get("", response=list[ObservationSchema])
 @paginate
 def get_all_observations(request):
@@ -58,6 +32,56 @@ def get_all_observations(request):
         .order_by("id")
         .all()
     )
+
+
+@router.get("/search", response=list[ObservationSchema])
+@paginate
+def search_observations(
+    request,
+    satellite_number: int | None = None,
+    start_date: datetime | None = None,
+    end_date: datetime | None = None,
+    min_magnitude: float | None = None,
+    max_magnitude: float | None = None,
+):
+    """Search Observations
+
+    Search for observations using various filters.
+
+    ### Parameters
+    - **satellite_number**: Filter by NORAD ID
+    - **start_date**: Include observations after this date (UTC)
+    - **end_date**: Include observations before this date (UTC)
+    - **min_magnitude**: Upper brightness limit (lower number = brighter)
+    - **max_magnitude**: Lower brightness limit (higher number = dimmer)
+
+    ### Returns
+    List of observations matching the search criteria
+    """
+    query = Observation.objects.select_related("location_id", "satellite_id")
+
+    if satellite_number:
+        query = query.filter(satellite_id__sat_number=satellite_number)
+    if start_date:
+        query = query.filter(obs_time_utc__gte=start_date)
+    if end_date:
+        query = query.filter(obs_time_utc__lte=end_date)
+
+    # Handle magnitude range
+    if min_magnitude is not None and max_magnitude is not None:
+
+        if min_magnitude < max_magnitude:
+            print("Invalid range, returning empty list")
+            return []
+        query = query.filter(
+            apparent_mag__lte=min_magnitude, apparent_mag__gte=max_magnitude
+        )
+    elif min_magnitude is not None:
+        query = query.filter(apparent_mag__lte=min_magnitude)
+    elif max_magnitude is not None:
+        query = query.filter(apparent_mag__gte=max_magnitude)
+
+    return query.all()
 
 
 @router.get("/recent", response=list[ObservationSchema])
@@ -139,51 +163,27 @@ def get_observation_stats(request):
     }
 
 
-@router.get("/search", response=list[ObservationSchema])
-@paginate
-def search_observations(
-    request,
-    satellite_number: int | None = None,
-    start_date: datetime | None = None,
-    end_date: datetime | None = None,
-    min_magnitude: float | None = None,
-    max_magnitude: float | None = None,
-):
-    """Search Observations
+@router.get("/{observation_id}", response=ObservationSchema)
+def get_observation(request, observation_id: int):
+    """Get Observation Details
 
-    Search for observations using various filters.
+    Retrieve detailed information about a specific observation by its ID.
 
     ### Parameters
-    - **satellite_number**: Filter by NORAD ID
-    - **start_date**: Include observations after this date (UTC)
-    - **end_date**: Include observations before this date (UTC)
-    - **min_magnitude**: Upper brightness limit (lower number = brighter)
-    - **max_magnitude**: Lower brightness limit (higher number = dimmer)
+    - **observation_id**: The unique identifier of the observation
 
     ### Returns
-    List of observations matching the search criteria
+    ObservationSchema containing:
+    - Basic observation details (time, uncertainties)
+    - Position measurements (RA, Dec, range, range rate)
+    - Observer information (instrument, mode, filter)
+    - Location data (latitude, longitude, altitude)
+    - Associated satellite information
+
+    ### Raises
+    - **404**: Observation not found
     """
-    query = Observation.objects.select_related("location_id", "satellite_id")
-
-    if satellite_number:
-        query = query.filter(satellite_id__sat_number=satellite_number)
-    if start_date:
-        query = query.filter(obs_time_utc__gte=start_date)
-    if end_date:
-        query = query.filter(obs_time_utc__lte=end_date)
-
-    # Handle magnitude range
-    if min_magnitude is not None and max_magnitude is not None:
-
-        if min_magnitude < max_magnitude:
-            print("Invalid range, returning empty list")
-            return []
-        query = query.filter(
-            apparent_mag__lte=min_magnitude, apparent_mag__gte=max_magnitude
-        )
-    elif min_magnitude is not None:
-        query = query.filter(apparent_mag__lte=min_magnitude)
-    elif max_magnitude is not None:
-        query = query.filter(apparent_mag__gte=max_magnitude)
-
-    return query.all()
+    return get_object_or_404(
+        Observation.objects.select_related("location_id", "satellite_id"),
+        id=observation_id,
+    )
