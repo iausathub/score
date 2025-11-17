@@ -2,7 +2,6 @@ import os
 import uuid
 
 import pytest
-from django.test import TestCase, override_settings
 from django.utils import timezone
 from ninja.testing import TestClient
 
@@ -10,60 +9,77 @@ from repository.api import api
 from repository.tasks import process_upload_api
 
 
-@override_settings(
-    CELERY_TASK_ALWAYS_EAGER=True,
-    CELERY_TASK_EAGER_PROPAGATES=True,
-)
-class TestUploadAPI(TestCase):
-    def setUp(self):
-        os.environ["NINJA_SKIP_REGISTRY"] = "1"
-        self.client = TestClient(api)
+@pytest.mark.django_db
+def test_upload_observation(mocker):
+    """Test uploading one observation"""
+    os.environ["NINJA_SKIP_REGISTRY"] = "1"
+    client = TestClient(api)
 
-    def test_upload_observation(self):
-        """Test uploading one observation"""
-        observation_data = {
-            "observations": [
-                {
-                    "obs_time_utc": "2024-01-01T00:00:00Z",
-                    "obs_time_uncert_sec": 0.1,
-                    "instrument": "TEST-SCOPE",
-                    "obs_mode": "CCD",
-                    "obs_filter": "Clear",
-                    "obs_email": "test@example.com",
-                    "obs_orc_id": ["0000-0000-0000-0000"],
-                    "satellite_number": 12345,
-                    "obs_lat_deg": 20.0,
-                    "obs_long_deg": -155.0,
-                    "obs_alt_m": 3000.0,
-                    "limiting_magnitude": 18.0,
-                }
-            ],
-            "notification_email": "test@example.com",
-        }
-        batch_id = uuid.uuid4()
-        response = self.client.post(
-            "/upload", json=observation_data, batch_id=str(batch_id)
-        )
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        self.assertEqual(data["status"], "PENDING")
-        self.assertEqual(data["batch_id"], response.json()["batch_id"])
-        self.assertEqual(data["created_at"], response.json()["created_at"])
+    # Mock the Celery task response
+    mock_task = mocker.Mock()
+    test_task_id = str(uuid.uuid4())
+    mock_task.task_id = test_task_id
+    mocker.patch(
+        "repository.api.upload.process_upload_api.apply_async",
+        return_value=mock_task,
+    )
 
-    def test_get_upload_status(self):
-        """Test getting the status endpoint returns valid response"""
-        batch_id = uuid.uuid4()
-        response = self.client.get(f"/upload/{batch_id}/status")
-        self.assertEqual(response.status_code, 200)
-        data = response.json()
-        # Should get a status for non-existent task (PENDING or FAILURE)
-        self.assertIn("status", data)
-        self.assertIn("batch_id", data)
+    observation_data = {
+        "observations": [
+            {
+                "obs_time_utc": "2024-01-01T00:00:00Z",
+                "obs_time_uncert_sec": 0.1,
+                "instrument": "TEST-SCOPE",
+                "obs_mode": "CCD",
+                "obs_filter": "Clear",
+                "obs_email": "test@example.com",
+                "obs_orc_id": ["0000-0000-0000-0000"],
+                "satellite_number": 12345,
+                "obs_lat_deg": 20.0,
+                "obs_long_deg": -155.0,
+                "obs_alt_m": 3000.0,
+                "limiting_magnitude": 18.0,
+            }
+        ],
+        "notification_email": "test@example.com",
+    }
+    batch_id = uuid.uuid4()
+    response = client.post("/upload", json=observation_data, batch_id=str(batch_id))
+    assert response.status_code == 200
+    data = response.json()
+    assert data["status"] == "PENDING"
+    assert data["batch_id"] == test_task_id
+    assert "created_at" in data
+
+
+@pytest.mark.django_db
+def test_get_upload_status(mocker):
+    """Test getting the status endpoint returns valid response"""
+    os.environ["NINJA_SKIP_REGISTRY"] = "1"
+    client = TestClient(api)
+
+    # Mock AsyncResult and Progress to avoid Redis connection
+    mock_task = mocker.Mock()
+    mock_task.info = None
+    mocker.patch("repository.api.upload.AsyncResult", return_value=mock_task)
+
+    mock_progress_instance = mocker.Mock()
+    mock_progress_instance.get_info.return_value = {"state": "PENDING"}
+    mocker.patch("repository.api.upload.Progress", return_value=mock_progress_instance)
+
+    batch_id = uuid.uuid4()
+    response = client.get(f"/upload/{batch_id}/status")
+    assert response.status_code == 200
+    data = response.json()
+    # Should get a status for non-existent task (PENDING)
+    assert "status" in data
+    assert data["status"] == "PENDING"
+    assert "batch_id" in data
 
 
 @pytest.mark.django_db
 def test_process_upload_api_success_task(mocker):
-    """Test the process_upload_api task directly"""
+    """Test that the task completes with a successfully created observation"""
     # Mock all the things
     mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
     mocker.patch("repository.tasks.send_confirmation_email")
@@ -151,7 +167,7 @@ def test_process_upload_api_success_task(mocker):
 
 @pytest.mark.django_db
 def test_process_upload_api_rejected_task(mocker):
-    """Test the process_upload_api task directly"""
+    """Test that task completes with a rejected observation"""
     # Mock all the things
     mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
     mocker.patch("repository.tasks.send_confirmation_email")
@@ -220,13 +236,8 @@ def test_process_upload_api_rejected_task(mocker):
 
 @pytest.mark.django_db
 def test_process_upload_api_null_email_task(mocker):
-    """Test the process_upload_api task directly"""
-    # Mock all the things
-    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
-    mocker.patch("repository.tasks.send_confirmation_email")
-    mocker.patch.object(process_upload_api, "update_state")
-
-    """Test the process_upload_api task directly"""
+    """Test that the task uses the email from the first observation
+    if no notification email is provided"""
     # Mock all the things
     mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
     mock_send_confirmation_email = mocker.patch(
@@ -295,7 +306,6 @@ def test_process_upload_api_null_email_task(mocker):
         True,  # send confirmation email
     )
 
-    # how to test this here?
     assert result["status"] == "SUCCESS"
     assert result["summary"]["total"] == 1
     assert mock_send_confirmation_email.call_args[0][1] == "test123@example.com"
@@ -449,7 +459,6 @@ def test_process_upload_api_progress_task(mocker):
 
     obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
 
-    # Create a single observation dict that we'll repeat 10 times
     single_observation = {
         "satellite_name": "TEST SAT",
         "satellite_number": 12345,
@@ -490,20 +499,16 @@ def test_process_upload_api_progress_task(mocker):
         False,
     )
 
-    # Check the actual return value structure
+    # Check that update_state was called with progress updates
     assert result["status"] == "SUCCESS"
     assert result["summary"]["total"] == 10
-    assert result["summary"]["created"] == 1  # First one creates, rest are duplicates
+    assert result["summary"]["created"] == 1
     assert result["summary"]["duplicates"] == 9
     assert result["summary"]["rejected"] == 0
 
-    # Check that update_state was called with progress updates
-    # Should be called: 1 initial + 10 progress updates (one per observation)
-    # The mock was created earlier in the test at line 434
     update_state_mock = process_upload_api.update_state
-    assert update_state_mock.call_count == 11  # 1 initial + 10 progress updates
+    assert update_state_mock.call_count == 11
 
-    # Verify progress increments correctly
     first_call = update_state_mock.call_args_list[0]
     assert first_call.kwargs["state"] == "PROGRESS"
     assert first_call.kwargs["meta"]["current"] == 0

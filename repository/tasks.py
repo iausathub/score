@@ -401,6 +401,11 @@ def process_upload_api(
             reject_observation(idx, obs_data, additional_data)
             continue
 
+        # rejected if validation returned False
+        if isinstance(additional_data, bool):
+            reject_observation(idx, obs_data, "Satellite position validation failed.")
+            continue
+
         potentially_discrepant = is_potentially_discrepant(additional_data)
 
         if (
@@ -444,29 +449,37 @@ def process_upload_api(
             sat_ra_deg=obs_data["sat_ra_deg"] if obs_data["sat_ra_deg"] else None,
             sat_dec_deg=obs_data["sat_dec_deg"] if obs_data["sat_dec_deg"] else None,
             sigma_2_ra=obs_data["sigma_2_ra"] if obs_data["sigma_2_ra"] else None,
-            sigma_ra_sigma_dec=obs_data["sigma_ra_sigma_dec"]
-            if obs_data["sigma_ra_sigma_dec"]
-            else None,
+            sigma_ra_sigma_dec=(
+                obs_data["sigma_ra_sigma_dec"]
+                if obs_data["sigma_ra_sigma_dec"]
+                else None
+            ),
             sigma_2_dec=obs_data["sigma_2_dec"] if obs_data["sigma_2_dec"] else None,
-            range_to_sat_km=obs_data["range_to_sat_km"]
-            if obs_data["range_to_sat_km"]
-            else None,
-            range_to_sat_uncert_km=obs_data["range_to_sat_uncert_km"]
-            if obs_data["range_to_sat_uncert_km"]
-            else None,
-            range_rate_sat_km_s=obs_data["range_rate_sat_km_s"]
-            if obs_data["range_rate_sat_km_s"]
-            else None,
-            range_rate_sat_uncert_km_s=obs_data["range_rate_sat_uncert_km_s"]
-            if obs_data["range_rate_sat_uncert_km_s"]
-            else None,
+            range_to_sat_km=(
+                obs_data["range_to_sat_km"] if obs_data["range_to_sat_km"] else None
+            ),
+            range_to_sat_uncert_km=(
+                obs_data["range_to_sat_uncert_km"]
+                if obs_data["range_to_sat_uncert_km"]
+                else None
+            ),
+            range_rate_sat_km_s=(
+                obs_data["range_rate_sat_km_s"]
+                if obs_data["range_rate_sat_km_s"]
+                else None
+            ),
+            range_rate_sat_uncert_km_s=(
+                obs_data["range_rate_sat_uncert_km_s"]
+                if obs_data["range_rate_sat_uncert_km_s"]
+                else None
+            ),
             comments=obs_data["comments"] if obs_data["comments"] else None,
-            data_archive_link=obs_data["data_archive_link"]
-            if obs_data["data_archive_link"]
-            else None,
-            mpc_code=obs_data["mpc_code"].strip().upper()
-            if obs_data["mpc_code"]
-            else None,
+            data_archive_link=(
+                obs_data["data_archive_link"] if obs_data["data_archive_link"] else None
+            ),
+            mpc_code=(
+                obs_data["mpc_code"].strip().upper() if obs_data["mpc_code"] else None
+            ),
             phase_angle=additional_data.phase_angle,
             range_to_sat_km_satchecker=additional_data.range_to_sat,
             range_rate_sat_km_s_satchecker=additional_data.range_rate,
@@ -494,40 +507,52 @@ def process_upload_api(
                 "obs_filter": obs_data["obs_filter"],
                 "obs_email": obs_data["obs_email"],
                 "obs_orc_id": obs_data["obs_orc_id"],
-                "sat_ra_deg": obs_data["sat_ra_deg"]
-                if obs_data["sat_ra_deg"]
-                else None,
-                "sat_dec_deg": obs_data["sat_dec_deg"]
-                if obs_data["sat_dec_deg"]
-                else None,
-                "sigma_2_ra": obs_data["sigma_2_ra"]
-                if obs_data["sigma_2_ra"]
-                else None,
-                "sigma_ra_sigma_dec": obs_data["sigma_ra_sigma_dec"]
-                if obs_data["sigma_ra_sigma_dec"]
-                else None,
-                "sigma_2_dec": obs_data["sigma_2_dec"]
-                if obs_data["sigma_2_dec"]
-                else None,
-                "range_to_sat_km": obs_data["range_to_sat_km"]
-                if obs_data["range_to_sat_km"]
-                else None,
-                "range_to_sat_uncert_km": obs_data["range_to_sat_uncert_km"]
-                if obs_data["range_to_sat_uncert_km"]
-                else None,
-                "range_rate_sat_km_s": obs_data["range_rate_sat_km_s"]
-                if obs_data["range_rate_sat_km_s"]
-                else None,
-                "range_rate_sat_uncert_km_s": obs_data["range_rate_sat_uncert_km_s"]
-                if obs_data["range_rate_sat_uncert_km_s"]
-                else None,
+                "sat_ra_deg": (
+                    obs_data["sat_ra_deg"] if obs_data["sat_ra_deg"] else None
+                ),
+                "sat_dec_deg": (
+                    obs_data["sat_dec_deg"] if obs_data["sat_dec_deg"] else None
+                ),
+                "sigma_2_ra": (
+                    obs_data["sigma_2_ra"] if obs_data["sigma_2_ra"] else None
+                ),
+                "sigma_ra_sigma_dec": (
+                    obs_data["sigma_ra_sigma_dec"]
+                    if obs_data["sigma_ra_sigma_dec"]
+                    else None
+                ),
+                "sigma_2_dec": (
+                    obs_data["sigma_2_dec"] if obs_data["sigma_2_dec"] else None
+                ),
+                "range_to_sat_km": (
+                    obs_data["range_to_sat_km"] if obs_data["range_to_sat_km"] else None
+                ),
+                "range_to_sat_uncert_km": (
+                    obs_data["range_to_sat_uncert_km"]
+                    if obs_data["range_to_sat_uncert_km"]
+                    else None
+                ),
+                "range_rate_sat_km_s": (
+                    obs_data["range_rate_sat_km_s"]
+                    if obs_data["range_rate_sat_km_s"]
+                    else None
+                ),
+                "range_rate_sat_uncert_km_s": (
+                    obs_data["range_rate_sat_uncert_km_s"]
+                    if obs_data["range_rate_sat_uncert_km_s"]
+                    else None
+                ),
                 "comments": obs_data["comments"] if obs_data["comments"] else None,
-                "data_archive_link": obs_data["data_archive_link"]
-                if obs_data["data_archive_link"]
-                else None,
-                "mpc_code": obs_data["mpc_code"].strip().upper()
-                if obs_data["mpc_code"]
-                else None,
+                "data_archive_link": (
+                    obs_data["data_archive_link"]
+                    if obs_data["data_archive_link"]
+                    else None
+                ),
+                "mpc_code": (
+                    obs_data["mpc_code"].strip().upper()
+                    if obs_data["mpc_code"]
+                    else None
+                ),
                 "phase_angle": additional_data.phase_angle,
                 "range_to_sat_km_satchecker": additional_data.range_to_sat,
                 "range_rate_sat_km_s_satchecker": additional_data.range_rate,
