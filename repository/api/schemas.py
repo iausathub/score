@@ -108,8 +108,8 @@ class ObservationBatchUploadSchema(Schema):
     """Schema for uploading multiple observations at once"""
 
     observations: list[ObservationUploadSchema]
-    notification_email: EmailStr = Field(
-        ...,
+    notification_email: EmailStr | None = Field(
+        None,
         description="Email address for confirmation, "
         "defaults to the email in the first observation if not provided",
     )
