@@ -24,6 +24,7 @@ def test_upload_observation(mocker):
         return_value=mock_task,
     )
 
+    batch_id = str(uuid.uuid4())
     observation_data = {
         "observations": [
             {
@@ -42,9 +43,9 @@ def test_upload_observation(mocker):
             }
         ],
         "notification_email": "test@example.com",
+        "batch_id": batch_id,
     }
-    batch_id = uuid.uuid4()
-    response = client.post("/upload", json=observation_data, batch_id=str(batch_id))
+    response = client.post("/upload", json=observation_data)
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "PENDING"

@@ -116,6 +116,11 @@ class ObservationBatchUploadSchema(Schema):
     send_confirmation: bool = Field(
         True, description="Whether to send confirmation email"
     )
+    batch_id: UUID | None = Field(
+        None,
+        description="Optional batch ID for the upload. "
+        "If not provided, one will be generated automatically",
+    )
 
 
 class UploadResponseSchema(Schema):

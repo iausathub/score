@@ -1,4 +1,4 @@
-from typing import Any, Optional
+from typing import Any
 
 from celery import shared_task
 from celery_progress.backend import ProgressRecorder
@@ -311,7 +311,7 @@ def process_upload_api(
     self,
     observations: list[dict],
     created_at: str,  # Receives as ISO string from Celery
-    notification_email: Optional[str] = None,
+    notification_email: str | None = None,
     send_confirmation: bool = True,
 ) -> dict[str, str | list[int] | bool]:
     """

@@ -1,4 +1,3 @@
-from typing import Optional
 from uuid import UUID, uuid4
 
 from celery.result import AsyncResult
@@ -24,15 +23,18 @@ router = Router()
 
 
 @router.post("", response=UploadResponseSchema)
-def upload_observations(
-    request, data: ObservationBatchUploadSchema, batch_id: Optional[UUID] = None
-):
+def upload_observations(request, data: ObservationBatchUploadSchema):
     """Upload observations
 
-    Upload observations to the database.
+    Upload an observation set to the database. This uses the same logic to validate
+    observations as the file upload endpoint, but does not stop on failures -
+    all rejected observations are added to the response with reasons for failure.
 
-    ### Parameters
-    - **data**: The JSON data with observations
+    The batch_id is optional and can be provided in the request body.
+    If not provided, one will be generated automatically and returned in the response.
+
+    If no notification email is provided, the email in the first observation
+    will be used for confirmation email if one is requested.
     """
 
     # start Celery task to process the upload
@@ -41,7 +43,7 @@ def upload_observations(
     observations_data = [obs.model_dump() for obs in data.observations]
 
     task_id = (
-        str(batch_id) if batch_id else str(uuid4())
+        str(data.batch_id) if data.batch_id else str(uuid4())
     )  # Celery requires string, not UUID object
     created_at = (
         timezone.now().isoformat()
@@ -76,7 +78,8 @@ def upload_observations(
 def get_upload_status(request, batch_id: UUID):
     """Get the status of a batch upload
 
-    Get the status of a batch upload.
+    Get the status of a batch upload. This is used to get the in-progress status of a
+    batch upload, as well as the final status when the upload is complete.
 
     ### Parameters
     - **batch_id**: The ID of the batch upload
