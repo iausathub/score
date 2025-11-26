@@ -320,6 +320,7 @@ def verify_email(request, token):
             "key": plaintext_key,
             "name": api_key.name,
             "email": api_key.email,
+            "orcid_id": api_key.orcid_id,
             "prefix": api_key.key_prefix,
             "created_at": api_key.created_at.isoformat(),
             "expires_at": (
