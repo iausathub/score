@@ -1,0 +1,99 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block title %}API Key Created - SCORE{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-3">
+    <div class="container-md">
+        <h2 class="text-center p-2">API Key Created Successfully</h2>
+
+        <div class="row">
+            <div class="col-md-10 offset-md-1">
+                <div class="card border-danger mb-4">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">
+                            IMPORTANT: Save This Key Now!
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">
+                            This is the <strong>only time</strong> you will see this API key.
+                            It cannot be recovered if lost.
+                        </p>
+
+                        <div class="bg-light p-4 rounded border mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <code id="api-key" style="font-size: 1.1rem; word-break: break-all;">
+                                    {{ api_key.key }}
+                                </code>
+                                <button
+                                    class="btn btn-outline-tertiary ms-3"
+                                    onclick="copyToClipboard()"
+                                    id="copy-btn"
+                                >
+                                    <i class="fas fa-copy"></i> Copy
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="alert alert-info mb-0">
+                            <p class="mb-2"><strong>Key Details:</strong></p>
+                            <ul class="mb-0">
+                                <li><strong>Name:</strong> {{ api_key.name }}</li>
+                                <li><strong>Email:</strong> {{ api_key.email }}</li>
+                                <li><strong>ORCID ID:</strong> {{ api_key.orcid_id }}</li>
+                                <li><strong>Prefix:</strong> {{ api_key.prefix }}...</li>
+                                <li><strong>Created:</strong> {{ api_key.created_at|date:"Y-m-d H:i:s" }} UTC</li>
+                                {% if api_key.expires_at %}
+                                    <li><strong>Expires:</strong> {{ api_key.expires_at|date:"Y-m-d H:i:s" }} UTC</li>
+                                {% else %}
+                                    <li><strong>Expires:</strong> Never</li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+
+            <div class="mt-4 d-flex justify-content-between">
+                {% if user.is_staff %}
+                    <a href="{% url 'create_api_key' %}" class="btn btn-primary btn-sm">
+                        Create Another Key
+                    </a>
+                    <a href="{% url 'list_api_keys' %}" class="btn btn-secondary btn-sm">
+                        View All Keys
+                    </a>
+                {% else %}
+                    <a href="{% url 'api-access' %}" class="btn btn-primary btn-sm">
+                        Back to API Access
+                    </a>
+                {% endif %}
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyToClipboard() {
+    const keyText = document.getElementById('api-key').textContent.trim();
+    const btn = document.getElementById('copy-btn');
+
+    navigator.clipboard.writeText(keyText).then(function() {
+        // Success feedback
+        const originalHTML = btn.innerHTML;
+        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+        btn.classList.remove('btn-outline-primary');
+        btn.classList.add('btn-success');
+
+        setTimeout(function() {
+            btn.innerHTML = originalHTML;
+            btn.classList.remove('btn-success');
+            btn.classList.add('btn-outline-primary');
+        }, 2000);
+    }, function(err) {
+        alert('Failed to copy key. Please copy manually.');
+    });
+}
+</script>
+{% endblock %}

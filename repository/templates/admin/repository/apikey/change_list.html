@@ -1,0 +1,33 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static %}
+
+{% block result_list %}
+    <div style="margin-bottom: 20px;">
+        <div style="display: flex; flex-direction: row; gap: 10px; max-width: 500px;">
+            <a href="/admin-tools/api-keys/create/" style="
+                display: block;
+                padding: 10px 20px;
+                background-color: #417690;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                text-align: center;
+            ">Create New API Key</a>
+
+            <a href="/admin-tools/api-keys/" style="
+                display: block;
+                padding: 10px 20px;
+                background-color: #417690;
+                color: white;
+                text-decoration: none;
+                border-radius: 4px;
+                text-align: center;
+            ">Manage All API Keys</a>
+        </div>
+        <p style="color: #666; margin-top: 15px;">
+            <strong>Note:</strong> Use the buttons above to manage API keys through the web interface.
+            This admin view is for viewing and monitoring only.
+        </p>
+    </div>
+    {{ block.super }}
+{% endblock %}

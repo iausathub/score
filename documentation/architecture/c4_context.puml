@@ -1,0 +1,32 @@
+@startuml c4_context
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+
+title System Context Diagram - SCORE (Satellite Constellation Observation Repository)
+
+Person(astronomer, "Astronomer/Observer", "Observer who collects satellite brightness and position data")
+Person(scientist, "Researcher/Operator", "Analyzes satellite observation data for research purposes")
+Person(automated_system, "Automated Observatory", "Robotic telescope or automated data collection system")
+Person(admin, "System Administrator", "Manages SCORE system and user accounts")
+
+System(score, "SCORE", "Repository and ingestion service for satellite brightness/position observations. Provides web interface and REST API for data upload, search, and download.")
+
+Boundary(iau, "IAU CPS System") {
+    System_Ext(satchecker, "SatChecker API", "Affiliated external service providing satellite ephemeris and validation")
+}
+
+System_Ext(email_service, "Email Service", "SMTP server for sending confirmation and notification emails")
+System_Ext(celestrak, "CelesTrak/Space-Track", "TLE data providers")
+
+' Relationships
+Rel(astronomer, score, "Uploads observation data via web form (CSV), downloads data, searches observations")
+Rel(astronomer, score, "Submits observations via REST API")
+Rel(scientist, score, "Searches and downloads observation datasets for analysis")
+Rel(automated_system, score, "Submits observations via REST API")
+Rel(admin, score, "Manages system, reviews flagged observations, monitors uploads")
+
+Rel(score, satchecker, "Requests satellite ephemeris and position validation data", "HTTPS/JSON")
+Rel(score, email_service, "Sends upload confirmation and data change notification emails", "SMTP")
+Rel(satchecker, celestrak, "Fetches TLE data for satellite position calculations", "HTTPS")
+
+SHOW_LEGEND(true)
+@enduml

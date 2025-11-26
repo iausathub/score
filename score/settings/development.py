@@ -21,6 +21,9 @@ SECRET_KEY = "score-secret-key"  # noqa: S105
 SECRET_HEALTH_CHECK_TOKEN = "health-check-token"  # noqa: S105
 SECRET_ADMIN_TOKEN = "test"  # noqa: S105
 
+EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
+SCORE_URL = "http://127.0.0.1:8000"
+
 DEBUG = True
 DEBUG_PROPAGATE_EXCEPTIONS = True
 ALLOWED_HOSTS = ["127.0.0.1"]

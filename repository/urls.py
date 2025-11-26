@@ -2,7 +2,7 @@ from django.conf import settings
 from django.urls import include, path
 from django.views.generic.base import RedirectView
 
-from . import views
+from . import views, views_admin
 from .api import api
 
 handler404 = views.custom_404
@@ -15,6 +15,7 @@ urlpatterns = [
     path("view", views.view_data, name="view-data"),
     path("download-all", views.download_all, name="download-all"),
     path("api-access", views.api_access, name="api-access"),
+    path("request-api-key", views.request_api_key, name="request-api-key"),
     path("download-results", views.download_results, name="download-results"),
     path("search", views.search, name="search"),
     path("download-ids", views.download_obs_ids, name="download-obs-ids"),
@@ -76,5 +77,27 @@ urlpatterns = [
         "api/observations/",
         views.get_observations_for_satellites,
         name="observations-for-satellites",
+    ),
+    path("verify/<uuid:token>/", views.verify_email, name="verify_email"),
+    path(
+        "api-key/show/",
+        views.show_api_key_view,
+        name="show_api_key",
+    ),
+    # API Key Management (Staff user role only)
+    path(
+        "admin-tools/api-keys/create/",
+        views_admin.create_api_key_view,
+        name="create_api_key",
+    ),
+    path(
+        "admin-tools/api-keys/",
+        views_admin.list_api_keys_view,
+        name="list_api_keys",
+    ),
+    path(
+        "admin-tools/api-keys/<int:key_id>/revoke/",
+        views_admin.revoke_api_key_view,
+        name="revoke_api_key",
     ),
 ]

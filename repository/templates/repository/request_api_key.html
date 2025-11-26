@@ -1,0 +1,125 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block title %}Request API Key - SCORE{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-3">
+    <div class="container-md">
+        <h2 class="text-center p-2 mb-5">Request API Key</h2>
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <div>
+                    <p class="mb-3">
+                        Request a new API key to upload your observations to SCORE. Once you verify your email,
+                        we'll generate your key and display it on screen. <strong>Copy it immediately</strong> —
+                        you won't be able to see it again. You'll use this key to upload observations and check upload status.
+                    </p>
+                    <p class="mb-3">
+                        Each API key is linked to an ORCID ID for verification. However, you can use one key to
+                        upload observations from multiple observers.
+                    </p>
+                    <p class="mb-4">
+                        If you do not have an ORCID ID, you can request one <a href="https://orcid.org/" target="_blank" rel="noopener noreferrer" class="text-decoration-none">here</a>.
+                    </p>
+
+                    <hr class="my-4">
+
+                    <form method="post" id="apiKeyForm">
+                        {% csrf_token %}
+                        <div class="mb-4">
+                            <label for="name" class="form-label">
+                                Name <span class="text-danger">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="name"
+                                name="name"
+                                required
+                                placeholder="John Doe or Organization Name"
+                            >
+                            <small class="form-text text-muted">
+                                Name of the person or organization this key is for
+                            </small>
+                        </div>
+                        <div class="mb-4">
+                            <label for="email" class="form-label">
+                                Email <span class="text-danger">*</span>
+                            </label>
+                            <input
+                                type="email"
+                                class="form-control"
+                                id="email"
+                                name="email"
+                                required
+                                placeholder="user@example.com"
+                            >
+                            <small class="form-text text-muted">
+                                Contact email - this email will be used to verify the request to view the key
+                            </small>
+                        </div>
+                        <div class="mb-4">
+                            <label for="orcid_id" class="form-label">
+                                ORCID ID <span class="text-danger">*</span>
+                            </label>
+                            <input
+                                type="text"
+                                class="form-control"
+                                id="orcid_id"
+                                name="orcid_id"
+                                required
+                                placeholder="0000-0000-0000-0000"
+                            >
+                            <small class="form-text text-muted">
+                                ORCID ID used for verification of key holder
+                            </small>
+                        </div>
+
+                        <div class="alert alert-warning mt-4 mb-4">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <strong>Important:</strong> The API key will be displayed only once after creation.
+                            Make sure to copy and securely store it.
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true" id="submitSpinner" style="display: none;"></span>
+                                <i class="fas fa-key" id="submitIcon"></i>
+                                <span id="submitText"> Request API Key</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const form = document.getElementById('apiKeyForm');
+    const submitBtn = document.getElementById('submitBtn');
+    const submitSpinner = document.getElementById('submitSpinner');
+    const submitIcon = document.getElementById('submitIcon');
+    const submitText = document.getElementById('submitText');
+
+    form.addEventListener('submit', function(e) {
+        // Show loading state
+        submitBtn.disabled = true;
+        submitSpinner.style.display = 'inline-block';
+        submitIcon.style.display = 'none';
+        submitText.textContent = ' Sending request...';
+    });
+});
+</script>
+{% endblock %}

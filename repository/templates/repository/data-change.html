@@ -6,7 +6,7 @@
 {% block content %}
 <div class="container-fluid p-3">
     <div class="container-md">
-        <h2 class="text-center p-2">Data Change Request</h2>
+        <h2 class="text-center p-2 mb-5">Data Change Request</h2>
 
     </div>
     <div class="d-flex justify-content-center">
@@ -41,7 +41,9 @@
                             {{ form.reason }}
                             <div class="text-danger">{{ form.reason.errors }}</div>
                         </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
+                        <div class="d-flex justify-content-end">
+                            <button type="submit" class="btn btn-primary">Submit</button>
+                        </div>
 
                         {% if msg %}
                         <div class="pt-3">

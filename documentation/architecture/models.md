@@ -7,6 +7,7 @@ classDiagram
         +Integer sat_number
         +CharField sat_name
         +DateTimeField date_added
+        +CharField intl_designator
         +clean()
         +save()
     }
@@ -15,7 +16,7 @@ classDiagram
         +FloatField obs_long_deg
         +FloatField obs_alt_m
         +DateTimeField date_added
-        +clean()
+        +distance_to(lat, lon)
         +save()
     }
     class Observation {
@@ -39,7 +40,7 @@ classDiagram
         +FloatField range_rate_sat_uncert_km_s
         +TextField comments
         +URLField data_archive_link
-        +CharField flag
+        +BooleanField potentially_discrepant
         +FloatField phase_angle
         +FloatField range_to_sat_km_satchecker
         +FloatField range_rate_sat_km_s_satchecker

@@ -1,0 +1,39 @@
+@startuml c4_container
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Container Diagram - SCORE System Architecture
+
+' Users
+Person(astronomer, "Astronomer/Observer", "Uploads observation data via web browser or REST API")
+Person(scientist, "Researcher", "Queries and downloads observation data")
+Person(admin, "System Administrator", "Manages system and reviews flagged observations")
+
+' SCORE Application
+Boundary(score_boundary, "SCORE Application") {
+    Container(django, "Django Web Application", "Python / Django / Gunicorn", "Provides web UI and REST API endpoints for data upload, search, visualization, and export. Handles authentication and request validation.")
+    Container(celery_worker, "Celery Worker", "Python / Celery", "Processes async upload tasks: validates observation data, enriches with SatChecker ephemeris data, and persists to database.")
+    ContainerDb(postgres, "PostgreSQL Database", "Stores satellites, observation locations, observations, and user accounts.")
+    Container(redis, "Redis Cache & Broker", "Redis", "Message broker for task queue communication between Django and Celery. Stores task progress and results.")
+}
+
+' External Systems
+System_Ext(satchecker, "SatChecker API", "External ephemeris validation service (IAU CPS)")
+System_Ext(email_service, "SMTP Server", "Email delivery service for notifications")
+
+' User interactions
+Rel(astronomer, django, "Uploads CSV files / submits observation data, searches, downloads data", "HTTPS/REST")
+Rel(scientist, django, "Searches and downloads datasets", "HTTPS")
+Rel(admin, django, "Reviews flagged observations, manages users", "HTTPS")
+
+' Internal interactions
+Rel(django, postgres, "Reads satellites, observations, locations", "SQL")
+Rel(django, redis, "Queues upload tasks, reads task status")
+Rel(django, email_service, "Sends data change notification emails", "SMTP")
+Rel(celery_worker, redis, "Reads queued tasks, writes progress")
+Rel(celery_worker, postgres, "Creates/updates observations and satellites", "SQL")
+Rel(celery_worker, satchecker, "Validates satellite positions", "HTTPS/JSON")
+Rel(celery_worker, email_service, "Sends upload confirmation emails", "SMTP")
+
+LAYOUT_LEFT_RIGHT()
+SHOW_LEGEND(true)
+@enduml

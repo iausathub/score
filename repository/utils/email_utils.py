@@ -1,3 +1,5 @@
+import uuid
+
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 
@@ -84,5 +86,46 @@ def send_data_change_email(contact_email: str, obs_ids: str, reason: str):
     <p>Reason for Data Change/Deletion: {reason}</p>
     </html>
     """
+    msg.attach_alternative(email_body, "text/html")
+    msg.send()
+
+
+def send_api_key_verification_email(
+    email_address: str,
+    verification_token: uuid.UUID,
+) -> None:
+    """
+    Sends a verification email for the user to open a page to view the API key.
+
+    Args:
+        email_address (str): The email address to send the verification email to.
+        verification_token (uuid.UUID): The unique verification token for this request.
+
+    Returns:
+        None
+    """
+
+    text_body = (
+        f"Please click the link below to verify your email and request the API key:\n\n"
+        f"Verify Email: {settings.SCORE_URL}/verify/{verification_token}/\n\n"
+        f"This link will expire in 30 minutes."
+    )
+
+    email_body = f"""
+    <html>
+    <h2>SCORE API Key Email Verification</h2>
+    <p>Please click the link below to verify your email and request the API key:</p>
+    <p><a href="{settings.SCORE_URL}/verify/{verification_token}/">Verify Email</a></p>
+    <p>This link will expire in 30 minutes.</p>
+    </html>
+    """
+
+    msg = EmailMultiAlternatives(
+        "SCORE API Key Email Verification",
+        text_body,
+        settings.EMAIL_HOST_USER,
+        [email_address],
+    )
+
     msg.attach_alternative(email_body, "text/html")
     msg.send()

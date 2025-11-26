@@ -8,7 +8,7 @@ from repository.api import api
 from repository.models import Location, Observation, Satellite
 
 
-class TestAPI(TestCase):
+class TestDataAccessAPI(TestCase):
     def setUp(self):
         os.environ["NINJA_SKIP_REGISTRY"] = "1"
         self.client = TestClient(api)
@@ -59,7 +59,7 @@ class TestAPI(TestCase):
 
     def test_get_observation(self):
         """Test getting a single observation"""
-        response = self.client.get(f"/observation/{self.observation.id}")
+        response = self.client.get(f"/observations/{self.observation.id}")
         self.assertEqual(response.status_code, 200)
         data = response.json()
 
@@ -76,7 +76,7 @@ class TestAPI(TestCase):
     def test_get_satellite_observations(self):
         """Test getting all observations for a satellite"""
         response = self.client.get(
-            f"/satellite/{self.satellite.sat_number}/observations"
+            f"/satellites/{self.satellite.sat_number}/observations"
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -92,7 +92,7 @@ class TestAPI(TestCase):
         self.assertIn(self.observation2.id, observation_ids)
 
         # Test with invalid satellite
-        response = self.client.get("/satellite/-1/observations?offset=1&limit=1")
+        response = self.client.get("/satellites/-1/observations?offset=1&limit=1")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data.get("items", [])), 0)
@@ -101,7 +101,7 @@ class TestAPI(TestCase):
         """Test searching observations with filters"""
         # In range
         response = self.client.get(
-            f"/search?satellite_number={self.satellite.sat_number}&min_magnitude={11.0}&max_magnitude={9.0}"
+            f"/observations/search?satellite_number={self.satellite.sat_number}&min_magnitude={11.0}&max_magnitude={9.0}"
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -114,7 +114,7 @@ class TestAPI(TestCase):
 
         # Out of range
         response = self.client.get(
-            f"/search?satellite_number={self.satellite.sat_number}&min_magnitude={6.0}&max_magnitude={5.0}"
+            f"/observations/search?satellite_number={self.satellite.sat_number}&min_magnitude={6.0}&max_magnitude={5.0}"
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -122,7 +122,7 @@ class TestAPI(TestCase):
         self.assertEqual(len(data["items"]), 0)
 
         response = self.client.get(
-            f"/search?satellite_number={self.satellite.sat_number}&min_magnitude={9.0}&max_magnitude={11.0}"
+            f"/observations/search?satellite_number={self.satellite.sat_number}&min_magnitude={9.0}&max_magnitude={11.0}"
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
@@ -131,7 +131,7 @@ class TestAPI(TestCase):
 
     def test_get_satellites(self):
         """Test getting all satellites"""
-        response = self.client.get("/satellites")
+        response = self.client.get("/satellites/")
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertEqual(len(data), 1)
