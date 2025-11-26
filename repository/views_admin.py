@@ -84,9 +84,9 @@ def create_api_key_view(request):
                 "orcid_id": orcid_id,
                 "prefix": api_key.key_prefix,
                 "created_at": api_key.created_at.isoformat(),
-                "expires_at": api_key.expires_at.isoformat()
-                if api_key.expires_at
-                else None,
+                "expires_at": (
+                    api_key.expires_at.isoformat() if api_key.expires_at else None
+                ),
             }
 
             # Set session to expire when browser closes for security
