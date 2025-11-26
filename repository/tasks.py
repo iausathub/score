@@ -376,7 +376,9 @@ def process_upload_api(
     for idx, obs_data in enumerate(observations):
 
         # Verify the observation data
-        if obs_data["satellite_name"] is not None:
+        if obs_data["satellite_name"] is None:
+            obs_data["satellite_name"] = ""
+        else:
             obs_data["satellite_name"] = obs_data["satellite_name"].upper()
 
         # get info from SatChecker
