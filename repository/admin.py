@@ -56,6 +56,7 @@ class APIKeyAdmin(admin.ModelAdmin):
         "key_prefix",
         "name",
         "email",
+        "orcid_id",
         "is_active",
         "created_at",
         "expires_at",
