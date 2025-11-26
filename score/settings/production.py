@@ -17,6 +17,8 @@ SECRET_ADMIN_TOKEN = get_secret("score-secret-key")["admin-token"]  # noqa: F405
 ALLOWED_HOSTS = [get_secret("score-allowed-hosts")["score-prod-alb"]]  # noqa: F405
 ALLOWED_HOSTS.append(gethostbyname(gethostname()))
 
+SCORE_URL = "https://score.cps.iau.org"
+
 USE_X_FORWARDED_HOST = True
 SECURE_PROXY_SSL_HEADER = ("HTTP_X_FORWARDED_PROTO", "https")
 CSRF_TRUSTED_ORIGINS = get_secret("score-allowed-hosts")[

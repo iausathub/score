@@ -6,14 +6,29 @@ from django.utils import timezone
 from ninja.testing import TestClient
 
 from repository.api import api
+from repository.models import APIKey
 from repository.tasks import process_upload_api
 
 
+@pytest.fixture
+def api_key():
+    """Create a test API key"""
+    api_key_obj, plaintext_key = APIKey.create_key(
+        name="Test User",
+        email="test@example.com",
+        orcid_id="0000-0000-0000-0000",
+        notes="Test API key",
+    )
+    # Return both the object and the plaintext key for testing
+    return api_key_obj, plaintext_key
+
+
 @pytest.mark.django_db
-def test_upload_observation(mocker):
-    """Test uploading one observation"""
+def test_upload_observation(mocker, api_key):
+    """Test uploading one observation with authentication"""
     os.environ["NINJA_SKIP_REGISTRY"] = "1"
     client = TestClient(api)
+    api_key_obj, plaintext_key = api_key
 
     # Mock the Celery task response
     mock_task = mocker.Mock()
@@ -45,7 +60,11 @@ def test_upload_observation(mocker):
         "notification_email": "test@example.com",
         "batch_id": batch_id,
     }
-    response = client.post("/upload", json=observation_data)
+    response = client.post(
+        "/upload",
+        json=observation_data,
+        headers={"Authorization": f"Bearer {plaintext_key}"},
+    )
     assert response.status_code == 200
     data = response.json()
     assert data["status"] == "PENDING"
@@ -54,10 +73,73 @@ def test_upload_observation(mocker):
 
 
 @pytest.mark.django_db
-def test_get_upload_status(mocker):
-    """Test getting the status endpoint returns valid response"""
+def test_upload_observation_no_auth(mocker):
+    """Test uploading without authentication returns 401"""
     os.environ["NINJA_SKIP_REGISTRY"] = "1"
     client = TestClient(api)
+
+    observation_data = {
+        "observations": [
+            {
+                "obs_time_utc": "2024-01-01T00:00:00Z",
+                "obs_time_uncert_sec": 0.1,
+                "instrument": "TEST-SCOPE",
+                "obs_mode": "CCD",
+                "obs_filter": "Clear",
+                "obs_email": "test@example.com",
+                "obs_orc_id": ["0000-0000-0000-0000"],
+                "satellite_number": 12345,
+                "obs_lat_deg": 20.0,
+                "obs_long_deg": -155.0,
+                "obs_alt_m": 3000.0,
+                "limiting_magnitude": 18.0,
+            }
+        ],
+        "notification_email": "test@example.com",
+    }
+    response = client.post("/upload", json=observation_data)
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_upload_observation_invalid_auth(mocker):
+    """Test uploading with invalid API key returns 401"""
+    os.environ["NINJA_SKIP_REGISTRY"] = "1"
+    client = TestClient(api)
+
+    observation_data = {
+        "observations": [
+            {
+                "obs_time_utc": "2024-01-01T00:00:00Z",
+                "obs_time_uncert_sec": 0.1,
+                "instrument": "TEST-SCOPE",
+                "obs_mode": "CCD",
+                "obs_filter": "Clear",
+                "obs_email": "test@example.com",
+                "obs_orc_id": ["0000-0000-0000-0000"],
+                "satellite_number": 12345,
+                "obs_lat_deg": 20.0,
+                "obs_long_deg": -155.0,
+                "obs_alt_m": 3000.0,
+                "limiting_magnitude": 18.0,
+            }
+        ],
+        "notification_email": "test@example.com",
+    }
+    response = client.post(
+        "/upload",
+        json=observation_data,
+        headers={"Authorization": "Bearer invalid_key_12345"},
+    )
+    assert response.status_code == 401
+
+
+@pytest.mark.django_db
+def test_get_upload_status(mocker, api_key):
+    """Test getting the status endpoint returns valid response with authentication"""
+    os.environ["NINJA_SKIP_REGISTRY"] = "1"
+    client = TestClient(api)
+    api_key_obj, plaintext_key = api_key
 
     # Mock AsyncResult and Progress to avoid Redis connection
     mock_task = mocker.Mock()
@@ -69,13 +151,27 @@ def test_get_upload_status(mocker):
     mocker.patch("repository.api.upload.Progress", return_value=mock_progress_instance)
 
     batch_id = uuid.uuid4()
-    response = client.get(f"/upload/{batch_id}/status")
+    response = client.get(
+        f"/upload/{batch_id}/status",
+        headers={"Authorization": f"Bearer {plaintext_key}"},
+    )
     assert response.status_code == 200
     data = response.json()
     # Should get a status for non-existent task (PENDING)
     assert "status" in data
     assert data["status"] == "PENDING"
     assert "batch_id" in data
+
+
+@pytest.mark.django_db
+def test_get_upload_status_no_auth(mocker):
+    """Test getting the status without authentication returns 401"""
+    os.environ["NINJA_SKIP_REGISTRY"] = "1"
+    client = TestClient(api)
+
+    batch_id = uuid.uuid4()
+    response = client.get(f"/upload/{batch_id}/status")
+    assert response.status_code == 401
 
 
 @pytest.mark.django_db

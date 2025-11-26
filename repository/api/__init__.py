@@ -59,7 +59,7 @@ def http_error_handler(request, exc: HttpError):
 
 api = NinjaAPI(
     title="SCORE API",
-    description="API for accessing and uploadingsatellite observation data",
+    description="API for accessing and uploading satellite observation data",
     version="2.0.0",
     throttle=[
         AnonRateThrottle("10/s"),
@@ -70,6 +70,6 @@ api = NinjaAPI(
 api.add_exception_handler(ValidationError, validation_error_handler)
 api.add_exception_handler(HttpError, http_error_handler)
 
-api.add_router("/observations", observations_router)
-api.add_router("/satellites", satellites_router)
-api.add_router("/upload", upload_router)
+api.add_router("/observations", observations_router, tags=["Observations"])
+api.add_router("/satellites", satellites_router, tags=["Satellites"])
+api.add_router("/upload", upload_router, tags=["Upload"])

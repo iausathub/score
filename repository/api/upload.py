@@ -6,6 +6,7 @@ from django.utils import timezone
 from ninja import Router
 
 from ..tasks import process_upload_api
+from .auth import APIKeyAuth
 from .schemas import (
     ErrorSchema,
     ObservationBatchUploadSchema,
@@ -20,9 +21,10 @@ from .schemas import (
 )
 
 router = Router()
+api_key_auth = APIKeyAuth()
 
 
-@router.post("", response=UploadResponseSchema)
+@router.post("", response=UploadResponseSchema, auth=api_key_auth)
 def upload_observations(request, data: ObservationBatchUploadSchema):
     """Upload observations
 
@@ -35,6 +37,9 @@ def upload_observations(request, data: ObservationBatchUploadSchema):
 
     If no notification email is provided, the email in the first observation
     will be used for confirmation email if one is requested.
+
+    **Authentication required**: Include your API key in the Authorization header as:
+    `Authorization: Bearer <your_api_key>`
     """
 
     # start Celery task to process the upload
@@ -74,6 +79,7 @@ def upload_observations(request, data: ObservationBatchUploadSchema):
         | UploadResponseSchema,
         500: UploadFailedSchema,
     },
+    auth=api_key_auth,
 )
 def get_upload_status(request, batch_id: UUID):
     """Get the status of a batch upload
@@ -83,6 +89,9 @@ def get_upload_status(request, batch_id: UUID):
 
     ### Parameters
     - **batch_id**: The ID of the batch upload
+
+    **Authentication required**: Include your API key in the Authorization header as:
+    `Authorization: Bearer <your_api_key>`
     """
 
     # Get the Celery task result
