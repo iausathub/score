@@ -283,4 +283,6 @@ SCORE_ACKNOWLEDGMENT_TEXT = (
     "member institution of the IAU CPS."
 )
 
+SCORE_URL = "https://score.cps.iau.org"
+
 NINJA_PAGINATION_PER_PAGE = 1000
