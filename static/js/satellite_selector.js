@@ -20,6 +20,7 @@ class SatelliteSelector {
         qianfan: 'accent2',
         spacemobile: 'accent3',
         oneweb: 'danger',
+        planetlabs: 'success',
         other: 'secondary'
     };
 
