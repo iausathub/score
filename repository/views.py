@@ -766,6 +766,12 @@ def _get_constellation_filter(const_id):
         return Q(satellite_id__sat_name__icontains="SPACEMOBILE")
     elif const_id == "oneweb":
         return Q(satellite_id__sat_name__icontains="ONEWEB")
+    elif const_id == "planetlabs":
+        return (
+            Q(satellite_id__sat_name__icontains="FLOCK")
+            | Q(satellite_id__sat_name__icontains="PELICAN")
+            | Q(satellite_id__sat_name__icontains="TANAGER")
+        )
     else:  # other
         return (
             ~Q(satellite_id__sat_name__icontains="STARLINK")
@@ -784,6 +790,7 @@ def visualization_view(request):
         "kuiper": {"name": "Kuiper"},
         "qianfan": {"name": "Qianfan"},
         "spacemobile": {"name": "AST SpaceMobile"},
+        "planetlabs": {"name": "PlanetLabs"},
         "oneweb": {"name": "OneWeb"},
         # 'other': {'name': 'Other'},
     }
@@ -1387,6 +1394,12 @@ def get_satellite_data(request):
                 constellation_id = "spacemobile"
             elif "ONEWEB" in sat_name.upper():
                 constellation_id = "oneweb"
+            elif "PELICAN" in sat_name.upper():
+                constellation_id = "planetlabs"
+            elif "FLOCK" in sat_name.upper():
+                constellation_id = "planetlabs"
+            elif "TANAGER" in sat_name.upper():
+                constellation_id = "planetlabs"
 
             if constellation_id not in constellations:
                 constellations[constellation_id] = {"count": 0, "satellites": []}
@@ -1452,6 +1465,12 @@ def get_observations_for_satellites(request):
                     )
                 elif constellation == "oneweb":
                     combined_filters |= Q(satellite_id__sat_name__icontains="ONEWEB")
+                elif constellation == "planetlabs":
+                    combined_filters |= (
+                        Q(satellite_id__sat_name__icontains="FLOCK")
+                        | Q(satellite_id__sat_name__icontains="PELICAN")
+                        | Q(satellite_id__sat_name__icontains="TANAGER")
+                    )
                 elif constellation == "other":
                     # "Other" means anything that's NOT the known constellations
                     combined_filters |= (
@@ -1460,6 +1479,9 @@ def get_observations_for_satellites(request):
                         & ~Q(satellite_id__sat_name__icontains="QIANFAN")
                         & ~Q(satellite_id__sat_name__icontains="SPACEMOBILE")
                         & ~Q(satellite_id__sat_name__icontains="ONEWEB")
+                        & ~Q(satellite_id__sat_name__icontains="FLOCK")
+                        & ~Q(satellite_id__sat_name__icontains="PELICAN")
+                        & ~Q(satellite_id__sat_name__icontains="TANAGER")
                     )
 
         # Apply the combined filter only if satellites/constellations are selected
