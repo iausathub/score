@@ -790,7 +790,7 @@ def visualization_view(request):
         "kuiper": {"name": "Kuiper"},
         "qianfan": {"name": "Qianfan"},
         "spacemobile": {"name": "AST SpaceMobile"},
-        "planetlabs": {"name": "PlanetLabs"},
+        "planetlabs": {"name": "Planet Labs"},
         "oneweb": {"name": "OneWeb"},
         # 'other': {'name': 'Other'},
     }
