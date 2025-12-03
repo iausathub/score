@@ -55,7 +55,7 @@ def test_benchmark_api_observations(benchmark):
 
 def test_benchmark_api_satellite_observations(benchmark):
     # Test get all observations for a satellite
-    endpoint = f"{base_url}/satellites/59588/observations"
+    endpoint = f"{base_url}/satellite/59588/observations"
 
     response = benchmark(make_request, endpoint)
     assert response.status_code == 200
