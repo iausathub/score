@@ -70,7 +70,7 @@ def filter_observations(form_data):
     radius = form_data.get("observer_radius")
 
     if all([latitude, longitude, radius]):
-        # Get location IDs within radius using existing distance_to method
+        # Filter by observation IDs meeting the radius constraint to return QuerySet
         matching_location_ids = [
             loc.id
             for loc in Location.objects.all()
