@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1764799905185,
+  "lastUpdate": 1764960467501,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -780,6 +780,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.06397129132332828",
             "extra": "mean: 198.03456199999894 msec\nrounds: 6"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "eb63a96f3f95152691e4cff84339fdfa89f72e4b",
+          "message": "Search location fix for missing results (#115)\n\n* Make sure filter_observations always returns a QuerySet when adding location to the search\n\n* Fix comment",
+          "timestamp": "2025-12-05T10:46:23-08:00",
+          "tree_id": "1f00ffe7641ec649e380ba3e748152a9802504f4",
+          "url": "https://github.com/iausathub/score/commit/eb63a96f3f95152691e4cff84339fdfa89f72e4b"
+        },
+        "date": 1764960467126,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 60.503215163043755,
+            "unit": "iter/sec",
+            "range": "stddev: 0.009198349252403181",
+            "extra": "mean: 16.52804726666517 msec\nrounds: 60"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 211.14420700257529,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00022748537230366002",
+            "extra": "mean: 4.73609962686688 msec\nrounds: 67"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 1.3250246215744013,
+            "unit": "iter/sec",
+            "range": "stddev: 0.058109380402374206",
+            "extra": "mean: 754.702956999995 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 3.607380935730002,
+            "unit": "iter/sec",
+            "range": "stddev: 0.01834347277291046",
+            "extra": "mean: 277.2094263999975 msec\nrounds: 5"
           }
         ]
       }
