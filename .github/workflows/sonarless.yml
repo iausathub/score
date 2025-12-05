@@ -1,0 +1,19 @@
+name: Sonarless
+on: push
+jobs:
+  Sonarless-Scan:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sonarless Scan
+        uses: gitricko/sonarless@v1.2
+        with:
+          sonar-source-path: 'repository'
+
+      - name: Upload SonarQube results as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: sonar-metrics
+          path: ./sonar-metrics.json
