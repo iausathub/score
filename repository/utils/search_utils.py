@@ -1,6 +1,6 @@
 from django.utils import timezone
 
-from repository.models import Observation
+from repository.models import Location, Observation
 
 
 def filter_observations(form_data):
@@ -70,10 +70,12 @@ def filter_observations(form_data):
     radius = form_data.get("observer_radius")
 
     if all([latitude, longitude, radius]):
-        observations = [
-            obs
-            for obs in observations
-            if obs.location_id.distance_to(latitude, longitude) <= radius
+        # Get location IDs within radius using existing distance_to method
+        matching_location_ids = [
+            loc.id
+            for loc in Location.objects.all()
+            if loc.distance_to(latitude, longitude) <= radius
         ]
+        observations = observations.filter(location_id__in=matching_location_ids)
 
     return observations
