@@ -45,6 +45,18 @@ def test_process_upload_valid_data(mocker):
     assert isinstance(result["date_added"], str)
     assert isinstance(result["email"], str)
 
+    # Re-upload same data - should not create duplicate
+    result2 = process_upload(data)
+    assert result2["obs_ids"][0] == result["obs_ids"][0]
+    assert Observation.objects.filter(satellite_id__sat_number="59588").count() == 1
+
+    # Upload with different apparent_mag - should create new record
+    data_different_mag = [data[0][:]]
+    data_different_mag[0][4] = 5.0
+    result3 = process_upload(data_different_mag)
+    assert result3["obs_ids"][0] != result["obs_ids"][0]
+    assert Observation.objects.filter(satellite_id__sat_number="59588").count() == 2
+
 
 @pytest.mark.django_db
 def test_process_upload_valid_data_zero_altitude(mocker):
@@ -805,3 +817,83 @@ def test_process_upload_discrepant_flag_false(mocker):
     assert observation.potentially_discrepant is False
     assert observation.alt_deg_satchecker == 15.0
     assert observation.illuminated is True
+
+
+@pytest.mark.django_db
+def test_process_upload_different_satchecker_values(mocker):
+    """Test that re-uploading the same observation does not create a duplicate
+    if SatChecker values are different."""
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+
+    def make_mock_satchecker(solar_azimuth):
+        mock = mocker.Mock()
+        mock.alt_deg = 15.0
+        mock.illuminated = True
+        mock.phase_angle = 15.0
+        mock.range_to_sat = 500.0
+        mock.range_rate = 0.1
+        mock.sat_ra_deg = 180.0
+        mock.sat_dec_deg = 45.0
+        mock.ddec_deg_s = 0.01
+        mock.dra_cosdec_deg_s = 0.02
+        mock.az_deg = 270.0
+        mock.satellite_name = "Duplicate_Test"
+        mock.intl_designator = "2024-888A"
+        mock.sat_altitude_km = 400.0
+        mock.solar_elevation_deg = -10.0
+        mock.solar_azimuth_deg = solar_azimuth
+        return mock
+
+    data = [
+        [
+            "Duplicate_Test",
+            "88888",
+            "2024-10-03T19:00:27.319Z",
+            0.001,
+            6.5,
+            0.1,
+            52.15,
+            4.49,
+            8,
+            10,
+            "Test Instrument",
+            "CCD",
+            "CLEAR",
+            "test@example.com",
+            "0000-0000-0000-0000",
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            "",
+            "",
+            "",
+        ]
+    ]
+
+    # Original upload
+    mocker.patch(
+        "repository.tasks.add_additional_data",
+        return_value=make_mock_satchecker(180.12345678),
+    )
+    result1 = process_upload(data)
+    assert result1["status"] == "success"
+    first_obs_id = result1["obs_ids"][0]
+    assert Observation.objects.filter(satellite_id__sat_number="88888").count() == 1
+
+    # Re-upload with slightly different solar azimuth value from SatChecker
+    mocker.patch(
+        "repository.tasks.add_additional_data",
+        return_value=make_mock_satchecker(180.1234568),
+    )
+    result2 = process_upload(data)
+    assert result2["status"] == "success"
+
+    # only one observation should be created
+    assert result2["obs_ids"][0] == first_obs_id
+    assert Observation.objects.filter(satellite_id__sat_number="88888").count() == 1
