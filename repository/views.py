@@ -751,6 +751,8 @@ def _get_constellation_id(sat_name):
         return "spacemobile"
     elif "ONEWEB" in sat_name_upper:
         return "oneweb"
+    elif any(x in sat_name_upper for x in ["FLOCK", "PELICAN", "TANAGER"]):
+        return "planetlabs"
     return "other"
 
 
@@ -779,6 +781,9 @@ def _get_constellation_filter(const_id):
             & ~Q(satellite_id__sat_name__icontains="QIANFAN")
             & ~Q(satellite_id__sat_name__icontains="SPACEMOBILE")
             & ~Q(satellite_id__sat_name__icontains="ONEWEB")
+            & ~Q(satellite_id__sat_name__icontains="FLOCK")
+            & ~Q(satellite_id__sat_name__icontains="PELICAN")
+            & ~Q(satellite_id__sat_name__icontains="TANAGER")
         )
 
 
@@ -1380,26 +1385,7 @@ def get_satellite_data(request):
             sat_name = satellite.sat_name or ""
 
             # Determine constellation based on satellite name patterns
-            constellation_id = "other"
-
-            if "STARLINK" in sat_name.upper() or "STARLINK" in str(
-                satellite.sat_number
-            ):
-                constellation_id = "starlink"
-            elif "KUIPER" in sat_name.upper() or "KUIPER" in str(satellite.sat_number):
-                constellation_id = "kuiper"
-            elif "QIANFAN" in sat_name.upper():
-                constellation_id = "qianfan"
-            elif "SPACEMOBILE" in sat_name.upper():
-                constellation_id = "spacemobile"
-            elif "ONEWEB" in sat_name.upper():
-                constellation_id = "oneweb"
-            elif "PELICAN" in sat_name.upper():
-                constellation_id = "planetlabs"
-            elif "FLOCK" in sat_name.upper():
-                constellation_id = "planetlabs"
-            elif "TANAGER" in sat_name.upper():
-                constellation_id = "planetlabs"
+            constellation_id = _get_constellation_id(sat_name)
 
             if constellation_id not in constellations:
                 constellations[constellation_id] = {"count": 0, "satellites": []}
@@ -1563,17 +1549,7 @@ def get_observations_for_satellites(request):
             sat_name = obs["satellite_id__sat_name"] or ""
 
             # Determine constellation ID for color mapping
-            constellation_id = "other"
-            if "STARLINK" in sat_name.upper():
-                constellation_id = "starlink"
-            elif "KUIPER" in sat_name.upper():
-                constellation_id = "kuiper"
-            elif "QIANFAN" in sat_name.upper():
-                constellation_id = "qianfan"
-            elif "SPACEMOBILE" in sat_name.upper():
-                constellation_id = "spacemobile"
-            elif "ONEWEB" in sat_name.upper():
-                constellation_id = "oneweb"
+            constellation_id = _get_constellation_id(sat_name)
 
             chart_data.append(
                 {
