@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1766516814695,
+  "lastUpdate": 1766886910180,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -936,6 +936,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.053426428846998504",
             "extra": "mean: 1.0043307891999915 sec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "distinct": true,
+          "id": "8f4e54146827c29b367bb9e75c9c87ca4e180ed0",
+          "message": "Make data visualization satellite selector and graph colors match, and match the ones on the main visualization page",
+          "timestamp": "2025-12-27T17:53:48-08:00",
+          "tree_id": "603851814936a9e1299228a665db7ef9c1e2d4a1",
+          "url": "https://github.com/iausathub/score/commit/8f4e54146827c29b367bb9e75c9c87ca4e180ed0"
+        },
+        "date": 1766886909309,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 53.91153209233321,
+            "unit": "iter/sec",
+            "range": "stddev: 0.010130427523575592",
+            "extra": "mean: 18.54890709259236 msec\nrounds: 54"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 196.1733320457917,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00011941368749539765",
+            "extra": "mean: 5.097532827584206 msec\nrounds: 58"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 2.422405950430543,
+            "unit": "iter/sec",
+            "range": "stddev: 0.01753086963046279",
+            "extra": "mean: 412.8127243999984 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 2.480980543888113,
+            "unit": "iter/sec",
+            "range": "stddev: 0.027410708646820818",
+            "extra": "mean: 403.0664417999958 msec\nrounds: 5"
           }
         ]
       }
