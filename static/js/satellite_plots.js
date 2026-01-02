@@ -253,7 +253,7 @@ function createTrace(obs, constellation, color, enableTooltip = true, showColorb
             symbol: CONSTELLATION_SYMBOLS[constellation] || 'circle',
             color: obs.map(o => -o.magnitude),  // Negate for reversed colorbar positioning
             colorscale: PLOT_CONFIG.colorscales[theme],
-            reversescale: true,  // Lower magnitude (brighter) gets warmer colors
+            reversescale: !isDark, // reverse for better visibility in dark mode
             showscale: showColorbar,
             colorbar: {
                 title: 'Magnitude',
