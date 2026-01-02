@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1766886910180,
+  "lastUpdate": 1767318863765,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -988,6 +988,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.027410708646820818",
             "extra": "mean: 403.0664417999958 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "distinct": true,
+          "id": "3d58255c3e231dc3a74a341ff5d8c77c7be50abe",
+          "message": "Reverse color scale for magnitudes in the overview all-sky plot for dark mode for better visibility",
+          "timestamp": "2026-01-01T17:53:01-08:00",
+          "tree_id": "7057ccd6e5f541c4449bc4909d9572eb65a55c4e",
+          "url": "https://github.com/iausathub/score/commit/3d58255c3e231dc3a74a341ff5d8c77c7be50abe"
+        },
+        "date": 1767318862926,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 56.95976008447595,
+            "unit": "iter/sec",
+            "range": "stddev: 0.009398958087896502",
+            "extra": "mean: 17.556253722222824 msec\nrounds: 54"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 167.6074068547673,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0059863417422800535",
+            "extra": "mean: 5.966323438596632 msec\nrounds: 57"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 2.380441923520468,
+            "unit": "iter/sec",
+            "range": "stddev: 0.027425659396910933",
+            "extra": "mean: 420.09006400000146 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 2.167725268870805,
+            "unit": "iter/sec",
+            "range": "stddev: 0.060006127164284766",
+            "extra": "mean: 461.31307059999926 msec\nrounds: 5"
           }
         ]
       }
