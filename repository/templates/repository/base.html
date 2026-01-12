@@ -87,6 +87,7 @@ crossorigin=""/>
               <ul class="dropdown-menu dropdown-menu-end">
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'index' %}">Upload observation file</a>
                 </li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'api-access' %}#uploading-observations">Upload observations - API</a></li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'generate-csv' %}">Generate observation file</a></li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'data-format' %}">Data format</a></li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'policy' %}">SCORE use policy</a></li>
@@ -104,11 +105,24 @@ crossorigin=""/>
                 </li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'download-data' %}">Download all
                   observations</a></li>
-                <li><a class="dropdown-item" aria-current="page" href="{% url 'api-access' %}">Data Access API</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'api-access' %}#data-retrieval">Data access - API</a></li>
                 <div class="dropdown-divider"></div>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'satellites' %}">Observed satellites</a></li>
                 <li><a class="dropdown-item" aria-current="page" href="{% url 'data-change' %}">Data change
                     request</a></li>
+              </ul>
+            </li>
+
+            <li class="nav-item dropdown">
+              <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown"
+                aria-expanded="false">
+                API
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="{% url 'api-access' %}">API Overview</a></li>
+                <li><a class="dropdown-item" aria-current="page" href="https://score.cps.iau.org/api/docs">API Documentation</a>
+                </li>
+                <li><a class="dropdown-item" aria-current="page" href="{% url 'request-api-key' %}">Request API Key</a></li>
               </ul>
             </li>
 
@@ -208,6 +222,7 @@ crossorigin=""/>
             <h6 class="text-uppercase fw-bold">Documentation</h6>
             <hr class="mb-4 mt-0 d-inline-block mx-auto" style="width: 60px; background-color: #4d85ff; height: 2px" />
             <p><a href="{% url 'data-format' %}" class="text-white">Data Format Guide</a></p>
+            <p><a href="{% url 'api-access' %}" class="text-white">API Overview</a></p>
             <p><a href="{% url 'policy' %}" class="text-white">SCORE Use Policy</a></p>
             <p><a href="{% url 'about' %}" class="text-white">About SCORE</a></p>
             <p><a href="{% url 'tools' %}" class="text-white">Tools & Resources</a></p>

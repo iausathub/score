@@ -13,6 +13,7 @@ SECRET_HEALTH_CHECK_TOKEN = get_secret("score-secret-key")[  # noqa: F405
     "health-check-token"
 ]  # noqa: F405
 SECRET_ADMIN_TOKEN = get_secret("score-secret-key")["admin-token"]  # noqa: F405
+SCORE_URL = "https://score.dev.aws.noirlab.edu/"
 
 ALLOWED_HOSTS = [get_secret("score-allowed-hosts")["score-prod-alb"]]  # noqa: F405
 ALLOWED_HOSTS.append(gethostbyname(gethostname()))

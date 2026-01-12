@@ -36,13 +36,21 @@ function populateModalFields(observation) {
     var apparent_mag = window.NumberFormatting.roundMagnitude(observation.apparent_mag, apparent_mag_uncert);
 
     document.getElementById('observation_id_label').textContent = observation.id;
-    document.getElementById('satellite_name').innerHTML = '<a href="' + satelliteDataViewUrl + '">'+ observation.satellite_id.sat_name +'</a>';
+
+    var satelliteNameLink = document.createElement('a');
+    satelliteNameLink.href = satelliteDataViewUrl;
+    satelliteNameLink.textContent = observation.satellite_id.sat_name;
+    document.getElementById('satellite_name').replaceChildren(satelliteNameLink);
+
     document.getElementById('satellite_number').textContent = observation.satellite_id.sat_number;
 
     // Make the international designator clickable if it exists
     if (observation.satellite_id.intl_designator) {
         const baseDesignator = observation.satellite_id.intl_designator.slice(0, 8);
-        document.getElementById('intl_designator').innerHTML = `<a href="/launch/${baseDesignator}/">${observation.satellite_id.intl_designator}</a>`;
+        var intlDesignatorLink = document.createElement('a');
+        intlDesignatorLink.href = '/launch/' + baseDesignator + '/';
+        intlDesignatorLink.textContent = observation.satellite_id.intl_designator;
+        document.getElementById('intl_designator').replaceChildren(intlDesignatorLink);
     } else {
         document.getElementById('intl_designator').textContent = "";
     }
@@ -60,8 +68,23 @@ function populateModalFields(observation) {
     document.getElementById('obs_instrument').textContent = observation.instrument;
 
     // Add ORCID link
-    var orcId = observation.obs_orc_id.toString().replace(/,/g, ',<br/>');
-    document.getElementById('obs_orc_id').innerHTML = `<a href="/observer/${orcId}/">${orcId}</a>`;
+    var orcIdContainer = document.getElementById('obs_orc_id');
+    orcIdContainer.replaceChildren(); // Clear existing content
+
+    var orcIds = Array.isArray(observation.obs_orc_id)
+        ? observation.obs_orc_id
+        : observation.obs_orc_id.toString().split(',');
+
+    orcIds.forEach(function(id, index) {
+        if (index > 0) {
+            orcIdContainer.appendChild(document.createTextNode(', '));
+            orcIdContainer.appendChild(document.createElement('br'));
+        }
+        var orcLink = document.createElement('a');
+        orcLink.href = '/observer/' + id.trim() + '/';
+        orcLink.textContent = id.trim();
+        orcIdContainer.appendChild(orcLink);
+    });
 
     // Populate additional fields
     populateIfExists('obs_comments', observation);
@@ -91,7 +114,11 @@ function populateModalFields(observation) {
     populateIfExists('sat_altitude_km_satchecker', observation);
 
     if (observation.data_archive_link && observation.data_archive_link !== "") {
-        document.getElementById('data_archive_link').innerHTML = '<a href="' + observation.data_archive_link + '">Data link</a>';
+        var archiveLink = document.createElement('a');
+        archiveLink.href = observation.data_archive_link;
+        archiveLink.textContent = 'Data link';
+        archiveLink.rel = 'noopener noreferrer'; // Security best practice for external links
+        document.getElementById('data_archive_link').replaceChildren(archiveLink);
     } else {
         document.getElementById('data_archive_link').textContent = "";
     }

@@ -1,0 +1,95 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block title %}Revoke API Key - SCORE{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-3">
+    <div class="container-md">
+        <h2 class="text-center p-2">Revoke API Key</h2>
+
+        <div class="row">
+            <div class="col-md-8 offset-md-2">
+                <div class="card border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">Confirm Revocation</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="lead">
+                            Are you sure you want to revoke this API key?
+                        </p>
+
+                    <div class="alert alert-warning">
+                        <strong>Warning:</strong> This action cannot be undone. The key will be immediately deactivated and cannot be used for API authentication.
+                    </div>
+
+                        <table class="table table-bordered">
+                            <tr>
+                                <th style="width: 30%;">Prefix</th>
+                                <td><code>{{ api_key.key_prefix }}...</code></td>
+                            </tr>
+                            <tr>
+                                <th>Name</th>
+                                <td>{{ api_key.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email</th>
+                                <td>{{ api_key.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Created</th>
+                                <td>{{ api_key.created_at|date:"Y-m-d H:i:s" }} UTC</td>
+                            </tr>
+                            <tr>
+                                <th>Usage Count</th>
+                                <td>{{ api_key.usage_count }}</td>
+                            </tr>
+                            <tr>
+                                <th>Last Used</th>
+                                <td>
+                                    {% if api_key.last_used_at %}
+                                        {{ api_key.last_used_at|date:"Y-m-d H:i:s" }} UTC
+                                    {% else %}
+                                        <em>Never</em>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            {% if api_key.notes %}
+                                <tr>
+                                    <th>Notes</th>
+                                    <td>{{ api_key.notes }}</td>
+                                </tr>
+                            {% endif %}
+                        </table>
+
+                    <form method="post" class="mt-4">
+                        {% csrf_token %}
+                        <div class="d-flex justify-content-between">
+                            <a href="{% url 'list_api_keys' %}" class="btn btn-secondary btn-sm">
+                                Cancel
+                            </a>
+                            <button type="submit" class="btn btn-danger btn-sm">
+                                Yes, Revoke This Key
+                            </button>
+                        </div>
+                    </form>
+                    </div>
+                </div>
+
+            <div class="card mt-4">
+                <div class="card-body">
+                    <h6>What happens when a key is revoked?</h6>
+                    <ul>
+                        <li>The key is immediately deactivated</li>
+                        <li>All API requests using this key will fail with 401 Unauthorized</li>
+                        <li>The key record remains in the database for audit purposes</li>
+                        <li>Usage history is preserved</li>
+                        <li>The key cannot be reactivated (a new key must be created)</li>
+                    </ul>
+                </div>
+            </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

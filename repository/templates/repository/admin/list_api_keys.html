@@ -1,0 +1,162 @@
+{% extends "repository/base.html" %}
+{% load static %}
+
+{% block title %}API Keys - SCORE{% endblock %}
+
+{% block content %}
+<div class="container-fluid p-3">
+    <div class="container-md">
+        <h2 class="text-center p-2">{{ title }}</h2>
+
+        <div class="row mb-3">
+            <div class="col-md-12 text-end">
+                <a href="{% url 'create_api_key' %}" class="btn btn-primary">
+                    Create New Key
+                </a>
+            </div>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row mb-3">
+            <div class="col-md-12">
+                <div class="btn-group" role="group">
+                    <a href="{% url 'list_api_keys' %}"
+                       class="btn {% if not show_all %}btn-primary{% else %}btn-secondary{% endif %}">
+                        Active Keys Only
+                    </a>
+                    <a href="{% url 'list_api_keys' %}?show_all=true"
+                       class="btn {% if show_all %}btn-primary{% else %}btn-secondary{% endif %}">
+                        All Keys
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        {% if api_keys %}
+            <div class="row">
+                <div class="col-md-12">
+                    <div class="table-responsive">
+                        <table class="table table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Prefix</th>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Status</th>
+                                    <th>Created (UTC)</th>
+                                    <th>Expires (UTC)</th>
+                                    <th>Usage Count</th>
+                                    <th>Last Used (UTC)</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for key in api_keys %}
+                                    <tr>
+                                        <td><code>{{ key.key_prefix }}...</code></td>
+                                        <td>{{ key.name }}</td>
+                                        <td>{{ key.email }}</td>
+                                        <td>
+                                            {% if key.is_valid %}
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check"></i> Active
+                                                </span>
+                                            {% else %}
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times"></i> Inactive
+                                                </span>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ key.created_at|date:"Y-m-d H:i" }}</td>
+                                        <td>
+                                            {% if key.expires_at %}
+                                                {{ key.expires_at|date:"Y-m-d H:i" }}
+                                            {% else %}
+                                                <em>Never</em>
+                                            {% endif %}
+                                        </td>
+                                        <td>{{ key.usage_count }}</td>
+                                        <td>
+                                            {% if key.last_used_at %}
+                                                {{ key.last_used_at|date:"Y-m-d H:i" }}
+                                            {% else %}
+                                                <em>Never</em>
+                                            {% endif %}
+                                        </td>
+                                        <td>
+                                        {% if key.is_active %}
+                                            <a href="{% url 'revoke_api_key' key.id %}"
+                                               class="btn btn-sm btn-danger"
+                                               title="Revoke this key">
+                                                Revoke
+                                            </a>
+                                            {% else %}
+                                                <span class="text-muted">—</span>
+                                            {% endif %}
+                                        </td>
+                                    </tr>
+                                    {% if key.notes %}
+                                        <tr class="table-secondary">
+                                            <td></td>
+                                            <td colspan="8">
+                                                <small>
+                                                    <strong>Notes:</strong> {{ key.notes }}
+                                                </small>
+                                            </td>
+                                        </tr>
+                                    {% endif %}
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row mt-3">
+                <div class="col-md-12">
+                    <div class="alert alert-info">
+                        <strong>Total:</strong> {{ api_keys|length }} key(s)
+                    </div>
+                </div>
+            </div>
+        {% else %}
+            <div class="alert alert-warning">
+                <i class="fas fa-exclamation-triangle"></i>
+                No API keys found.
+                <a href="{% url 'create_api_key' %}" class="alert-link">Create your first key</a>
+            </div>
+        {% endif %}
+
+        <div class="row mt-4">
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="card-header">
+                        <h5 class="mb-0">API Key Management</h5>
+                    </div>
+                    <div class="card-body">
+                        <p><strong>Key Management Tips:</strong></p>
+                        <ul>
+                            <li><strong>Active Keys:</strong> Valid and can be used for API authentication</li>
+                            <li><strong>Inactive Keys:</strong> Revoked or expired, cannot be used</li>
+                            <li><strong>Usage Tracking:</strong> Monitor how often keys are being used</li>
+                            <li><strong>Revocation:</strong> Immediately disables a key (cannot be undone)</li>
+                            <li><strong>Expiration:</strong> Keys automatically become invalid after expiration date</li>
+                        </ul>
+                        <div class="alert alert-warning mb-0">
+                            <strong>Security Reminder:</strong> Regularly review active keys and revoke any that are no longer needed.
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

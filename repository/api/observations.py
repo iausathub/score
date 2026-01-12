@@ -2,90 +2,16 @@ from datetime import datetime
 
 from django.db.models import Avg, Count, Max, Min
 from django.shortcuts import get_object_or_404
-from ninja import Field, ModelSchema, NinjaAPI
+from ninja import Router
 from ninja.pagination import paginate
-from ninja.throttling import AnonRateThrottle
 
-from .models import Observation, Satellite
+from ..models import Observation, Satellite
+from .schemas import ObservationSchema
 
-api = NinjaAPI(
-    title="SCORE API",
-    description="API for searching and accessing satellite observation data",
-    version="1.0.0",
-    throttle=[
-        AnonRateThrottle("10/s"),
-    ],
-)
+router = Router()
 
 
-class ObservationSchema(ModelSchema):
-    satellite_name: str = Field(None, alias="satellite_id.sat_name")
-    satellite_number: int = Field(None, alias="satellite_id.sat_number")
-    obs_lat_deg: float = Field(None, alias="location_id.obs_lat_deg")
-    obs_long_deg: float = Field(None, alias="location_id.obs_long_deg")
-    obs_alt_m: float = Field(None, alias="location_id.obs_alt_m")
-
-    class Meta:
-        model = Observation
-        fields = [
-            "id",
-            "obs_time_utc",
-            "obs_time_uncert_sec",
-            "sat_ra_deg",
-            "sat_dec_deg",
-            "range_to_sat_km",
-            "range_rate_sat_km_s",
-            "apparent_mag",
-            "apparent_mag_uncert",
-            "instrument",
-            "obs_mode",
-            "obs_filter",
-            "obs_orc_id",
-            "sigma_2_ra",
-            "sigma_2_dec",
-            "sigma_ra_sigma_dec",
-            "range_to_sat_uncert_km",
-            "range_rate_sat_uncert_km_s",
-            "comments",
-            "data_archive_link",
-            "limiting_magnitude",
-            "mpc_code",
-        ]
-
-
-class SatelliteSchema(ModelSchema):
-    class Meta:
-        model = Satellite
-        fields = ["sat_number", "sat_name", "date_added"]
-
-
-@api.get("/observation/{observation_id}", response=ObservationSchema)
-def get_observation(request, observation_id: int):
-    """Get Observation Details
-
-    Retrieve detailed information about a specific observation by its ID.
-
-    ### Parameters
-    - **observation_id**: The unique identifier of the observation
-
-    ### Returns
-    ObservationSchema containing:
-    - Basic observation details (time, uncertainties)
-    - Position measurements (RA, Dec, range, range rate)
-    - Observer information (instrument, mode, filter)
-    - Location data (latitude, longitude, altitude)
-    - Associated satellite information
-
-    ### Raises
-    - **404**: Observation not found
-    """
-    return get_object_or_404(
-        Observation.objects.select_related("location_id", "satellite_id"),
-        id=observation_id,
-    )
-
-
-@api.get("/observations", response=list[ObservationSchema])
+@router.get("", response=list[ObservationSchema])
 @paginate
 def get_all_observations(request):
     """Get All Observations
@@ -108,44 +34,7 @@ def get_all_observations(request):
     )
 
 
-@api.get("/satellite/{satellite_number}/observations", response=list[ObservationSchema])
-@paginate
-def get_observations_for_satellite(request, satellite_number: int):
-    """Get Satellite Observations
-
-    Retrieve all observations for a specific satellite.
-
-    ### Parameters
-    - **satellite_number**: NORAD ID of the satellite
-
-    ### Returns
-    List of observations containing:
-    - Position measurements (RA, Dec, range)
-    - Brightness measurements (apparent magnitude)
-    - Observation metadata (time, location, instrument, observer)
-    """
-    return Observation.objects.select_related("location_id", "satellite_id").filter(
-        satellite_id__sat_number=satellite_number
-    )
-
-
-@api.get("/satellite/{satellite_number}", response=SatelliteSchema)
-def get_satellite(request, satellite_number: int):
-    """Get a single satellite by number
-
-    Parameters
-    ----------
-    satellite_number (int): NORAD ID of the satellite
-
-    Returns
-    ----------
-    SatelliteSchema: A schema containing satellite details
-    """
-    satellite = get_object_or_404(Satellite, sat_number=satellite_number)
-    return SatelliteSchema.model_validate(satellite).model_dump()
-
-
-@api.get("/search", response=list[ObservationSchema])
+@router.get("/search", response=list[ObservationSchema])
 @paginate
 def search_observations(
     request,
@@ -195,25 +84,7 @@ def search_observations(
     return query.all()
 
 
-@api.get("/satellites", response=list[SatelliteSchema])
-def list_satellites(
-    request,
-    name: str | None = None,
-):
-    """List all satellites with optional name filter
-
-    Parameters
-    ----------
-    name (optional): Filter by satellite name
-    """
-
-    query = Satellite.objects.all()
-    if name:
-        query = query.filter(sat_name__icontains=name)
-    return query.all()
-
-
-@api.get("/observations/recent", response=list[ObservationSchema])
+@router.get("/recent", response=list[ObservationSchema])
 @paginate
 def get_recent_observations(request):
     """Get most recent observations
@@ -228,7 +99,7 @@ def get_recent_observations(request):
     return observations.all()
 
 
-@api.get("/observations/stats", response=dict)
+@router.get("/stats", response=dict)
 def get_observation_stats(request):
     """Get Observation Statistics
 
@@ -290,3 +161,29 @@ def get_observation_stats(request):
             for sat in top_satellites
         ],
     }
+
+
+@router.get("/{observation_id}", response=ObservationSchema)
+def get_observation(request, observation_id: int):
+    """Get Observation Details
+
+    Retrieve detailed information about a specific observation by its ID.
+
+    ### Parameters
+    - **observation_id**: The unique identifier of the observation
+
+    ### Returns
+    ObservationSchema containing:
+    - Basic observation details (time, uncertainties)
+    - Position measurements (RA, Dec, range, range rate)
+    - Observer information (instrument, mode, filter)
+    - Location data (latitude, longitude, altitude)
+    - Associated satellite information
+
+    ### Raises
+    - **404**: Observation not found
+    """
+    return get_object_or_404(
+        Observation.objects.select_related("location_id", "satellite_id"),
+        id=observation_id,
+    )

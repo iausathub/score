@@ -1,0 +1,57 @@
+@startuml c4_component
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Component.puml
+
+title Component Diagram - Django Web Application
+
+' External actors
+Person(astronomer, "Astronomer/Observer", "Uploads and searches data")
+Person(scientist, "Researcher", "Queries data")
+Person(admin, "Administrator", "Manages system")
+
+' Container being decomposed
+Container_Boundary(django_boundary, "Django Web Application") {
+    Component(views, "Views", "Django Views", "Handles web UI requests, renders templates, manages file uploads")
+    Component(api, "API Endpoints", "Django Ninja", "Provides REST API for observation data queries and uploads")
+    Component(models, "Models", "Django ORM", "Defines data structures with field-level validation (constraints, ORCID format, range checks)")
+    Component(forms, "Forms", "Django Forms", "Validates web UI input data")
+    Component(serializers, "Serializers", "Django REST Framework", "Serializes observation data for API responses")
+    Component(tasks_def, "Task Definitions", "Celery Tasks", "Defines process_upload tasks (executes in Celery Worker)")
+    Component(utils, "Utilities", "Python modules", "CSV parsing, email sending, satellite lookups, search helpers")
+}
+
+' External containers
+ContainerDb(postgres, "PostgreSQL Database", "Stores observation data")
+Container(redis, "Redis", "Task queue broker")
+Container(celery_worker, "Celery Worker", "Executes tasks")
+System_Ext(satchecker, "SatChecker API", "Ephemeris validation")
+
+' User to components
+Rel(astronomer, views, "Uploads CSV, searches", "HTTPS")
+Rel(astronomer, api, "Submits data", "HTTPS/REST")
+Rel(scientist, api, "Queries observations", "HTTPS/REST")
+Rel(scientist, views, "Queries observations", "HTTPS")
+Rel(admin, views, "Manages system", "HTTPS")
+
+' Internal component relationships
+Rel(views, forms, "Validates input")
+Rel(views, models, "Reads/writes data")
+Rel(views, redis, "Queues tasks, checks status")
+Rel(views, tasks_def, "Enqueues upload tasks via .delay()")
+Rel(views, utils, "Uses CSV, email, search helpers")
+
+Rel(api, models, "Queries observation data")
+Rel(api, serializers, "Uses for data serialization")
+Rel(api, utils, "Uses helper functions")
+
+Rel(models, postgres, "ORM queries", "SQL")
+
+Rel(tasks_def, utils, "Calls validation, SatChecker, email functions")
+
+Rel_L(celery_worker, redis, "Reads tasks")
+Rel(celery_worker, tasks_def, "Executes process_upload()", "Shared codebase")
+
+Rel_U(utils, satchecker, "Fetches satellite metadata", "HTTPS")
+
+LAYOUT_LEFT_RIGHT()
+SHOW_LEGEND(true)
+@enduml

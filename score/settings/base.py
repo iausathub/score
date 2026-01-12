@@ -8,6 +8,7 @@ from pathlib import Path
 
 import boto3
 from botocore.exceptions import ClientError
+from django.contrib.messages import constants as messages
 
 
 def get_secret_env(secret_name):
@@ -124,6 +125,15 @@ MIDDLEWARE = [
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
 ]
 
+# Map Django message levels to Bootstrap alert classes
+MESSAGE_TAGS = {
+    messages.DEBUG: "secondary",
+    messages.INFO: "info",
+    messages.SUCCESS: "success",
+    messages.WARNING: "warning",
+    messages.ERROR: "danger",
+}
+
 ROOT_URLCONF = "score.urls"
 
 TEMPLATES = [
@@ -230,6 +240,18 @@ BROKER_URL = "redis://localhost"
 CELERY_RESULT_BACKEND = "redis://localhost"
 CELERY_RESULT_SERIALIZER = "json"
 
+# Cache settings (uses same Redis as Celery)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": "redis://localhost:6379/1",  # Using db 1 (Celery uses db 0)
+    }
+}
+
+# Rate limiting settings
+RATELIMIT_USE_CACHE = "default"
+RATELIMIT_ENABLE = True
+
 """
 EMAIL_BACKEND = "anymail.backends.sendgrid.EmailBackend" # for use with non-gmail email
 ANYMAIL = {
@@ -260,5 +282,7 @@ SCORE_ACKNOWLEDGMENT_TEXT = (
     "reflect the views of the NSF NOIRLab, the SKAO, the IAU, or any host or "
     "member institution of the IAU CPS."
 )
+
+SCORE_URL = "https://score.cps.iau.org"
 
 NINJA_PAGINATION_PER_PAGE = 1000

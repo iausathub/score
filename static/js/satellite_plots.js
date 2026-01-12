@@ -141,6 +141,26 @@ function createAllSkyPlot(observationData, options = {}) {
     // Get the container element for responsive sizing
     const container = document.getElementById(plotElementId);
 
+    // Create custom home/reset button since polar plots don't seem to
+    // have one by default.
+    const homeButton = {
+      name: 'home',
+      title: 'Reset view',
+      icon: {
+          width: 512,
+          height: 512,
+          path: 'M256 0l-256 256h64v256h128v-128h128v128h128v-256h64z',
+          transform: 'scale(1)'
+      },
+      click: function(gd) {
+          Plotly.relayout(gd, {
+              'polar.radialaxis.range': [0, 90],
+              'polar.radialaxis.autorange': false,
+              'polar.angularaxis.rotation': 90
+          });
+      }
+    };
+
     Plotly.newPlot(plotElementId, traces, {
         title: { text: title, font: { size: 14, color: textColor } },
         polar: {
@@ -182,16 +202,29 @@ function createAllSkyPlot(observationData, options = {}) {
         autosize: true  // Enable responsive sizing
     }, {
         responsive: true,
-        displayModeBar: enableZoom,
-        modeBarButtonsToRemove: enableZoom ? ['lasso2d', 'select2d'] : [],
+        displayModeBar: true,
+        modeBarButtonsToRemove: ['select2d', 'lasso2d'],
+        modeBarButtonsToAdd: [homeButton],
         displaylogo: false,
         scrollZoom: enableZoom,
-        doubleClick: enableZoom ? 'reset' : false,
-        // Disable drag modes when zoom is disabled
-        ...(enableZoom ? {} : {
-            staticPlot: false,
-            dragmode: false
-        })
+        doubleClick: 'reset'
+    }).then(function() {
+        // Adjust modebar spacing after plot is created to keep
+        // buttons from getting cut off
+        setTimeout(function() {
+            const plotDiv = document.getElementById(plotElementId);
+            const modebar = plotDiv.querySelector('.modebar');
+
+            if (modebar) {
+                const buttons = modebar.querySelectorAll('.modebar-btn');
+
+                buttons.forEach(btn => {
+                    btn.style.display = 'inline-flex';
+                    btn.style.marginRight = '4px';
+                    btn.style.setProperty('padding', '2px', 'important');
+                });
+            }
+        }, 100);
     });
 }
 
@@ -268,7 +301,7 @@ function createTrace(obs, constellation, color, enableTooltip = true, showColorb
                 tickvals: tickVals.map(v => -v),  // Negate for positioning
                 ticktext: tickVals.map(v => v.toFixed(tickInterval < 1 ? 1 : 0))  // Format based on interval
             },
-            opacity: 0.85
+            opacity: 0.85,
         }
     };
 

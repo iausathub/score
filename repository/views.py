@@ -2,30 +2,39 @@ import csv
 import datetime
 import io
 import logging
+import re
 import time
+import uuid
 import zipfile
+from datetime import timedelta
 
 import requests
 from astropy.time import Time
 from celery.result import AsyncResult
 from django.conf import settings
+from django.contrib import messages
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
 from django.db.models import Avg, Count, Max, Min, Q
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template import loader
+from django.utils import timezone
 from django.views.decorators.csrf import csrf_exempt
+from django_ratelimit.decorators import ratelimit
 
 from repository.forms import (
     DataChangeForm,
     GenerateCSVForm,
     SearchForm,
 )
-from repository.models import Observation, Satellite
+from repository.models import APIKey, APIKeyVerification, Observation, Satellite
 from repository.serializers import ObservationSerializer
-from repository.tasks import process_upload
+from repository.tasks import process_upload_csv
 from repository.utils.csv_utils import create_csv
-from repository.utils.email_utils import send_data_change_email
+from repository.utils.email_utils import (
+    send_api_key_verification_email,
+    send_data_change_email,
+)
 from repository.utils.general_utils import (
     get_norad_id,
     get_satellite_metadata,
@@ -98,7 +107,7 @@ def index(request):
         obs = list(read_data)
 
         # Create Task
-        upload_task = process_upload.delay(obs)
+        upload_task = process_upload_csv.delay(obs)
         task_id = upload_task.task_id
 
         # This prevents the file from being re-uploaded if the page is refreshed
@@ -202,7 +211,7 @@ def download_all(request) -> HttpResponse:
 
 def api_access(request) -> HttpResponse:
     """
-    Render the 'repository/api-access.html' template.
+    Render the 'repository/api_access.html' template.
 
     Args:
         request (HttpRequest): The request object.
@@ -210,9 +219,165 @@ def api_access(request) -> HttpResponse:
     Returns:
         HttpResponse: The HttpResponse object with the zipped CSV file.
     """
-    template = loader.get_template("repository/api-access.html")
+    template = loader.get_template("repository/api_access.html")
     context = {"": ""}
     return HttpResponse(template.render(context, request))
+
+
+@ratelimit(key="ip", rate="3/h", method="POST")
+@ratelimit(key="post:email", rate="3/h", method="POST")
+def request_api_key(request) -> HttpResponse:
+    """
+    Render the 'repository/request_api_key.html' template.
+    Rate limited to 3 requests per hour per IP and per email.
+
+    Args:
+        request (HttpRequest): The request object.
+
+    Returns:
+        HttpResponse: The HttpResponse object with the rendered template.
+    """
+
+    # verify ORCID ID - if invalid, update the form field with an error message
+    # sanitize content of ORCID field and check for correct format (last character
+    # can be a letter)
+    # then try the orcid at https://orcid.org/{orcid_id}
+    # see if the page exists - if not, update the form field with an error message
+
+    if request.method == "POST":
+        name = request.POST.get("name")
+        email = request.POST.get("email")
+        orcid_id = request.POST.get("orcid_id")
+
+        # Validation
+        if not name or not email:
+            messages.error(request, "Invalid request. Please try again.")
+            return render(request, "repository/admin/create_api_key.html")
+
+        try:
+            orcid_error_message = "Invalid ORCID ID. Must be a valid ORCID ID."
+            # Validate and sanitize the ORCID ID
+            orcid_id = orcid_id.strip().upper()
+            if not re.match(r"^\d{4}-\d{4}-\d{4}-\d{3}[0-9Xx]$", orcid_id):
+                messages.error(request, orcid_error_message)
+                return render(request, "repository/request_api_key.html")
+
+            # Use Accept header to get XML response, which returns 404 for invalid
+            # ORCID IDs - if using the regular request it returns 200 for everything.
+            response = requests.get(
+                f"https://orcid.org/{orcid_id}",
+                headers={"Accept": "application/xml"},
+                timeout=30,
+            )
+            if response.status_code != 200:
+                messages.error(request, orcid_error_message)
+                return render(request, "repository/request_api_key.html")
+        except Exception as e:
+            messages.error(request, f"An unexpected error occurred: {e}")
+            return render(request, "repository/request_api_key.html")
+
+        # Send verification email to the email address provided
+        verification_token = uuid.uuid4()
+        APIKeyVerification.objects.create(
+            name=name,
+            email=email,
+            orcid_id=orcid_id,
+            verification_token=verification_token,
+            expires_at=timezone.now() + timedelta(minutes=30),
+        )
+        send_api_key_verification_email(email, verification_token)
+        messages.success(request, "Verification email sent. Please check your email.")
+
+    return render(request, "repository/request_api_key.html")
+
+
+@ratelimit(key="ip", rate="10/h", method="GET")
+def verify_email(request, token):
+    """
+    Verify the email address and create the API key.
+    Token is single-use and expires in 30 minutes.
+    Rate limited to 10 verification attempts per hour per IP.
+    """
+    try:
+        verification = APIKeyVerification.objects.get(verification_token=token)
+
+        if not verification.is_active():
+            return render(request, "repository/verification_failed.html")
+
+        # Create the API key
+        api_key, plaintext_key = APIKey.create_key(
+            name=verification.name,
+            email=verification.email,
+            orcid_id=verification.orcid_id,
+            expires_in_days=90,
+        )
+
+        # Delete verification record (single-use token)
+        verification.delete()
+
+        # Store the plaintext key in session to display on next page
+        request.session["new_api_key"] = {
+            "key": plaintext_key,
+            "name": api_key.name,
+            "email": api_key.email,
+            "orcid_id": api_key.orcid_id,
+            "prefix": api_key.key_prefix,
+            "created_at": api_key.created_at.isoformat(),
+            "expires_at": (
+                api_key.expires_at.isoformat() if api_key.expires_at else None
+            ),
+        }
+        # Set session to expire when browser closes for security
+        request.session.set_expiry(0)
+
+        # Prevent token leakage via Referer header
+        response = redirect("show_api_key")
+        response["Referrer-Policy"] = "no-referrer"
+        return response
+
+    except APIKeyVerification.DoesNotExist:
+        return render(request, "repository/verification_failed.html")
+    except Exception as e:
+        logger.error(f"Error during email verification: {e}", exc_info=True)
+        messages.error(
+            request, "An error occurred during verification. Please try again."
+        )
+        return redirect("request-api-key")
+
+
+def show_api_key_view(request):
+    """
+    Display the newly created API key.
+    This is the only time the plaintext key will be shown.
+    Accessible to staff members OR users with valid session from email verification.
+    """
+
+    # Get the key from session (pops it out for security)
+    api_key_data = request.session.pop("new_api_key", None)
+
+    # Security check: Must have session data OR be staff
+    if not api_key_data:
+        if request.user.is_authenticated and request.user.is_staff:
+            messages.warning(request, "No API key to display. Create a new one.")
+            return redirect("create_api_key")
+        else:
+            # For non-staff users, redirect to API access page
+            messages.warning(
+                request, "API key link has expired or already been viewed."
+            )
+            return redirect("api-access")
+
+    # Convert ISO format strings back to datetime objects for template
+    if api_key_data.get("created_at"):
+        api_key_data["created_at"] = datetime.datetime.fromisoformat(
+            api_key_data["created_at"]
+        )
+    if api_key_data.get("expires_at"):
+        api_key_data["expires_at"] = datetime.datetime.fromisoformat(
+            api_key_data["expires_at"]
+        )
+
+    return render(request, "repository/show_api_key.html", {"api_key": api_key_data})
 
 
 def create_and_return_csv(

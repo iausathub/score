@@ -2,7 +2,7 @@ import pytest
 from django.utils import timezone
 
 from repository.models import Observation, Satellite
-from repository.tasks import UploadError, process_upload
+from repository.tasks import UploadError, process_upload_csv
 
 
 @pytest.mark.django_db
@@ -39,21 +39,21 @@ def test_process_upload_valid_data(mocker):
             "",
         ]
     ]
-    result = process_upload(data)
+    result = process_upload_csv(data)
     assert result["status"] == "success"
     assert isinstance(result["obs_ids"], list)
     assert isinstance(result["date_added"], str)
     assert isinstance(result["email"], str)
 
     # Re-upload same data - should not create duplicate
-    result2 = process_upload(data)
+    result2 = process_upload_csv(data)
     assert result2["obs_ids"][0] == result["obs_ids"][0]
     assert Observation.objects.filter(satellite_id__sat_number="59588").count() == 1
 
     # Upload with different apparent_mag - should create new record
     data_different_mag = [data[0][:]]
     data_different_mag[0][4] = 5.0
-    result3 = process_upload(data_different_mag)
+    result3 = process_upload_csv(data_different_mag)
     assert result3["obs_ids"][0] != result["obs_ids"][0]
     assert Observation.objects.filter(satellite_id__sat_number="59588").count() == 2
 
@@ -92,7 +92,7 @@ def test_process_upload_valid_data_zero_altitude(mocker):
             "",
         ]
     ]
-    result = process_upload(data)
+    result = process_upload_csv(data)
     assert result["status"] == "success"
     assert isinstance(result["obs_ids"], list)
     assert isinstance(result["date_added"], str)
@@ -136,7 +136,7 @@ def test_process_upload_sample_data(mocker):
     with pytest.raises(
         UploadError, match="File contains sample data. Please upload a valid file."
     ):
-        process_upload(data)
+        process_upload_csv(data)
 
 
 @pytest.mark.django_db
@@ -174,7 +174,7 @@ def test_process_upload_incorrect_number_of_fields(mocker):
         ]
     ]
     with pytest.raises(UploadError, match="Incorrect number of fields in csv file."):
-        process_upload(data)
+        process_upload_csv(data)
 
 
 @pytest.mark.django_db
@@ -213,7 +213,7 @@ def test_process_upload_value_error(mocker):
         ]
     ]
     with pytest.raises(UploadError):
-        process_upload(data)
+        process_upload_csv(data)
 
 
 @pytest.mark.django_db
@@ -252,7 +252,7 @@ def test_process_upload_validation_error(mocker):
         ]
     ]
     with pytest.raises(UploadError):
-        process_upload(data)
+        process_upload_csv(data)
 
 
 @pytest.mark.django_db
@@ -291,7 +291,7 @@ def test_process_upload_general_exception(mocker):
         ]
     ]
     with pytest.raises(UploadError):
-        process_upload(data)
+        process_upload_csv(data)
 
 
 @pytest.mark.django_db
@@ -330,7 +330,7 @@ def test_process_upload_name_id_mismatch(mocker):
     ]
 
     with pytest.raises(UploadError):
-        process_upload(data)
+        process_upload_csv(data)
 
 
 @pytest.mark.django_db
@@ -378,7 +378,7 @@ def test_process_upload_existing_satellite(mocker):
         ]
     ]
 
-    result = process_upload(data)
+    result = process_upload_csv(data)
 
     # Verify satellite wasn't duplicated
     assert Satellite.objects.count() == 1
@@ -430,7 +430,7 @@ def test_process_upload_update_empty_name(mocker):
         ]
     ]
 
-    result = process_upload(data)
+    result = process_upload_csv(data)
 
     # Verify satellite name was updated
     satellite = Satellite.objects.get(sat_number="59588")
@@ -474,7 +474,7 @@ def test_process_upload_new_satellites(mocker):
         ]
     ]
 
-    result = process_upload(data)
+    result = process_upload_csv(data)
 
     # Verify satellite name was updated
     satellite = Satellite.objects.get(sat_number="59588")
@@ -513,7 +513,7 @@ def test_process_upload_new_satellites(mocker):
             "",
         ]
     ]
-    result = process_upload(data)
+    result = process_upload_csv(data)
     assert result["status"] == "success"
     assert Satellite.objects.count() == 2
     assert Satellite.objects.get(sat_number="58296").sat_name == ""
@@ -549,7 +549,7 @@ def test_process_upload_new_satellites(mocker):
             "",
         ]
     ]
-    result = process_upload(data)
+    result = process_upload_csv(data)
     assert result["status"] == "success"
     assert Satellite.objects.count() == 3
     assert Satellite.objects.get(sat_number="58013").sat_name == "KUIPER-P2"
@@ -612,7 +612,7 @@ def test_process_upload_discrepant_flag_low_altitude(mocker):
         ]
     ]
 
-    result = process_upload(data)
+    result = process_upload_csv(data)
     assert result["status"] == "success"
 
     observation = Observation.objects.get(satellite_id__sat_number="99999")
@@ -678,7 +678,7 @@ def test_process_upload_discrepant_flag_not_illuminated(mocker):
         ]
     ]
 
-    result = process_upload(data)
+    result = process_upload_csv(data)
     assert result["status"] == "success"
 
     observation = Observation.objects.get(satellite_id__sat_number="99998")
@@ -744,7 +744,7 @@ def test_process_upload_discrepant_flag_both_conditions(mocker):
         ]
     ]
 
-    result = process_upload(data)
+    result = process_upload_csv(data)
     assert result["status"] == "success"
 
     observation = Observation.objects.get(satellite_id__sat_number="99997")
@@ -810,7 +810,7 @@ def test_process_upload_discrepant_flag_false(mocker):
         ]
     ]
 
-    result = process_upload(data)
+    result = process_upload_csv(data)
     assert result["status"] == "success"
 
     observation = Observation.objects.get(satellite_id__sat_number="99996")
@@ -881,7 +881,7 @@ def test_process_upload_different_satchecker_values(mocker):
         "repository.tasks.add_additional_data",
         return_value=make_mock_satchecker(180.12345678),
     )
-    result1 = process_upload(data)
+    result1 = process_upload_csv(data)
     assert result1["status"] == "success"
     first_obs_id = result1["obs_ids"][0]
     assert Observation.objects.filter(satellite_id__sat_number="88888").count() == 1
@@ -891,7 +891,7 @@ def test_process_upload_different_satchecker_values(mocker):
         "repository.tasks.add_additional_data",
         return_value=make_mock_satchecker(180.1234568),
     )
-    result2 = process_upload(data)
+    result2 = process_upload_csv(data)
     assert result2["status"] == "success"
 
     # only one observation should be created
