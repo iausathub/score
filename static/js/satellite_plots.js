@@ -13,6 +13,7 @@ const CONSTELLATION_SYMBOLS = {
     'qianfan': 'diamond',
     'spacemobile': 'triangle-up',
     'oneweb': 'star',
+    'planetlabs': 'diamond-tall',
     'other': 'cross',
     'all': 'circle'
 };
@@ -285,7 +286,7 @@ function createTrace(obs, constellation, color, enableTooltip = true, showColorb
             symbol: CONSTELLATION_SYMBOLS[constellation] || 'circle',
             color: obs.map(o => -o.magnitude),  // Negate for reversed colorbar positioning
             colorscale: PLOT_CONFIG.colorscales[theme],
-            reversescale: true,  // Lower magnitude (brighter) gets warmer colors
+            reversescale: !isDark, // reverse for better visibility in dark mode
             showscale: showColorbar,
             colorbar: {
                 title: 'Magnitude',
@@ -295,6 +296,7 @@ function createTrace(obs, constellation, color, enableTooltip = true, showColorb
                 tickfont: { color: textColor, size: 10 },
                 titlefont: { color: textColor, size: 11 },
                 x: 1.02,
+                y: 0.25,
                 tickmode: 'array',
                 tickvals: tickVals.map(v => -v),  // Negate for positioning
                 ticktext: tickVals.map(v => v.toFixed(tickInterval < 1 ? 1 : 0))  // Format based on interval

@@ -170,13 +170,14 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
   --bs-tooltip-bg: var(--bs-dark);
   --bs-tooltip-color: var(--bs-white);
 
-  // Chart colors for constellation badges - globally accessible
-  --bs-chart-primary: #4a9eff;      // Bright blue for Starlink
-  --bs-chart-accent1: #{darken(map-get($theme-colors, "accent1"), 20%)};  // Orange for Kuiper
-  --bs-chart-secondary: #8ba3c4;    // Lighter blue for Other
-  --bs-chart-accent2: #9b59b6;      // Purple for Qianfan
-  --bs-chart-accent3: #27ae60;      // Green for Spacemobile
-  --bs-chart-danger: #ec7063;       // Coral for OneWeb
+  // Chart colors for constellation badges - constellation_config.js dark theme
+  --bs-chart-primary: #4a9eff;      // Starlink
+  --bs-chart-accent1: #e18605;      // Kuiper
+  --bs-chart-secondary: #8ba3c4;    // Other
+  --bs-chart-accent2: #9b59b6;      // Qianfan
+  --bs-chart-accent3: #22d3ee;      // SpaceMobile
+  --bs-chart-danger: #ec7063;       // OneWeb
+  --bs-chart-success: #a3e635;      // Planet Labs
 
 
   .bg-light {
@@ -294,6 +295,11 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
 
     .badge.bg-accent3 {
       background-color: var(--bs-chart-accent3) !important;
+      color: var(--bs-dark) !important;
+    }
+
+    .badge.bg-success {
+      background-color: var(--bs-chart-success) !important;
       color: var(--bs-dark) !important;
     }
 
@@ -468,24 +474,39 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
     margin-top: 0.5rem;
   }
 
-  // Light theme badge colors (default)
+  // Light theme badge colors - constellation_config.js light theme
+  .badge.bg-primary {
+    background-color: #142943 !important;  // Starlink
+    color: var(--bs-white);
+  }
+
   .badge.bg-accent1 {
-    background-color: map-get($theme-colors, "accent1") !important;
+    background-color: #fbb552 !important;  // Kuiper
     color: var(--bs-dark);
   }
 
   .badge.bg-accent2 {
-    background-color: #8e44ad !important;  // Qianfan dark purple for light theme
+    background-color: #8e44ad !important;  // Qianfan
     color: var(--bs-white);
   }
 
   .badge.bg-accent3 {
-    background-color: #16a085 !important;  // Spacemobile teal for light theme
+    background-color: #0891b2 !important;  // SpaceMobile
     color: var(--bs-white);
   }
 
   .badge.bg-danger {
-    background-color: #c0392b !important;  // OneWeb red for light theme
+    background-color: #c0392b !important;  // OneWeb
+    color: var(--bs-white);
+  }
+
+  .badge.bg-success {
+    background-color: #65a30d !important;  // Planet Labs
+    color: var(--bs-white);
+  }
+
+  .badge.bg-secondary {
+    background-color: #5c7da7 !important;  // Other
     color: var(--bs-white);
   }
 
