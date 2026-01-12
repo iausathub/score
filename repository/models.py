@@ -367,10 +367,7 @@ class APIKey(models.Model):
 
             # Validate the hash
             if not secrets.compare_digest(api_key.key_hash, provided_hash):
-                prefix = plaintext_key[: cls.PREFIX_LENGTH]
-                logger.warning(
-                    f"API key validation failed: Hash mismatch for prefix {prefix}..."
-                )
+                logger.warning("API key validation failed: Hash mismatch")
                 return None
 
             # Check if key is valid (active and not expired)
@@ -385,10 +382,7 @@ class APIKey(models.Model):
                 return None
 
         except cls.DoesNotExist:
-            logger.warning(
-                f"API key validation failed: Key not found "
-                f"(prefix={plaintext_key[:cls.PREFIX_LENGTH]}...)"
-            )
+            logger.warning("API key validation failed: Key not found")
             return None
 
 
