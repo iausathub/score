@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1767318863765,
+  "lastUpdate": 1768261033323,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1040,6 +1040,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.060006127164284766",
             "extra": "mean: 461.31307059999926 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "73515323ca068ad14a3addb15e43ac31ce382115",
+          "message": "Add data upload API endpoints (#117)\n\n* Upload observations via API (#113)\n\n* Update obs_id field used with download results button after each search\n\n* Update tests\n\n* Add reset button to all sky plot, security improvements for the modal dialog\n\n* Add upload observation endpoint to API; split API code into files for each route and separate data schemas; make routes consistent for existing data query endpoints\n\n* Update observation summary with created vs. duplicate if observation was created or not; update documentation; update order of endpoints for observation endpoints; add tests\n\n* Update requirements.txt\n\n* Update package versions; change api upload test to use mocks to avoid Redis, and clean up comments\n\n* Update API documentation and fix formatting errors\n\n* Allow notification email to be null\n\n* Add API key for upload authentication; add page to request API key with email and ORCID ID verification and admin pages to manage/add/revoke keys\n\n* Fix formatting\n\n* Add default SCORE_URL\n\n* Add orcid_id to admin view\n\n* Add missing orcid_id to session to view API key after request\n\n* Fix for missing satellite names in API upload data\n\n* Add PlanetLabs satellites as a constellation set for visualizations\n\n* Remove SatChecker reference data from fields used to check for duplicate observations\n\n* Remove key prefix from logging",
+          "timestamp": "2026-01-12T15:35:50-08:00",
+          "tree_id": "8efc696a29efe0ad5c0929fb79af629e2119811f",
+          "url": "https://github.com/iausathub/score/commit/73515323ca068ad14a3addb15e43ac31ce382115"
+        },
+        "date": 1768261032446,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 54.46609866301664,
+            "unit": "iter/sec",
+            "range": "stddev: 0.010248421241263022",
+            "extra": "mean: 18.36004458823147 msec\nrounds: 17"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 196.28932930048458,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00012758207612076936",
+            "extra": "mean: 5.094520438597939 msec\nrounds: 57"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 1.9549222554846244,
+            "unit": "iter/sec",
+            "range": "stddev: 0.18311535331683343",
+            "extra": "mean: 511.5292934000081 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 2.4688321263641755,
+            "unit": "iter/sec",
+            "range": "stddev: 0.016841723874118",
+            "extra": "mean: 405.0498166000011 msec\nrounds: 5"
           }
         ]
       }
