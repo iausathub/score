@@ -414,7 +414,7 @@ def get_norad_id(satellite_name):
         if not data:
             return None
 
-        for item in data:
+        for item in data["data"]:
             if item["is_current_version"] is True:
                 return item["norad_id"]
 

@@ -153,13 +153,15 @@ def test_get_norad_id(requests_mock):
     requests_mock.get(
         "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         status_code=200,
-        json=[
-            {
-                "norad_id": "12345",
-                "date_added": "2022-01-01 00:00:00 UTC",
-                "is_current_version": True,
-            }
-        ],
+        json={
+            "data": [
+                {
+                    "norad_id": "12345",
+                    "date_added": "2022-01-01 00:00:00 UTC",
+                    "is_current_version": True,
+                }
+            ]
+        },
     )
 
     result = get_norad_id("TestSat")
@@ -172,7 +174,7 @@ def test_get_norad_id_invalid_sat_name(requests_mock):
     requests_mock.get(
         "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         status_code=200,
-        json=[],
+        json={"data": []},
     )
 
     result = get_norad_id("InvalidSat")
@@ -185,7 +187,7 @@ def test_get_norad_id_no_data(requests_mock):
     requests_mock.get(
         "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         status_code=200,
-        json=[],
+        json={"data": []},
     )
 
     result = get_norad_id("TestSat")
