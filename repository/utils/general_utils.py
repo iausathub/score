@@ -193,17 +193,20 @@ def add_additional_data(
                 error = "Satellite info check failed - check the input and try again."
                 raise Exception(requests.exceptions.RequestException(error))
             response_json = response.json()
-            if not response_json or response_json[0] == []:
+            data_list = (
+                response_json.get("data") if isinstance(response_json, dict) else []
+            )
+            if not data_list:
                 error = f"No satellite found for the provided NORAD ID ({sat_number})."
                 raise Exception(requests.exceptions.RequestException(error))
             else:
                 satellite_found = any(
-                    item.get("name") == satellite_name for item in response_json
+                    item.get("name") == satellite_name for item in data_list
                 )
 
                 # Name is valid - now make sure it's the most recent version
                 if satellite_found or (not satellite_found and satellite_name == ""):
-                    for item in response_json:
+                    for item in data_list:
                         if item.get("is_current_version") == True:  # noqa: E712
                             updated_satellite_name = item.get("name")
                             break
@@ -238,8 +241,12 @@ def add_additional_data(
         return is_valid
 
     if is_valid and r.json():
-        satellite_data = r.json()["data"][0]
-        fields = r.json().get("fields", [])
+        response_data = r.json()
+        data_list = response_data.get("data") or []
+        if not data_list:
+            return "Satellite with this ID not visible at this time and location"
+        satellite_data = data_list[0]
+        fields = response_data.get("fields", [])
 
         # Mapping fields to their values for easier access
         data_dict = dict(zip(fields, satellite_data, strict=True))
@@ -375,12 +382,17 @@ def get_satellite_name(norad_id):
         response = requests.get(url, params=params, timeout=10)
         response.raise_for_status()
 
-        if not response.json() or response.json()[0] == []:
-            return None
         data = response.json()
-        for item in data:
-            if item["is_current_version"] is True:
-                return item["name"]
+        data_list = data.get("data") if isinstance(data, dict) else []
+        if not isinstance(data_list, list) or not data_list:
+            return None
+        for item in data_list:
+            if not isinstance(item, dict):
+                continue
+            if item.get("is_current_version") is True:
+                name = item.get("name")
+                return str(name) if name is not None else None
+        return None
     except requests.exceptions.RequestException:
         return None
 
@@ -414,9 +426,11 @@ def get_norad_id(satellite_name):
         if not data:
             return None
 
-        for item in data["data"]:
-            if item["is_current_version"] is True:
-                return item["norad_id"]
+        data_list = data.get("data") or []
+        for item in data_list:
+            if item.get("is_current_version") is True:
+                norad_id = item.get("norad_id")
+                return str(norad_id) if norad_id is not None else None
 
     except requests.exceptions.RequestException:
         return None
