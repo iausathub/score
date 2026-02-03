@@ -249,7 +249,10 @@ def add_additional_data(
         fields = response_data.get("fields", [])
 
         # Mapping fields to their values for easier access
-        data_dict = dict(zip(fields, satellite_data, strict=True))
+        if isinstance(satellite_data, dict):
+            data_dict = satellite_data
+        else:
+            data_dict = dict(zip(fields, satellite_data, strict=True))
         satellite_data = SatCheckerData(
             phase_angle=round(data_dict.get("phase_angle_deg", 0), 7),
             range_to_sat=round(data_dict.get("range_km", 0), 7),
