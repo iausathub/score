@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1768261033323,
+  "lastUpdate": 1770166400571,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1092,6 +1092,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.016841723874118",
             "extra": "mean: 405.0498166000011 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "f3cef41466c8af0618cc74a5456c94b66caa3f9f",
+          "message": "Fix name/id lookup (#118)\n\n* Update obs_id field used with download results button after each search\n\n* Update tests\n\n* Add reset button to all sky plot, security improvements for the modal dialog\n\n* Upload observations via API (#113)\n\n* Add upload observation endpoint to API; split API code into files for each route and separate data schemas; make routes consistent for existing data query endpoints\n\n* Update observation summary with created vs. duplicate if observation was created or not; update documentation; update order of endpoints for observation endpoints; add tests\n\n* Update requirements.txt\n\n* Update package versions; change api upload test to use mocks to avoid Redis, and clean up comments\n\n* Update API documentation and fix formatting errors\n\n* Allow notification email to be null\n\n* Add API key for upload authentication; add page to request API key with email and ORCID ID verification and admin pages to manage/add/revoke keys\n\n* Fix formatting\n\n* Add default SCORE_URL\n\n* Add orcid_id to admin view\n\n* Add missing orcid_id to session to view API key after request\n\n* Fix for missing satellite names in API upload data\n\n* Add PlanetLabs satellites as a constellation set for visualizations\n\n* Remove SatChecker reference data from fields used to check for duplicate observations\n\n* Remove key prefix from logging\n\n* Update data structure used in name/id lookup to match SatChecker response structure\n\n* Update black version and formatting fixes; update additional functions and tests to reflect SatChecker response format changes\n\n* Update black pre-commit hook\n\n* Update requirements.txt\n\n* Update data structure in add_additional_data",
+          "timestamp": "2026-02-03T16:51:57-08:00",
+          "tree_id": "49430f927643dde2256018a010fe92bc292652dd",
+          "url": "https://github.com/iausathub/score/commit/f3cef41466c8af0618cc74a5456c94b66caa3f9f"
+        },
+        "date": 1770166399557,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 53.37109524132403,
+            "unit": "iter/sec",
+            "range": "stddev: 0.011201457355335448",
+            "extra": "mean: 18.736733722221288 msec\nrounds: 54"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 192.96980965890478,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00013699541435275396",
+            "extra": "mean: 5.18215777777679 msec\nrounds: 54"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 1.904879385386063,
+            "unit": "iter/sec",
+            "range": "stddev: 0.03728812016779685",
+            "extra": "mean: 524.9676213999919 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 2.0003175520116243,
+            "unit": "iter/sec",
+            "range": "stddev: 0.034985994975411244",
+            "extra": "mean: 499.92062460000284 msec\nrounds: 5"
           }
         ]
       }
