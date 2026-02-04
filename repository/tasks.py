@@ -277,11 +277,16 @@ def process_upload_csv(
                 raise UploadError(e.messages[0]) from e
 
     except Exception as e:
-        if obs_error_reference and obs_error_reference not in str(e):
-            print(f"obs_error_reference: {obs_error_reference}")
-            raise UploadError(str(e) + " - " + obs_error_reference) from e
+        msg = str(e).strip()
+        # return message type if the error is only a number
+        if not msg or msg.isdigit():
+            msg = f"{type(e).__name__}: {msg or repr(e)}"
+
+        # only add the error reference if it is not already in the message
+        if obs_error_reference and obs_error_reference not in msg:
+            raise UploadError(msg + " - " + obs_error_reference) from e
         else:
-            raise UploadError(str(e)) from e
+            raise UploadError(msg) from e
 
     send_confirmation_email(obs_ids, confirmation_email)
 

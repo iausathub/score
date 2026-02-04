@@ -153,13 +153,15 @@ def test_get_norad_id(requests_mock):
     requests_mock.get(
         "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         status_code=200,
-        json=[
-            {
-                "norad_id": "12345",
-                "date_added": "2022-01-01 00:00:00 UTC",
-                "is_current_version": True,
-            }
-        ],
+        json={
+            "data": [
+                {
+                    "norad_id": "12345",
+                    "date_added": "2022-01-01 00:00:00 UTC",
+                    "is_current_version": True,
+                }
+            ]
+        },
     )
 
     result = get_norad_id("TestSat")
@@ -172,7 +174,7 @@ def test_get_norad_id_invalid_sat_name(requests_mock):
     requests_mock.get(
         "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         status_code=200,
-        json=[],
+        json={"data": []},
     )
 
     result = get_norad_id("InvalidSat")
@@ -185,7 +187,7 @@ def test_get_norad_id_no_data(requests_mock):
     requests_mock.get(
         "https://satchecker.cps.iau.org/tools/norad-ids-from-name/",
         status_code=200,
-        json=[],
+        json={"data": []},
     )
 
     result = get_norad_id("TestSat")
@@ -206,16 +208,21 @@ def test_get_norad_id_request_exception(requests_mock):
 
 @pytest.mark.django_db
 def test_get_satellite_name(requests_mock):
-    # Mock the response from the API
+    # Mock the response from the API (structure: count, data, source, version)
     requests_mock.get(
         "https://satchecker.cps.iau.org/tools/names-from-norad-id/",
         status_code=200,
-        json=[
-            {
-                "name": "TestSat",
-                "is_current_version": True,
-            }
-        ],
+        json={
+            "count": 1,
+            "data": [
+                {
+                    "name": "TestSat",
+                    "is_current_version": True,
+                }
+            ],
+            "source": "IAU CPS SatChecker",
+            "version": "1.6.0",
+        },
     )
 
     result = get_satellite_name("12345")
@@ -228,7 +235,7 @@ def test_get_satellite_name_invalid_norad_id(requests_mock):
     requests_mock.get(
         "https://satchecker.cps.iau.org/tools/names-from-norad-id/",
         status_code=200,
-        json=[],
+        json={"count": 0, "data": []},
     )
 
     result = get_satellite_name("InvalidID")
@@ -241,7 +248,7 @@ def test_get_satellite_name_no_data(requests_mock):
     requests_mock.get(
         "https://satchecker.cps.iau.org/tools/names-from-norad-id/",
         status_code=200,
-        json=[],
+        json={"count": 0, "data": []},
     )
 
     result = get_satellite_name("12345")

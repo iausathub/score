@@ -187,10 +187,8 @@ class Observation(models.Model):
                 "apparent magnitude is provided."
             )
         if self.apparent_mag is None and self.apparent_mag_uncert is not None:
-            raise ValidationError(
-                "Apparent magnitude must be provided if \
-                                  uncertainty is provided."
-            )
+            raise ValidationError("Apparent magnitude must be provided if \
+                                  uncertainty is provided.")
         if self.obs_mode not in ["VISUAL", "BINOCULARS", "CCD", "CMOS", "OTHER"]:
             raise ValidationError(
                 "Observation mode must be one of the following: VISUAL,\

@@ -31,8 +31,7 @@ def send_confirmation_email(obs_ids: list[int], email_address: str | bool):
         "SCORE Observation Upload Confirmation",
         "SCORE Observation Upload Confirmation \n\n Thank you for submitting your \
             observations. Your observations have been successfully uploaded to the \
-                SCORE database.  The observation ID(s) are: \n\n"
-        + text_body,
+                SCORE database.  The observation ID(s) are: \n\n" + text_body,
         settings.EMAIL_HOST_USER,
         [email_address],
     )
