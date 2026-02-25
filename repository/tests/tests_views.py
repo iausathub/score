@@ -23,8 +23,8 @@ class TestViews(TestCase):
             date_added=timezone.now(),
         )
         self.satellite = Satellite.objects.create(
-            sat_name="STARLINK-123",
-            sat_number=12345,
+            sat_name="STARLINK-30321",
+            sat_number=57679,
             date_added=timezone.now(),
         )
         self.observation = Observation.objects.create(
@@ -46,7 +46,7 @@ class TestViews(TestCase):
         response = self.client.get("/")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/index.html")
-        self.assertContains(response, "STARLINK-123")
+        self.assertContains(response, "STARLINK-30321")
         self.assertContains(response, "satellites")
         self.assertContains(response, "observers")
 
@@ -64,7 +64,7 @@ class TestViews(TestCase):
         response = self.client.get("/view")
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/view.html")
-        self.assertContains(response, "STARLINK-123")
+        self.assertContains(response, "STARLINK-30321")
         self.assertContains(response, "VISUAL")
         self.assertContains(response, "5.2")
         self.assertContains(response, self.obs_date.strftime("%b. %d, %Y"))
@@ -94,7 +94,7 @@ class TestViews(TestCase):
         self.assertContains(response, self.satellite.sat_name)
 
     def test_satellite_detail_view(self):
-        response = self.client.get(reverse("satellite-data-view", args=[12345]))
+        response = self.client.get(reverse("satellite-data-view", args=[57679]))
         self.assertEqual(response.status_code, 200)
         self.assertTemplateUsed(response, "repository/satellites/data_view.html")
         self.assertContains(response, self.satellite.sat_name)
@@ -165,7 +165,7 @@ class SearchViewTest(TestCase):
         self.client = Client()
         self.obs_date = timezone.now()
         self.satellite = Satellite.objects.create(
-            sat_name="STARLINK-123", sat_number=12345
+            sat_name="STARLINK-30321", sat_number=57679
         )
         self.location = Location.objects.create(
             obs_lat_deg=33,
@@ -198,11 +198,11 @@ class SearchViewTest(TestCase):
         response = self.client.post(
             reverse("search"),
             {
-                "sat_name": "STARLINK-123",
+                "sat_name": "STARLINK-30321",
             },
         )
         self.assertEqual(response.status_code, 200)
-        self.assertIn("STARLINK-123", response.content.decode())
+        self.assertIn("STARLINK-30321", response.content.decode())
 
     def test_search_post_no_results(self):
         response = self.client.post(
@@ -252,7 +252,7 @@ class SearchViewTest(TestCase):
         self.assertEqual(response.status_code, 200)
         data = response.json()
         self.assertTrue(len(data["rows"]) > 0)
-        self.assertEqual(data["rows"][0]["satellite_name"], "STARLINK-123")
+        self.assertEqual(data["rows"][0]["satellite_name"], "STARLINK-30321")
         self.assertIn("obs_ids", data)
         self.assertIsInstance(data["obs_ids"], list)
         self.assertTrue(len(data["obs_ids"]) > 0)
@@ -424,7 +424,7 @@ class SearchViewTest(TestCase):
 
     def test_generate_csv_post_valid(self):
         data = {
-            "output": "STARLINK-123,12345,2024-03-19T12:00:00Z,0.1,5.0,0.1,33.0,-117.0,100,10,none,VISUAL,CLEAR,test@example.com,0000-0000-0000-0000,185.0,25.0,0,0,0,500,0,0,0,test comment,,",  # noqa: E501
+            "output": "STARLINK-30321,57679,2024-03-19T12:00:00Z,0.1,5.0,0.1,33.0,-117.0,100,10,none,VISUAL,CLEAR,test@example.com,0000-0000-0000-0000,185.0,25.0,0,0,0,500,0,0,0,test comment,,",  # noqa: E501
         }
         response = self.client.post(reverse("generate-csv"), data)
         self.assertEqual(response.status_code, 200)
@@ -435,40 +435,40 @@ class SearchViewTest(TestCase):
 
     @patch("repository.views.get_satellite_name")
     def test_name_id_lookup_with_norad_id(self, mock_get_name):
-        mock_get_name.return_value = "STARLINK-123"
+        mock_get_name.return_value = "STARLINK-30321"
         response = self.client.post(
             reverse("name-id-lookup"),
             {
-                "satellite_id": "12345",
+                "satellite_id": "57679",
                 "satellite_name": "",
             },
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["satellite_name"], "STARLINK-123")
-        self.assertEqual(data["norad_id"], "12345")
+        self.assertEqual(data["satellite_name"], "STARLINK-30321")
+        self.assertEqual(data["norad_id"], "57679")
 
     @patch("repository.views.get_norad_id")
     def test_name_id_lookup_with_name(self, mock_get_id):
-        mock_get_id.return_value = "12345"
+        mock_get_id.return_value = "57679"
         response = self.client.post(
             reverse("name-id-lookup"),
             {
-                "satellite_name": "STARLINK-123",
+                "satellite_name": "STARLINK-30321",
                 "satellite_id": "",
             },
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["satellite_name"], "STARLINK-123")
-        self.assertEqual(data["norad_id"], "12345")
+        self.assertEqual(data["satellite_name"], "STARLINK-30321")
+        self.assertEqual(data["norad_id"], "57679")
 
     def test_name_id_lookup_with_both(self):
         response = self.client.post(
             reverse("name-id-lookup"),
             {
-                "satellite_id": "12345",
-                "satellite_name": "STARLINK-123",
+                "satellite_id": "57679",
+                "satellite_name": "STARLINK-30321",
             },
         )
         self.assertEqual(response.status_code, 200)
@@ -490,13 +490,15 @@ class SearchViewTest(TestCase):
                 "declination_deg",
                 "tle_date",
             ],
-            "data": [["STARLINK-123", "12345", 45.0, 180.0, 100.0, 20.0, "2024-03-19"]],
+            "data": [
+                ["STARLINK-30321", "57679", 45.0, 180.0, 100.0, 20.0, "2024-03-19"]
+            ],
         }
 
         response = self.client.post(
             reverse("satellite-pos-lookup"),
             {
-                "satellite_id": "12345",
+                "satellite_id": "57679",
                 "satellite_name": "",
                 "obs_lat": "33.0",
                 "obs_long": "-117.0",
@@ -511,8 +513,8 @@ class SearchViewTest(TestCase):
         )
         self.assertEqual(response.status_code, 200)
         data = response.json()
-        self.assertEqual(data["satellite_name"], "STARLINK-123")
-        self.assertEqual(data["norad_id"], "12345")
+        self.assertEqual(data["satellite_name"], "STARLINK-30321")
+        self.assertEqual(data["norad_id"], "57679")
         self.assertEqual(data["altitude"], 45.0)
         self.assertEqual(data["azimuth"], 180.0)
         self.assertEqual(data["ra"], 100.0)
@@ -523,7 +525,7 @@ class SearchViewTest(TestCase):
         response = self.client.post(
             reverse("satellite-pos-lookup"),
             {
-                "satellite_id": "12345",
+                "satellite_id": "57679",
                 # Missing required fields
             },
         )
@@ -536,8 +538,8 @@ class SearchViewTest(TestCase):
         response = self.client.post(
             reverse("satellite-pos-lookup"),
             {
-                "satellite_id": "12345",
-                "satellite_name": "STARLINK-123",
+                "satellite_id": "57679",
+                "satellite_name": "STARLINK-30321",
                 "obs_lat": "33.0",
                 "obs_long": "-117.0",
                 "obs_alt": "100",
@@ -681,7 +683,7 @@ class LaunchViewTests(TestCase):
 
         # Create base test satellites
         self.satellite1 = Satellite.objects.create(
-            sat_name="Test-1", sat_number="12345", intl_designator="2023-001A"
+            sat_name="Test-1", sat_number="57679", intl_designator="2023-001A"
         )
         self.satellite2 = Satellite.objects.create(
             sat_name="Test-2", sat_number="12346", intl_designator="2023-001B"
@@ -768,7 +770,7 @@ class VisualizationViewsTest(TestCase):
         )
         # Create satellites from different constellations
         self.starlink_sat = Satellite.objects.create(
-            sat_name="STARLINK-12345", sat_number=50001
+            sat_name="STARLINK-3032145", sat_number=50001
         )
         self.oneweb_sat = Satellite.objects.create(
             sat_name="ONEWEB-0001", sat_number=50002
