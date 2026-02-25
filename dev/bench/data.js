@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1770166400571,
+  "lastUpdate": 1772045022665,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1144,6 +1144,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.034985994975411244",
             "extra": "mean: 499.92062460000284 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "ab894d62df6f0264d4e102538975a0fbe44f7c82",
+          "message": "Update response parsing for get-satellite-data from SatChecker (#119)\n\n\n* Update satellite metadata endpoint response format\n\n* Update test satellite for views tests to use a real name/norad ID",
+          "timestamp": "2026-02-25T10:42:04-08:00",
+          "tree_id": "46bdcc769e3621419cdf0bfb8f88612365549e68",
+          "url": "https://github.com/iausathub/score/commit/ab894d62df6f0264d4e102538975a0fbe44f7c82"
+        },
+        "date": 1772045022357,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 49.51477588971993,
+            "unit": "iter/sec",
+            "range": "stddev: 0.013512720463269321",
+            "extra": "mean: 20.1959916415095 msec\nrounds: 53"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 175.3692241181054,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00010952175763019359",
+            "extra": "mean: 5.7022548000014694 msec\nrounds: 50"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 0.8457610944403534,
+            "unit": "iter/sec",
+            "range": "stddev: 0.2327677648432383",
+            "extra": "mean: 1.1823669905999963 sec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 0.9171703867625187,
+            "unit": "iter/sec",
+            "range": "stddev: 0.09612867183668022",
+            "extra": "mean: 1.0903099516000054 sec\nrounds: 5"
           }
         ]
       }
