@@ -458,15 +458,16 @@ def get_satellite_metadata(satellite_number: str) -> dict[str, str | None] | Non
         response.raise_for_status()
         satellite_data = response.json()
 
-        if satellite_data:
-            metadata = satellite_data[0]
+        data_list = satellite_data.get("data", [])
+        if data_list:
+            metadata = data_list[0]
             return {
                 "rcs_size": metadata.get("rcs_size"),
                 "object_type": metadata.get("object_type"),
                 "launch_date": metadata.get("launch_date"),
                 "decay_date": metadata.get("decay_date"),
-                "name": metadata.get("name"),
-                "norad_id": metadata.get("norad_id"),
+                "name": metadata.get("satellite_name"),
+                "norad_id": metadata.get("satellite_id"),
                 "international_designator": metadata.get("international_designator"),
                 "generation": metadata.get("generation"),
             }
