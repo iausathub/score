@@ -4,7 +4,7 @@ from collections import namedtuple
 
 import requests
 from astropy.time import Time
-from django.db.models import Count
+from django.db.models import Count, Q
 from requests import Response
 
 from repository.models import Observation, Satellite
@@ -84,6 +84,7 @@ def get_stats():
         )
         .annotate(count=Count("location_id"))
         .order_by("-count")
+        .filter(~Q(instrument__icontains="CHEOPS"))  # exclude observations from CHEOPS
     )
     observer_locations_list = list(observer_locations)
     observer_locations_json = json.dumps(observer_locations_list)
