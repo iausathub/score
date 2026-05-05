@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1777672316420,
+  "lastUpdate": 1778025289658,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1300,6 +1300,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.12221387320001002",
             "extra": "mean: 1.4846454379999954 sec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "distinct": true,
+          "id": "c45da426ac1a719d925bb954d3e17b7b219b35de",
+          "message": "Update satellite altitude check to account for space-based positions",
+          "timestamp": "2026-05-05T16:49:23-07:00",
+          "tree_id": "6c534d161c92e6c588c1d051a413449d244a9e1e",
+          "url": "https://github.com/iausathub/score/commit/c45da426ac1a719d925bb954d3e17b7b219b35de"
+        },
+        "date": 1778025288905,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 48.94118212871418,
+            "unit": "iter/sec",
+            "range": "stddev: 0.015452193674130199",
+            "extra": "mean: 20.432689945453767 msec\nrounds: 55"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 165.6644614998402,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0005213449427584477",
+            "extra": "mean: 6.036297652173062 msec\nrounds: 46"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 1.317935101509572,
+            "unit": "iter/sec",
+            "range": "stddev: 0.07662735562658055",
+            "extra": "mean: 758.7627030000135 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 1.253349639893449,
+            "unit": "iter/sec",
+            "range": "stddev: 0.10955597190066495",
+            "extra": "mean: 797.8619597999909 msec\nrounds: 5"
           }
         ]
       }
