@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1781300832003,
+  "lastUpdate": 1781304897905,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1404,6 +1404,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.0887370146199137",
             "extra": "mean: 447.59683080000343 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "distinct": true,
+          "id": "9e32931d60cc0832ad430e62d50bed6490ad177f",
+          "message": "Rename logo file to update",
+          "timestamp": "2026-06-12T15:53:21-07:00",
+          "tree_id": "78beff71ce1e96e4a11b64de7604391d37cfceb7",
+          "url": "https://github.com/iausathub/score/commit/9e32931d60cc0832ad430e62d50bed6490ad177f"
+        },
+        "date": 1781304897629,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 54.3840517312452,
+            "unit": "iter/sec",
+            "range": "stddev: 0.012939225076952984",
+            "extra": "mean: 18.387743615385524 msec\nrounds: 39"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 162.47349745367214,
+            "unit": "iter/sec",
+            "range": "stddev: 0.007250537456253651",
+            "extra": "mean: 6.1548499642850425 msec\nrounds: 56"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 0.6964811467531304,
+            "unit": "iter/sec",
+            "range": "stddev: 0.16544318475611397",
+            "extra": "mean: 1.435789044200004 sec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 0.6439403114421361,
+            "unit": "iter/sec",
+            "range": "stddev: 0.26911856240993715",
+            "extra": "mean: 1.5529389637999997 sec\nrounds: 5"
           }
         ]
       }
