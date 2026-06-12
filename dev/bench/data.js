@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1778025289658,
+  "lastUpdate": 1781300832003,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1352,6 +1352,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.10955597190066495",
             "extra": "mean: 797.8619597999909 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "a06818051848e5073999e5c73481aecf0f4405e4",
+          "message": "Update CPS logo (#124)\n\n* Update obs_id field used with download results button after each search\n\n* Update tests\n\n* Add reset button to all sky plot, security improvements for the modal dialog\n\n* Upload observations via API (#113)\n\n* Add upload observation endpoint to API; split API code into files for each route and separate data schemas; make routes consistent for existing data query endpoints\n\n* Update observation summary with created vs. duplicate if observation was created or not; update documentation; update order of endpoints for observation endpoints; add tests\n\n* Update requirements.txt\n\n* Update package versions; change api upload test to use mocks to avoid Redis, and clean up comments\n\n* Update API documentation and fix formatting errors\n\n* Allow notification email to be null\n\n* Add API key for upload authentication; add page to request API key with email and ORCID ID verification and admin pages to manage/add/revoke keys\n\n* Fix formatting\n\n* Add default SCORE_URL\n\n* Add orcid_id to admin view\n\n* Add missing orcid_id to session to view API key after request\n\n* Fix for missing satellite names in API upload data\n\n* Add PlanetLabs satellites as a constellation set for visualizations\n\n* Remove SatChecker reference data from fields used to check for duplicate observations\n\n* Remove key prefix from logging\n\n* Update data structure used in name/id lookup to match SatChecker response structure\n\n* Update black version and formatting fixes; update additional functions and tests to reflect SatChecker response format changes\n\n* Update black pre-commit hook\n\n* Update requirements.txt\n\n* Update data structure in add_additional_data\n\n* Update satellite metadata endpoint response format\n\n* Update test satellite for views tests to use a real name/norad ID\n\n* Exclude space-based observations from the observer map\n\n* Update CPS logo\n\n* Fix broken tests",
+          "timestamp": "2026-06-12T14:45:55-07:00",
+          "tree_id": "be64830d0a30534beff96f156665dc32435377c1",
+          "url": "https://github.com/iausathub/score/commit/a06818051848e5073999e5c73481aecf0f4405e4"
+        },
+        "date": 1781300831205,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 57.51224394245171,
+            "unit": "iter/sec",
+            "range": "stddev: 0.010189872593746582",
+            "extra": "mean: 17.38760186440694 msec\nrounds: 59"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 200.3560880390506,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0004839631820583781",
+            "extra": "mean: 4.991113620690648 msec\nrounds: 58"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 2.3265379963536645,
+            "unit": "iter/sec",
+            "range": "stddev: 0.059981966183409965",
+            "extra": "mean: 429.82319719999396 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 2.234153441642269,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0887370146199137",
+            "extra": "mean: 447.59683080000343 msec\nrounds: 5"
           }
         ]
       }
