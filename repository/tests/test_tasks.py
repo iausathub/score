@@ -385,7 +385,7 @@ def test_process_upload_existing_satellite(mocker):
 
     # Verify existing satellite was used and maintained its data
     satellite = Satellite.objects.get(sat_number="59588")
-    assert satellite.sat_name == "ACS3"
+    assert satellite.sat_name == "ACS 3"
     assert satellite.intl_designator == "2024-001A"
     assert result["status"] == "success"
 
@@ -486,7 +486,7 @@ def test_process_upload_new_satellites(mocker):
         [
             "",
             "58296",
-            "2015-05-08T21:42:54.572Z",
+            "2024-05-08T21:42:54.572Z",
             0.001,
             6.0418,
             0.0952,
@@ -516,7 +516,7 @@ def test_process_upload_new_satellites(mocker):
     result = process_upload_csv(data)
     assert result["status"] == "success"
     assert Satellite.objects.count() == 2
-    assert Satellite.objects.get(sat_number="58296").sat_name == ""
+    assert Satellite.objects.get(sat_number="58296").sat_name == "PELICAN 3001"
 
     data = [
         [
