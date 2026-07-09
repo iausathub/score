@@ -2,7 +2,10 @@ import json
 import logging
 from collections import namedtuple
 
+import astropy.units as u
+import numpy as np
 import requests
+from astropy.constants import R_earth
 from astropy.time import Time
 from django.db.models import Count, Q
 from requests import Response
@@ -167,7 +170,7 @@ def add_additional_data(
     except requests.exceptions.RequestException:
         return "Satellite position check failed - try again later."
 
-    is_valid = validate_position(r, satellite_name, observation_time)
+    is_valid = validate_position(r, satellite_name, observation_time, altitude)
     updated_satellite_name = None
 
     # There are a few cases where we need to confirm the satellite name
@@ -276,8 +279,32 @@ def add_additional_data(
     return is_valid
 
 
+def below_line_of_sight(
+    satellite_altitude_deg: float,
+    observer_altitude_km: float,
+) -> bool:
+    """
+    Return True if the satellite is below line of sight, False otherwise.
+
+    Uses observer altitude (km) and Earth's radius so this works for observers
+    above the surface (e.g. space-based), not only Skyfield-style altitude from
+    the ground.
+    """
+    earth_radius_km = float(R_earth.to(u.km).value)
+    ratio = earth_radius_km / (earth_radius_km + observer_altitude_km)
+
+    # allow for a 5 degree buffer to account for potential differences
+    # with predicted and actual positions
+    horizon_limit = float(np.degrees(np.arccos(ratio))) - 5
+
+    return satellite_altitude_deg < horizon_limit
+
+
 def validate_position(
-    response: Response, satellite_name: str, obs_time: str | Time
+    response: Response,
+    satellite_name: str,
+    obs_time: str | Time,
+    observer_altitude_km: float = 0.0,
 ) -> str | bool:
     """
     Validates the position of a satellite based on the response from an API call.
@@ -311,7 +338,7 @@ def validate_position(
         return "archival data"
     if satellite_name and satellite_info[0] != satellite_name:
         return "Satellite name and number do not match"
-    if float(satellite_info[9]) < -5:
+    if below_line_of_sight(float(satellite_info[9]), observer_altitude_km):
         return (
             f"Satellite below horizon at this time and location "
             f"({float(satellite_info[9]):.2f}°)"

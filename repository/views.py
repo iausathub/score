@@ -93,7 +93,8 @@ def index(request):
     if request.method == "POST" and request.FILES["uploaded_file"]:
         uploaded_file = request.FILES["uploaded_file"]
 
-        data_set = uploaded_file.read().decode("UTF-8")
+        # Use utf-8-sig so BOM from spreadsheet exports is removed automatically.
+        data_set = uploaded_file.read().decode("utf-8-sig")
         io_string = io.StringIO(data_set)
 
         # Skip the header if it exists
