@@ -1,9 +1,10 @@
+import math
 from datetime import datetime
 from typing import Literal
 from uuid import UUID
 
 from ninja import Field, ModelSchema, Schema
-from pydantic import ConfigDict, EmailStr
+from pydantic import ConfigDict, EmailStr, field_validator
 
 from repository.models import Observation, Satellite
 
@@ -90,6 +91,13 @@ class ObservationUploadSchema(Schema):
     comments: str | None = None
     data_archive_link: str | None = None
     mpc_code: str | None = None
+
+    @field_validator("apparent_mag")
+    @classmethod
+    def convert_nan_apparent_mag_to_none(cls, value: float | None) -> float | None:
+        if value is not None and math.isnan(value):
+            return None
+        return value
 
 
 class SatelliteSchema(ModelSchema):
