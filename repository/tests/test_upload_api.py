@@ -6,6 +6,7 @@ from django.utils import timezone
 from ninja.testing import TestClient
 
 from repository.api import api
+from repository.api.schemas import ObservationUploadSchema
 from repository.models import APIKey
 from repository.tasks import process_upload_api
 
@@ -21,6 +22,25 @@ def api_key():
     )
     # Return both the object and the plaintext key for testing
     return api_key_obj, plaintext_key
+
+
+@pytest.mark.parametrize("apparent_mag", [float("nan"), "NaN", " nan ", "+NaN", "-NaN"])
+def test_observation_upload_schema_converts_nan_magnitude_to_null(apparent_mag):
+    observation = ObservationUploadSchema(
+        obs_time_utc="2024-01-01T00:00:00Z",
+        obs_time_uncert_sec=0.1,
+        instrument="TEST-SCOPE",
+        obs_mode="CCD",
+        obs_filter="Clear",
+        obs_email="test@example.com",
+        satellite_number=12345,
+        obs_lat_deg=20.0,
+        obs_long_deg=-155.0,
+        limiting_magnitude=18.0,
+        apparent_mag=apparent_mag,
+    )
+
+    assert observation.apparent_mag is None
 
 
 @pytest.mark.django_db
