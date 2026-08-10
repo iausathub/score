@@ -1,5 +1,6 @@
 import os
 import uuid
+from datetime import timezone as dt_timezone
 
 import pytest
 from django.utils import timezone
@@ -221,7 +222,7 @@ def test_process_upload_api_success_task(mocker):
     mock_satchecker.solar_azimuth_deg = 180.0
     mocker.patch("repository.tasks.add_additional_data", return_value=mock_satchecker)
 
-    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc)
 
     # Completed, with accepted observation
     observations_data = [
@@ -296,7 +297,7 @@ def test_process_upload_api_rejected_task(mocker):
         return_value="Satellite below horizon at this time and location",
     )
 
-    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc)
 
     # Rejected observation
     observations_data = [
@@ -381,7 +382,7 @@ def test_process_upload_api_null_email_task(mocker):
     mock_satchecker.solar_azimuth_deg = 180.0
     mocker.patch("repository.tasks.add_additional_data", return_value=mock_satchecker)
 
-    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc)
 
     # Completed, with accepted observation
     observations_data = [
@@ -458,7 +459,7 @@ def test_process_upload_api_magnitude_task(mocker):
     mock_satchecker.solar_azimuth_deg = 180.0
     mocker.patch("repository.tasks.add_additional_data", return_value=mock_satchecker)
 
-    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc)
 
     # Completed, with accepted observation
     observations_data = [
@@ -553,7 +554,7 @@ def test_process_upload_api_progress_task(mocker):
     mocker.patch("repository.tasks.send_confirmation_email")
     mocker.patch.object(process_upload_api, "update_state")
 
-    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc)
 
     # Mock the SatChecker response
     mock_satchecker = mocker.Mock()
@@ -574,7 +575,7 @@ def test_process_upload_api_progress_task(mocker):
     mock_satchecker.solar_azimuth_deg = 180.0
     mocker.patch("repository.tasks.add_additional_data", return_value=mock_satchecker)
 
-    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=timezone.utc)
+    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc)
 
     single_observation = {
         "satellite_name": "TEST SAT",
