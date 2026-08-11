@@ -385,7 +385,7 @@ def test_process_upload_existing_satellite(mocker):
 
     # Verify existing satellite was used and maintained its data
     satellite = Satellite.objects.get(sat_number="59588")
-    assert satellite.sat_name == "ACS 3"
+    assert satellite.sat_name == "ACS3"
     assert satellite.intl_designator == "2024-001A"
     assert result["status"] == "success"
 
