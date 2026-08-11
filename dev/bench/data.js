@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1786422873469,
+  "lastUpdate": 1786464406816,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1560,6 +1560,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.058160556037359604",
             "extra": "mean: 1.0153234791999979 sec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "c6cce89ecf969668fcb1bd9b09537e3fdbcdcac1",
+          "message": "Update additional dependencies (security) (#131)\n\n* Bump vulnerable dependencies to resolve Dependabot security alerts\n\nPatch versions for known CVEs (verified clean with pip-audit):\n- black 26.1.0 -> 26.3.1, click 8.1.7 -> 8.3.3\n- certifi 2024.2.2 -> 2024.7.4, idna 3.6 -> 3.15\n- cryptography 42.0.5 -> 50.0.0 (requires cffi 1.16.0 -> 2.1.1)\n- filelock 3.13.1 -> 3.20.3, virtualenv 20.25.0 -> 20.36.1\n- gunicorn 21.2.0 -> 23.0.0, requests 2.31.0 -> 2.33.0\n- setuptools 69.5.1 -> 83.0.0, sqlparse 0.4.4 -> 0.5.4\n- soupsieve 2.5 -> 2.8.4, pytest 8.3.5 -> 9.0.3\n- urllib3 2.0.7 -> 2.7.0\n\nConflict resolutions:\n- Bump boto3/botocore 1.34.40 -> 1.43.68 and s3transfer 0.10.0 -> 0.19.2\n  (botocore 1.34.40 capped urllib3<2.1, blocking the urllib3 fix)\n- Fix benchmark_data fixture to depend on the db fixture instead of an\n  ineffective @pytest.mark.django_db (removed as a no-op in pytest 9)",
+          "timestamp": "2026-08-11T09:05:20-07:00",
+          "tree_id": "f7601fa9c75c631fc032103b3857ffe17618d069",
+          "url": "https://github.com/iausathub/score/commit/c6cce89ecf969668fcb1bd9b09537e3fdbcdcac1"
+        },
+        "date": 1786464405591,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 71.5515293011113,
+            "unit": "iter/sec",
+            "range": "stddev: 0.010812122654079277",
+            "extra": "mean: 13.975941671235091 msec\nrounds: 73"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 259.56641112410847,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00015880758956650693",
+            "extra": "mean: 3.852578597012162 msec\nrounds: 67"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 2.1631715845504056,
+            "unit": "iter/sec",
+            "range": "stddev: 0.03164922836975213",
+            "extra": "mean: 462.28417899999386 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 2.077539077711244,
+            "unit": "iter/sec",
+            "range": "stddev: 0.03809787029193565",
+            "extra": "mean: 481.33871979999867 msec\nrounds: 5"
           }
         ]
       }
