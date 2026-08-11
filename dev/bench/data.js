@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1784316508225,
+  "lastUpdate": 1786422873469,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1508,6 +1508,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.25246152613422973",
             "extra": "mean: 1.2219111843999997 sec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "852dbcab4d42104e82bbeaf734a868c158c7781d",
+          "message": "Upgrade Django and dependencies (#129)\n\n* Change NaN values to none before saving\n\n* Bump Django from 4.2.16 to 5.2.16 and resolve dependency conflicts\n\n- Remove unused django-bootstrap-v5 (pinned django<5.0, abandoned)\n- Bump djangorestframework 3.14.0 -> 3.16.1 (Django 5.x compat)\n- Bump django-health-check 3.18.1 -> 3.24.0 (drops removed DEFAULT_FILE_STORAGE)\n- Bump django-anymail 10.2 -> 13.0, django-jazzmin 2.6.1 -> 3.0.1,\n  django-recaptcha 4.0.0 -> 4.1.0, django-compressor 4.4 -> 4.5.1\n  (with transitive rcssmin/rjsmin pins)\n- Replace removed django.utils.timezone.utc with datetime.timezone.utc in tests\n\n* Fix broken test (SatChecker data change)",
+          "timestamp": "2026-08-10T21:33:02-07:00",
+          "tree_id": "389c4916ad19724f56c526c215029cf3e799da14",
+          "url": "https://github.com/iausathub/score/commit/852dbcab4d42104e82bbeaf734a868c158c7781d"
+        },
+        "date": 1786422872731,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 57.30965009388281,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00967316132835359",
+            "extra": "mean: 17.449068322033593 msec\nrounds: 59"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 190.38311815327341,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0001638092843476366",
+            "extra": "mean: 5.252566559997831 msec\nrounds: 50"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 0.9578334960011732,
+            "unit": "iter/sec",
+            "range": "stddev: 0.06773162919559374",
+            "extra": "mean: 1.044022791200001 sec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 0.9849077860269009,
+            "unit": "iter/sec",
+            "range": "stddev: 0.058160556037359604",
+            "extra": "mean: 1.0153234791999979 sec\nrounds: 5"
           }
         ]
       }
