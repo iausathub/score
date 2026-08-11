@@ -13,8 +13,7 @@ def make_request(endpoint):
 
 
 @pytest.fixture
-@pytest.mark.django_db
-def benchmark_data():
+def benchmark_data(db):
     # Create test satellite
     satellite = Satellite.objects.create(
         sat_name="STARLINK-TEST", sat_number=59588, date_added=timezone.now()
