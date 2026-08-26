@@ -4,6 +4,8 @@ from django.utils import timezone
 
 from repository.models import Location, Observation, Satellite
 from repository.utils.general_utils import (
+    add_additional_data,
+    below_line_of_sight,
     get_norad_id,
     get_satellite_name,
     validate_position,
@@ -40,6 +42,103 @@ def setup_data():
         obs_orc_id=["0123-4567-8910-1112"],
     )
     return location, satellite, observation
+
+
+def test_below_line_of_sight_visible_satellite():
+    # Satellite well above the horizon is not below the line of sight.
+    assert below_line_of_sight(45.0, 0.0) is False
+
+
+def test_below_line_of_sight_rejects_far_below_horizon():
+    # A satellite 42 deg below the horizon must be rejected for a ground observer
+    # (0 km) and for a realistic elevation (100 m expressed as km).
+    assert below_line_of_sight(-42.0, 0.0) is True
+    assert below_line_of_sight(-42.0, 0.1) is True
+
+
+def test_below_line_of_sight_negative_altitude_no_nan_passthrough():
+    # Regression: a negative observer altitude used to make arccos return NaN,
+    # and `-42 < NaN` silently evaluated False, letting the observation through.
+    assert below_line_of_sight(-42.0, -0.1) is True
+    assert below_line_of_sight(-42.0, -500.0) is True
+
+
+def test_below_line_of_sight_missing_altitude_fails_safe():
+    # An unparseable/NaN satellite altitude cannot be validated, so fail safe.
+    assert below_line_of_sight(float("nan"), 0.0) is True
+
+
+def test_add_additional_data_converts_meters_to_km(mocker):
+    # Regression: the observation altitude arrives in meters (obs_alt_m) but the
+    # line-of-sight geometry needs kilometers. add_additional_data must divide
+    # by 1000 before handing the altitude to validate_position. Without this,
+    # a below-horizon satellite could pass the visibility check.
+    mocker.patch(
+        "repository.utils.general_utils.requests.get",
+        return_value=mocker.Mock(),
+    )
+    # Return a plain string so add_additional_data short-circuits after the
+    # position check without needing a full SatChecker response to parse.
+    mock_validate = mocker.patch(
+        "repository.utils.general_utils.validate_position",
+        return_value="checked",
+    )
+
+    add_additional_data(
+        "TESTSAT",
+        12345,
+        "2024-06-01T00:00:00.000",  # after 2024-05-01 to skip the name lookup
+        0.0,  # latitude
+        0.0,  # longitude
+        1000.0,  # altitude in METERS
+    )
+
+    # validate_position(response, name, obs_time, observer_altitude_km)
+    observer_altitude_km = mock_validate.call_args.args[3]
+    assert observer_altitude_km == pytest.approx(1.0)
+
+
+@pytest.mark.django_db
+def test_validate_position_below_horizon(requests_mock, setup_data):
+    # SatChecker returns a position 42 deg below the horizon (e.g. from an
+    # observer longitude entered without its minus sign): must be rejected.
+    requests_mock.get(
+        "https://satchecker.cps.iau.org/ephemeris/catalog-number/",
+        status_code=200,
+        json={
+            "data": [
+                [
+                    "TestSat",
+                    "",
+                    "",  # noqa: B033
+                    "",  # noqa: B033
+                    "",  # noqa: B033
+                    "",  # noqa: B033
+                    "2024-02-20 00:36:13 UTC",
+                    "",  # noqa: B033
+                    "",  # noqa: B033
+                    "-42",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "",
+                    "2024-02-20 00:36:13 UTC",
+                ]
+            ]
+        },
+    )
+    response = requests.get(
+        "https://satchecker.cps.iau.org/ephemeris/catalog-number/", timeout=5
+    )
+    result = validate_position(response, "TestSat", "2024-02-22T04:09:38.150")
+    assert "below horizon" in result
 
 
 @pytest.mark.django_db
