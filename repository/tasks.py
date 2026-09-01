@@ -7,7 +7,11 @@ from django.utils import timezone
 
 from repository.models import Location, Observation, Satellite
 from repository.utils.email_utils import send_confirmation_email
-from repository.utils.general_utils import SatCheckerData, add_additional_data
+from repository.utils.general_utils import (
+    SatCheckerData,
+    add_additional_data,
+    get_satellite_metadata,
+)
 
 
 class UploadError(Exception):
@@ -18,6 +22,19 @@ def is_potentially_discrepant(additional_data: SatCheckerData) -> bool:
     return additional_data.alt_deg is not None and (
         additional_data.alt_deg < -3 or additional_data.illuminated is False
     )
+
+
+def _fetch_generation(sat_number: int) -> str | None:
+    """Best-effort lookup of a satellite's generation from SatChecker.
+
+    Returns None on any failure or if SatChecker hasn't classified it yet, so
+    it can never break an upload.
+    """
+    try:
+        metadata = get_satellite_metadata(sat_number)
+    except Exception:
+        return None
+    return metadata.get("generation") if metadata else None
 
 
 def get_or_create_satellite(
@@ -53,6 +70,7 @@ def get_or_create_satellite(
             sat_number=sat_number,
             date_added=timezone.now(),
             intl_designator=additional_data.intl_designator,
+            generation=_fetch_generation(sat_number),
         )
     return satellite
 
