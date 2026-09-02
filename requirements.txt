@@ -84,7 +84,7 @@ s3transfer==0.19.2
 setuptools==83.0.0
 six==1.16.0
 soupsieve==2.8.4
-sqlparse==0.5.4
+sqlparse==0.6.0
 tokenize-rt==6.0.0
 types-jmespath==1.0.2.20240106
 types-requests==2.31.0.20240311
