@@ -1,3 +1,4 @@
+import numpy as np
 import pytest
 import requests
 from django.utils import timezone
@@ -6,6 +7,7 @@ from repository.models import Location, Observation, Satellite
 from repository.utils.general_utils import (
     add_additional_data,
     below_line_of_sight,
+    distance_corrected_mag,
     get_norad_id,
     get_satellite_name,
     validate_position,
@@ -66,6 +68,36 @@ def test_below_line_of_sight_negative_altitude_no_nan_passthrough():
 def test_below_line_of_sight_missing_altitude_fails_safe():
     # An unparseable/NaN satellite altitude cannot be validated, so fail safe.
     assert below_line_of_sight(float("nan"), 0.0) is True
+
+
+def test_distance_corrected_mag_at_reference_is_unchanged():
+    # At the reference distance the correction is zero (log10(1) = 0).
+    assert distance_corrected_mag(6.0, 1000) == pytest.approx(6.0)
+
+
+def test_distance_corrected_mag_scales_with_distance():
+    # M = m - 5*log10(r/r0). Closer than the reference (r < r0) -> fainter once
+    # normalized out to r0; farther (r > r0) -> brighter.
+    assert distance_corrected_mag(6.0, 500) == pytest.approx(7.5051499783)
+    assert distance_corrected_mag(6.0, 2000) == pytest.approx(4.4948500217)
+
+
+def test_distance_corrected_mag_custom_reference_distance():
+    assert distance_corrected_mag(6.0, 550, reference_distance_km=550) == pytest.approx(
+        6.0
+    )
+
+
+def test_distance_corrected_mag_vectorized():
+    # Accepts NumPy arrays elementwise.
+    result = distance_corrected_mag(np.array([6.0, 7.0]), np.array([1000.0, 500.0]))
+    assert result[0] == pytest.approx(6.0)
+    assert result[1] == pytest.approx(8.5051499783)
+
+
+def test_distance_corrected_mag_invalid_input_returns_nan():
+    # Unusable input (e.g. None distance) fails safe to NaN rather than raising.
+    assert np.isnan(distance_corrected_mag(6.0, None))
 
 
 def test_add_additional_data_converts_meters_to_km(mocker):

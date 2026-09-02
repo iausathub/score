@@ -84,6 +84,10 @@
                     {% endfor %}
                 </div>
 
+                {{ constellation_stats|json_script:"constellation-data" }}
+                {{ magnitude_bins|json_script:"magnitude-bins-data" }}
+                {{ observations|json_script:"observations-data" }}
+
                 <!-- Stacked Magnitude Histogram -->
                 <div class="row g-2">
                     <div class="col-lg-6 col-md-6 col-sm-12">
@@ -92,9 +96,6 @@
                                 <h5 class="card-title mb-0">Observations by Apparent Magnitude</h5>
                             </div>
                             <div class="card-body">
-                                {{ constellation_stats|json_script:"constellation-data" }}
-                                {{ magnitude_bins|json_script:"magnitude-bins-data" }}
-
                                 <div style="position: relative; height:350px; width:100%;">
                                     <canvas id="magnitude_distribution"></canvas>
                                 </div>
@@ -109,9 +110,34 @@
                                 <h5 class="card-title mb-0">All Observations</h5>
                             </div>
                             <div class="card-body">
-                                {{ observations|json_script:"observations-data" }}
-
                                 <div id="allsky-plot" style="width: 100%; height: 350px;"></div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="row g-2 mt-2">
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Observed Brightness vs Orbital Altitude</h5>
+                            </div>
+                            <div class="card-body">
+                                <div style="position: relative; height:350px; width:100%;">
+                                    <canvas id="constellation_magnitude"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header">
+                                <h5 class="card-title mb-0">Brightness Standardized to 1000 km</h5>
+                            </div>
+                            <div class="card-body">
+                                <div style="position: relative; height:350px; width:100%;">
+                                    <canvas id="standardized_magnitude"></canvas>
+                                </div>
                             </div>
                         </div>
                     </div>

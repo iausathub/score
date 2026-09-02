@@ -835,6 +835,33 @@ class VisualizationViewsTest(TestCase):
         self.assertIn("Starlink", constellation_names)
         self.assertIn("OneWeb", constellation_names)
 
+    def test_visualization_view_magnitude_stats_fields(self):
+        # Give Starlink a slant range so the distance-corrected stats compute.
+        Observation.objects.filter(pk=self.starlink_obs.pk).update(
+            range_to_sat_km_satchecker=550.0
+        )
+        response = self.client.get(reverse("data-visualization"))
+        constellation_stats = response.context["constellation_stats"]
+
+        # Every constellation carries the full magnitude-stat schema.
+        for stat in constellation_stats:
+            for key in (
+                "avg_magnitude",
+                "mag_std",
+                "median_altitude_km",
+                "abs_mean_magnitude",
+                "abs_std_magnitude",
+            ):
+                self.assertIn(key, stat)
+
+        stats_by_name = {stat["name"]: stat for stat in constellation_stats}
+        starlink = stats_by_name["Starlink"]
+        # One observation: mag 5.5 at 550 km altitude and 550 km range.
+        self.assertAlmostEqual(starlink["avg_magnitude"], 5.5)
+        self.assertEqual(starlink["median_altitude_km"], 550)
+        # Distance-corrected to 1000 km: 5.5 - 5*log10(550/1000) ≈ 6.8.
+        self.assertAlmostEqual(starlink["abs_mean_magnitude"], 6.8, places=1)
+
     def test_visualization_view_observations_data(self):
         response = self.client.get(reverse("data-visualization"))
         observations = response.context["observations"]
