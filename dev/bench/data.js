@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1786464406816,
+  "lastUpdate": 1788369693334,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1612,6 +1612,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.03809787029193565",
             "extra": "mean: 481.33871979999867 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "9f88377066567a2083b0782c03d148511d516f38",
+          "message": "Bump sqlparse from 0.5.4 to 0.6.0 (#132)\n\nBumps [sqlparse](https://github.com/andialbrecht/sqlparse) from 0.5.4 to 0.6.0.\n- [Changelog](https://github.com/andialbrecht/sqlparse/blob/master/CHANGELOG)\n- [Commits](https://github.com/andialbrecht/sqlparse/compare/0.5.4...0.6.0)\n\n---\nupdated-dependencies:\n- dependency-name: sqlparse\n  dependency-version: 0.6.0\n  dependency-type: direct:production\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-09-02T10:20:03-07:00",
+          "tree_id": "57de83bfa21ea0c9ae4a0f9e036e779297bdb654",
+          "url": "https://github.com/iausathub/score/commit/9f88377066567a2083b0782c03d148511d516f38"
+        },
+        "date": 1788369692554,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 51.80096769733167,
+            "unit": "iter/sec",
+            "range": "stddev: 0.01470579157419335",
+            "extra": "mean: 19.3046586666664 msec\nrounds: 57"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 190.1827944257723,
+            "unit": "iter/sec",
+            "range": "stddev: 0.0002614021054683083",
+            "extra": "mean: 5.258099204080717 msec\nrounds: 49"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 0.853316175042831,
+            "unit": "iter/sec",
+            "range": "stddev: 0.16764659686813432",
+            "extra": "mean: 1.1718985637999964 sec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 0.8888700845064522,
+            "unit": "iter/sec",
+            "range": "stddev: 0.10522957480400975",
+            "extra": "mean: 1.1250237998000046 sec\nrounds: 5"
           }
         ]
       }
