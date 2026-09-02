@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788369693334,
+  "lastUpdate": 1788369977537,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1664,6 +1664,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.10522957480400975",
             "extra": "mean: 1.1250237998000046 sec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "49699333+dependabot[bot]@users.noreply.github.com",
+            "name": "dependabot[bot]",
+            "username": "dependabot[bot]"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "29cecb40f65052a39d258858b3126b58cc26d9c9",
+          "message": "Bump djangorestframework from 3.16.1 to 3.17.2 (#133)\n\nBumps [djangorestframework](https://github.com/encode/django-rest-framework) from 3.16.1 to 3.17.2.\n- [Release notes](https://github.com/encode/django-rest-framework/releases)\n- [Commits](https://github.com/encode/django-rest-framework/compare/3.16.1...3.17.2)\n\n---\nupdated-dependencies:\n- dependency-name: djangorestframework\n  dependency-version: 3.17.2\n  dependency-type: direct:production\n...\n\nSigned-off-by: dependabot[bot] <support@github.com>\nCo-authored-by: dependabot[bot] <49699333+dependabot[bot]@users.noreply.github.com>",
+          "timestamp": "2026-09-02T10:24:45-07:00",
+          "tree_id": "10c5a2ec2d0fb9b7d961d22e52a223d2b22ee02b",
+          "url": "https://github.com/iausathub/score/commit/29cecb40f65052a39d258858b3126b58cc26d9c9"
+        },
+        "date": 1788369977006,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 52.23932573194897,
+            "unit": "iter/sec",
+            "range": "stddev: 0.012947268063499395",
+            "extra": "mean: 19.14266667857107 msec\nrounds: 56"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 175.04572155350778,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000336380620703077",
+            "extra": "mean: 5.7127931555546265 msec\nrounds: 45"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 0.7223895671366002,
+            "unit": "iter/sec",
+            "range": "stddev: 0.22462313282934987",
+            "extra": "mean: 1.384294632000001 sec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 0.7831118993205476,
+            "unit": "iter/sec",
+            "range": "stddev: 0.10484800830917515",
+            "extra": "mean: 1.2769567169999987 sec\nrounds: 5"
           }
         ]
       }
