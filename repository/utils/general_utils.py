@@ -170,7 +170,8 @@ def add_additional_data(
     except requests.exceptions.RequestException:
         return "Satellite position check failed - try again later."
 
-    is_valid = validate_position(r, satellite_name, observation_time, altitude)
+    # obs altitude is provided in meters; validate_position expects kilometers
+    is_valid = validate_position(r, satellite_name, observation_time, altitude / 1000)
     updated_satellite_name = None
 
     # There are a few cases where we need to confirm the satellite name
@@ -291,7 +292,20 @@ def below_line_of_sight(
     the ground.
     """
     earth_radius_km = float(R_earth.to(u.km).value)
-    ratio = earth_radius_km / (earth_radius_km + observer_altitude_km)
+    denominator = earth_radius_km + observer_altitude_km
+
+    # Safety check: a nonsensical observer altitude or a missing/unparseable
+    # satellite altitude means we cannot confirm visibility, so treat the
+    # satellite as below the line of sight (reject) rather than let it pass.
+    if denominator <= 0 or np.isnan(satellite_altitude_deg):
+        return True
+
+    ratio = earth_radius_km / denominator
+    # Clamp to arccos's valid domain. Without this, an at/below-sea-level
+    # observer (ratio slightly > 1) makes arccos return NaN, and
+    # `satellite_altitude_deg < NaN` is always False, which lets a
+    # below-horizon satellite through.
+    ratio = min(1.0, max(-1.0, ratio))
 
     # allow for a 5 degree buffer to account for potential differences
     # with predicted and actual positions
