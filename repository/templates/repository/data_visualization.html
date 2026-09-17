@@ -85,15 +85,34 @@
                 </div>
 
                 {{ constellation_stats|json_script:"constellation-data" }}
+                {{ altitude_stats|json_script:"altitude-data" }}
                 {{ magnitude_bins|json_script:"magnitude-bins-data" }}
                 {{ observations|json_script:"observations-data" }}
+
+                <style>
+                  .viz-legend { text-align: center; font-size: 13px; padding: 12px 0 4px; }
+                  .viz-legend-row { padding: 3px 0; }
+                  .viz-legend-item { display: inline-block; margin: 0 12px; white-space: nowrap; }
+                  .viz-legend-dot { display:inline-block; width:11px; height:11px; border-radius:50%; margin-right:6px; vertical-align:middle; }
+                  .viz-legend-line { display:inline-block; width:22px; border-top:3px solid transparent; margin-right:6px; vertical-align:middle; }
+                  .viz-legend-line.dashed { border-top-style: dashed; }
+                </style>
 
                 <!-- Stacked Magnitude Histogram -->
                 <div class="row g-2">
                     <div class="col-lg-6 col-md-6 col-sm-12">
                         <div class="card shadow-sm">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0">Observations by Apparent Magnitude</h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Download chart" aria-label="Download chart">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><button class="dropdown-item" type="button" data-chart-download="magnitude_distribution" data-format="png">Download PNG</button></li>
+                                        <li><button class="dropdown-item" type="button" data-chart-download="magnitude_distribution" data-format="jpeg">Download JPG</button></li>
+                                    </ul>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div style="position: relative; height:350px; width:100%;">
@@ -106,8 +125,17 @@
                     <!-- All Observations Plot -->
                     <div class="col-lg-6 col-md-6 col-sm-12">
                         <div class="card shadow-sm">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0">All Observations</h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Download chart" aria-label="Download chart">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><button class="dropdown-item" type="button" data-chart-download="allsky-plot" data-format="png">Download PNG</button></li>
+                                        <li><button class="dropdown-item" type="button" data-chart-download="allsky-plot" data-format="jpeg">Download JPG</button></li>
+                                    </ul>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div id="allsky-plot" style="width: 100%; height: 350px;"></div>
@@ -116,23 +144,77 @@
                     </div>
                 </div>
 
+                <!-- Observed Brightness vs Orbital Altitude — two marker-size variations -->
                 <div class="row g-2 mt-2">
                     <div class="col-lg-6 col-md-6 col-sm-12">
                         <div class="card shadow-sm">
-                            <div class="card-header">
-                                <h5 class="card-title mb-0">Observed Brightness vs Orbital Altitude</h5>
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title mb-0">Observed Brightness vs Orbital Altitude</h5>
+                                    {# Empty subtitle keeps this card's header height matched to the scaled card's. #}
+                                    <small class="text-muted">&nbsp;</small>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Download chart" aria-label="Download chart">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><button class="dropdown-item" type="button" data-chart-download="constellation_magnitude_uniform" data-format="png">Download PNG</button></li>
+                                        <li><button class="dropdown-item" type="button" data-chart-download="constellation_magnitude_uniform" data-format="jpeg">Download JPG</button></li>
+                                    </ul>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div style="position: relative; height:350px; width:100%;">
-                                    <canvas id="constellation_magnitude"></canvas>
+                                    <canvas id="constellation_magnitude_uniform"></canvas>
                                 </div>
                             </div>
                         </div>
                     </div>
                     <div class="col-lg-6 col-md-6 col-sm-12">
                         <div class="card shadow-sm">
-                            <div class="card-header">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h5 class="card-title mb-0">Observed Brightness vs Orbital Altitude</h5>
+                                    <small class="text-muted">Marker size scaled by observation count</small>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Download chart" aria-label="Download chart">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><button class="dropdown-item" type="button" data-chart-download="constellation_magnitude_scaled" data-format="png">Download PNG</button></li>
+                                        <li><button class="dropdown-item" type="button" data-chart-download="constellation_magnitude_scaled" data-format="jpeg">Download JPG</button></li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="card-body">
+                                <div style="position: relative; height:350px; width:100%;">
+                                    <canvas id="constellation_magnitude_scaled"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Shared legend for the two altitude charts -->
+                <div id="altitude-legend" class="viz-legend"></div>
+
+                <!-- Brightness Standardized to 1000 km (own row) -->
+                <div class="row g-2 mt-2">
+                    <div class="col-lg-6 col-md-6 col-sm-12">
+                        <div class="card shadow-sm">
+                            <div class="card-header d-flex justify-content-between align-items-center">
                                 <h5 class="card-title mb-0">Brightness Standardized to 1000 km</h5>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-link text-muted p-0" type="button" data-bs-toggle="dropdown" aria-expanded="false" title="Download chart" aria-label="Download chart">
+                                        <i class="fas fa-download"></i>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-end">
+                                        <li><button class="dropdown-item" type="button" data-chart-download="standardized_magnitude" data-format="png">Download PNG</button></li>
+                                        <li><button class="dropdown-item" type="button" data-chart-download="standardized_magnitude" data-format="jpeg">Download JPG</button></li>
+                                    </ul>
+                                </div>
                             </div>
                             <div class="card-body">
                                 <div style="position: relative; height:350px; width:100%;">
