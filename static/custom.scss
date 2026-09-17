@@ -172,7 +172,7 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
 
   // Chart colors for constellation badges - constellation_config.js dark theme
   --bs-chart-primary: #4a9eff;      // Starlink
-  --bs-chart-accent1: #e18605;      // Kuiper
+  --bs-chart-accent1: #e18605;      // Amazon LEO
   --bs-chart-secondary: #8ba3c4;    // Other
   --bs-chart-accent2: #9b59b6;      // Qianfan
   --bs-chart-accent3: #22d3ee;      // SpaceMobile
@@ -481,7 +481,7 @@ $theme-colors-dark: map-merge($theme-colors, $custom-colors-dark);
   }
 
   .badge.bg-accent1 {
-    background-color: #fbb552 !important;  // Kuiper
+    background-color: #fbb552 !important;  // Amazon LEO
     color: var(--bs-dark);
   }
 

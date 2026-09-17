@@ -16,7 +16,7 @@ class SatelliteSelector {
     // Bootstrap CSS color classes for badges (not chart colors)
     static BOOTSTRAP_COLOR_CLASSES = {
         starlink: 'primary',
-        kuiper: 'accent1',
+        amazonleo: 'accent1',
         qianfan: 'accent2',
         spacemobile: 'accent3',
         oneweb: 'danger',

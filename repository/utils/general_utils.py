@@ -521,3 +521,29 @@ def get_satellite_metadata(satellite_number: str) -> dict[str, str | None] | Non
         )
 
     return None
+
+
+def distance_corrected_mag(
+    apparent_mag, obs_to_sat_distance_km, reference_distance_km=1000
+):
+    """Distance-corrected proxy for a satellite's absolute magnitude.
+
+    Applies the distance-modulus correction ``M = m - 5*log10(r / r0)``, where
+    m is apparent magnitude, r the observer-to-satellite distance, and r0 the
+    normalizing distance. Phase angles are ignored (satellites are not simple
+    Lambertian plates or spheres anyway). Accepts scalars or NumPy arrays.
+
+    Parameters:
+        apparent_mag: apparent magnitude [mag]
+        obs_to_sat_distance_km: observer-to-satellite distance [km]
+        reference_distance_km: normalizing distance [km]
+
+    Returns:
+        Distance-corrected pseudo-absolute magnitude (NaN on invalid input).
+    """
+    try:
+        return apparent_mag - 5.0 * np.log10(
+            obs_to_sat_distance_km / reference_distance_km
+        )
+    except Exception:
+        return np.nan

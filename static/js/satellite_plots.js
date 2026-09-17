@@ -9,7 +9,7 @@
 
 const CONSTELLATION_SYMBOLS = {
     'starlink': 'circle',
-    'kuiper': 'square',
+    'amazonleo': 'square',
     'qianfan': 'diamond',
     'spacemobile': 'triangle-up',
     'oneweb': 'star',
@@ -231,7 +231,7 @@ function createAllSkyPlot(observationData, options = {}) {
 /**
  * Create a Plotly trace for a constellation
  * @param {Array<Object>} obs - Observation data for this constellation
- * @param {string} constellation - Constellation ID (starlink, kuiper, etc.)
+ * @param {string} constellation - Constellation ID (starlink, amazonleo, etc.)
  * @param {string} color - Base color for this constellation
  * @param {boolean} [enableTooltip=true] - Show tooltip on hover
  * @param {boolean} [showColorbar=true] - Show magnitude colorbar

@@ -8,13 +8,15 @@ import uuid
 import zipfile
 from datetime import timedelta
 
+import numpy as np
 import requests
 from astropy.time import Time
 from celery.result import AsyncResult
 from django.conf import settings
 from django.contrib import messages
+from django.core.cache import cache
 from django.core.paginator import EmptyPage, PageNotAnInteger, Paginator
-from django.db.models import Avg, Count, Max, Min, Q
+from django.db.models import Aggregate, Avg, Count, FloatField, Max, Min, Q, StdDev
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.template import loader
@@ -36,6 +38,7 @@ from repository.utils.email_utils import (
     send_data_change_email,
 )
 from repository.utils.general_utils import (
+    distance_corrected_mag,
     get_norad_id,
     get_satellite_metadata,
     get_satellite_name,
@@ -910,7 +913,7 @@ def _get_constellation_id(sat_name):
     if "STARLINK" in sat_name_upper:
         return "starlink"
     elif "KUIPER" in sat_name_upper:
-        return "kuiper"
+        return "amazonleo"
     elif "QIANFAN" in sat_name_upper:
         return "qianfan"
     elif "SPACEMOBILE" in sat_name_upper:
@@ -926,7 +929,7 @@ def _get_constellation_filter(const_id):
     """Helper to get Q filter for constellation."""
     if const_id == "starlink":
         return Q(satellite_id__sat_name__icontains="STARLINK")
-    elif const_id == "kuiper":
+    elif const_id == "amazonleo":
         return Q(satellite_id__sat_name__icontains="KUIPER")
     elif const_id == "qianfan":
         return Q(satellite_id__sat_name__icontains="QIANFAN")
@@ -953,12 +956,142 @@ def _get_constellation_filter(const_id):
         )
 
 
+class Percentile(Aggregate):
+    """Continuous percentile aggregate (Postgres PERCENTILE_CONT).
+
+    Ignores NULLs, like the built-in aggregates. ``fraction`` is the
+    percentile to compute in the range 0-1 (e.g. 0.5 for the median).
+    """
+
+    function = "PERCENTILE_CONT"
+    name = "percentile"
+    output_field = FloatField()
+    template = "%(function)s(%(fraction)s) WITHIN GROUP (ORDER BY %(expressions)s)"
+
+    def __init__(self, expression, fraction, **extra):
+        super().__init__(expression, fraction=fraction, **extra)
+
+
+def _starlink_generation_order():
+    """Ordered Starlink generation names (oldest -> newest) from SatChecker.
+
+    Uses SatChecker's get-starlink-generations endpoint so the ordering is never
+    hardcoded — new generations appear (and sort by launch date) automatically.
+    Cached for a day; returns [] on failure so callers fall back gracefully.
+    """
+    cached = cache.get("starlink_generation_order")
+    if cached is not None:
+        return cached
+    order = []
+    try:
+        resp = requests.get(
+            "https://satchecker.cps.iau.org/tools/get-starlink-generations/",
+            timeout=10,
+        )
+        resp.raise_for_status()
+        data = resp.json().get("data", [])
+        data.sort(key=lambda g: g.get("earliest_launch_date") or "")
+        order = [g["generation"] for g in data if g.get("generation")]
+    except Exception as exc:
+        logger.warning("Could not fetch Starlink generations from SatChecker: %s", exc)
+    cache.set("starlink_generation_order", order, 60 * 60 * 24)
+    return order
+
+
+def _generation_order_key(gen, gen_order):
+    """Sort key for a Starlink generation using SatChecker's launch-date order.
+
+    Generations SatChecker doesn't know sort after the known ones; unclassified
+    (None) sorts last.
+    """
+    if gen is None:
+        return (len(gen_order) + 1, "")
+    rank = gen_order.index(gen) if gen in gen_order else len(gen_order)
+    return (rank, gen)
+
+
+def _altitude_row(obs_qs, row_id, name):
+    """Per-group stats for the observed-brightness-vs-altitude chart."""
+    obs_count = obs_qs.filter(apparent_mag__isnull=False).count()
+    if obs_count == 0:
+        return None
+    agg = obs_qs.aggregate(
+        avg=Avg("apparent_mag"),
+        std=StdDev("apparent_mag"),
+        altitude=Percentile("sat_altitude_km_satchecker", 0.5),
+    )
+    if agg["avg"] is None:
+        return None
+    sat_count = Satellite.objects.filter(observations__in=obs_qs).distinct().count()
+    return {
+        "id": row_id,
+        "name": name,
+        "satellite_count": sat_count,
+        "observation_count": obs_count,
+        "avg_magnitude": round(agg["avg"], 2),
+        "mag_std": round(agg["std"], 2) if agg["std"] is not None else None,
+        "median_altitude_km": (round(agg["altitude"]) if agg["altitude"] else None),
+    }
+
+
+def _build_altitude_stats(constellations_config):
+    """Like constellation_stats but with Starlink split by generation.
+
+    Used only by the altitude charts; the histogram and stat boxes keep the
+    aggregate constellation_stats. Starlink satellites without a stored
+    generation are grouped as "unclassified".
+    """
+    stats = []
+    for const_id, const_info in constellations_config.items():
+        base_q = _get_constellation_filter(const_id)
+        if const_id != "starlink":
+            row = _altitude_row(
+                Observation.objects.filter(base_q), const_id, const_info["name"]
+            )
+            if row:
+                stats.append(row)
+            continue
+
+        rows = []
+        gen_order = _starlink_generation_order()
+        gens = (
+            Observation.objects.filter(base_q)
+            .exclude(satellite_id__generation__isnull=True)
+            .exclude(satellite_id__generation="")
+            .values_list("satellite_id__generation", flat=True)
+            .distinct()
+        )
+        for gen in gens:
+            row = _altitude_row(
+                Observation.objects.filter(base_q, satellite_id__generation=gen),
+                "starlink_" + gen.replace(" ", "").replace(".", ""),
+                f"Starlink {gen}",
+            )
+            if row:
+                row["_order"] = _generation_order_key(gen, gen_order)
+                rows.append(row)
+        unclassified = _altitude_row(
+            Observation.objects.filter(base_q).filter(
+                Q(satellite_id__generation__isnull=True)
+                | Q(satellite_id__generation="")
+            ),
+            "starlink_unknown",
+            "Starlink (unclassified)",
+        )
+        if unclassified:
+            unclassified["_order"] = _generation_order_key(None, gen_order)
+            rows.append(unclassified)
+        rows.sort(key=lambda r: r.pop("_order"))
+        stats.extend(rows)
+    return stats
+
+
 def visualization_view(request):
     """Landing page with constellation stats and magnitude histogram."""
     # Constellation definitions
     constellations_config = {
         "starlink": {"name": "Starlink"},
-        "kuiper": {"name": "Kuiper"},
+        "amazonleo": {"name": "Amazon LEO"},
         "qianfan": {"name": "Qianfan"},
         "spacemobile": {"name": "AST SpaceMobile"},
         "planetlabs": {"name": "Planet Labs"},
@@ -977,6 +1110,9 @@ def visualization_view(request):
     constellation_stats = []
     magnitude_bins = {i: {} for i in range(min_mag, max_mag + 1)}
 
+    def _round(value):
+        return round(value, 2) if value is not None else None
+
     for const_id, const_info in constellations_config.items():
         filter_q = _get_constellation_filter(const_id)
 
@@ -984,15 +1120,45 @@ def visualization_view(request):
         obs_qs = Observation.objects.filter(filter_q)
         obs_count = obs_qs.count()
         sat_count = Satellite.objects.filter(observations__in=obs_qs).distinct().count()
-        avg_mag = obs_qs.aggregate(Avg("apparent_mag"))["apparent_mag__avg"]
+        mag_stats_const = obs_qs.aggregate(
+            avg=Avg("apparent_mag"),
+            std=StdDev("apparent_mag"),
+            altitude=Percentile("sat_altitude_km_satchecker", 0.5),
+        )
 
+        # Distance-corrected ("pseudo-absolute") magnitude, normalized to a
+        # 1000 km slant range per observation, then summarized. This removes the
+        # distance effect so constellations at different altitudes are directly
+        # comparable. Uses SatChecker range (best populated); ignores rows with
+        # no usable range.
+        corrected = obs_qs.filter(
+            apparent_mag__isnull=False,
+            range_to_sat_km_satchecker__isnull=False,
+            range_to_sat_km_satchecker__gt=0,
+        ).values_list("apparent_mag", "range_to_sat_km_satchecker")
+        if corrected:
+            mags = np.array([row[0] for row in corrected], dtype=float)
+            ranges = np.array([row[1] for row in corrected], dtype=float)
+            abs_mags = distance_corrected_mag(mags, ranges)
+            abs_mean = round(float(np.nanmean(abs_mags)), 2)
+            abs_std = round(float(np.nanstd(abs_mags)), 2)
+        else:
+            abs_mean = abs_std = None
+
+        median_altitude = mag_stats_const["altitude"]
         constellation_stats.append(
             {
                 "id": const_id,
                 "name": const_info["name"],
                 "satellite_count": sat_count,
                 "observation_count": obs_count,
-                "avg_magnitude": round(avg_mag, 2) if avg_mag else None,
+                "avg_magnitude": _round(mag_stats_const["avg"]),
+                "mag_std": _round(mag_stats_const["std"]),
+                "median_altitude_km": (
+                    round(median_altitude) if median_altitude else None
+                ),
+                "abs_mean_magnitude": abs_mean,
+                "abs_std_magnitude": abs_std,
             }
         )
 
@@ -1005,6 +1171,9 @@ def visualization_view(request):
 
     # Sort by observation count, but keep "Other" at the end
     constellation_stats.sort(key=lambda x: (-x["observation_count"]))
+
+    # Separate dataset for the altitude charts: Starlink split by generation.
+    altitude_stats = _build_altitude_stats(constellations_config)
 
     # Get all observations for the all-sky plot
     # Only fetch minimal fields since tooltips are disabled
@@ -1027,6 +1196,7 @@ def visualization_view(request):
         "repository/data_visualization.html",
         {
             "constellation_stats": constellation_stats,
+            "altitude_stats": altitude_stats,
             "magnitude_bins": magnitude_bins,
             "observations": observations,
         },
@@ -1607,7 +1777,7 @@ def get_observations_for_satellites(request):
             for constellation in selected_constellations:
                 if constellation == "starlink":
                     combined_filters |= Q(satellite_id__sat_name__icontains="STARLINK")
-                elif constellation == "kuiper":
+                elif constellation == "amazonleo":
                     combined_filters |= Q(satellite_id__sat_name__icontains="KUIPER")
                 elif constellation == "qianfan":
                     combined_filters |= Q(satellite_id__sat_name__icontains="QIANFAN")

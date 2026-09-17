@@ -2,12 +2,17 @@
  * Shared constellation configuration
  */
 window.ConstellationConfig = {
+    // Paul Tol "bright" qualitative palette (colorblind-safe; his recommended
+    // default), mapped to each constellation's brand hue — every constellation
+    // gets its natural color. Grey is Tol's designated "other" slot. The dark
+    // column uses lightened steps of the same hues for contrast on the dark
+    // surface, keeping blue deeper than cyan so Starlink and SpaceMobile stay apart.
     colors: {
-        light: { starlink: '#142943', kuiper: '#fbb552', qianfan: '#8e44ad', spacemobile: '#0891b2', oneweb: '#c0392b', planetlabs: '#65a30d', other: '#5c7da7' },
-        dark: { starlink: '#4a9eff', kuiper: '#e18605', qianfan: '#9b59b6', spacemobile: '#22d3ee', oneweb: '#ec7063', planetlabs: '#a3e635', other: '#8ba3c4' }
+        light: { starlink: '#4477AA', amazonleo: '#CCBB44', qianfan: '#AA3377', spacemobile: '#66CCEE', oneweb: '#EE6677', planetlabs: '#228833', other: '#BBBBBB' },
+        dark: { starlink: '#3f80d6', amazonleo: '#d8c85a', qianfan: '#d264a0', spacemobile: '#7dd6f2', oneweb: '#f07a88', planetlabs: '#4caf5f', other: '#b0b0b0' }
     },
 
-    names: { starlink: 'Starlink', kuiper: 'Kuiper', qianfan: 'Qianfan', spacemobile: 'SpaceMobile', oneweb: 'OneWeb', planetlabs: 'Planet Labs', other: 'Other' },
+    names: { starlink: 'Starlink', amazonleo: 'Amazon LEO', qianfan: 'Qianfan', spacemobile: 'SpaceMobile', oneweb: 'OneWeb', planetlabs: 'Planet Labs', other: 'Other' },
 
     getCurrentTheme: () => document.documentElement.getAttribute('data-bs-theme') || 'light',
 

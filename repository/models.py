@@ -32,6 +32,7 @@ class Satellite(models.Model):
     decay_date = models.DateField(null=True, blank=True)
     rcs_size = models.CharField(max_length=200, null=True, blank=True)
     object_type = models.CharField(max_length=200, null=True, blank=True)
+    generation = models.CharField(max_length=100, null=True, blank=True)
 
     def __str__(self):
         return str(self.sat_number) + ", " + self.sat_name

@@ -2,7 +2,18 @@ import pytest
 from django.utils import timezone
 
 from repository.models import Observation, Satellite
-from repository.tasks import UploadError, process_upload_csv
+from repository.tasks import (
+    UploadError,
+    get_or_create_satellite,
+    process_upload_csv,
+)
+from repository.utils.general_utils import SatCheckerData
+
+
+def _satchecker_data(**overrides):
+    """Build a SatCheckerData namedtuple with all-None defaults."""
+    base = SatCheckerData._make([None] * len(SatCheckerData._fields))
+    return base._replace(**overrides)
 
 
 @pytest.mark.django_db
@@ -897,3 +908,50 @@ def test_process_upload_different_satchecker_values(mocker):
     # only one observation should be created
     assert result2["obs_ids"][0] == first_obs_id
     assert Observation.objects.filter(satellite_id__sat_number="88888").count() == 1
+
+
+@pytest.mark.django_db
+def test_get_or_create_satellite_stores_generation_on_create(mocker):
+    mocker.patch(
+        "repository.tasks.get_satellite_metadata",
+        return_value={"generation": "v2 mini"},
+    )
+    additional = _satchecker_data(
+        satellite_name="STARLINK-1234", intl_designator="2024-001A"
+    )
+    satellite = get_or_create_satellite(70001, "STARLINK-1234", additional)
+    assert satellite.generation == "v2 mini"
+
+
+@pytest.mark.django_db
+def test_get_or_create_satellite_generation_none_when_unclassified(mocker):
+    # SatChecker returns no metadata (e.g. a brand-new satellite): stays None,
+    # and the upload must not fail.
+    mocker.patch("repository.tasks.get_satellite_metadata", return_value=None)
+    additional = _satchecker_data(satellite_name="STARLINK-9999")
+    satellite = get_or_create_satellite(70002, "STARLINK-9999", additional)
+    assert satellite.generation is None
+
+
+@pytest.mark.django_db
+def test_get_or_create_satellite_generation_lookup_error_is_safe(mocker):
+    # A SatChecker failure must never break satellite creation.
+    mocker.patch(
+        "repository.tasks.get_satellite_metadata",
+        side_effect=Exception("SatChecker down"),
+    )
+    additional = _satchecker_data(satellite_name="STARLINK-8888")
+    satellite = get_or_create_satellite(70003, "STARLINK-8888", additional)
+    assert satellite.generation is None
+
+
+@pytest.mark.django_db
+def test_get_or_create_satellite_existing_not_refetched(mocker):
+    # Existing satellites keep their stored generation; no metadata call on the
+    # update path (generation is fetched only when a satellite is created).
+    Satellite.objects.create(sat_number=70004, sat_name="STARLINK-7", generation="v1.5")
+    fetch = mocker.patch("repository.tasks.get_satellite_metadata")
+    additional = _satchecker_data(satellite_name="STARLINK-7")
+    satellite = get_or_create_satellite(70004, "STARLINK-7", additional)
+    assert satellite.generation == "v1.5"
+    fetch.assert_not_called()
