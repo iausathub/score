@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1788542151456,
+  "lastUpdate": 1789682954975,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1768,6 +1768,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.0685223528002521",
             "extra": "mean: 435.1257071999953 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "e9ff16a00b079865e8500cace01caa34df287c76",
+          "message": "Add plots for brightness per constellation at observed altitude and 1000km (#135)\n\n* Fix for only integers allowed for lat/long in satellite position lookup\n\n* Fix observer-altitude unit bug in satellite visibility check\n\n* Save Starlink generation info when satellites are added to db\n\n* Add two new plots for observed brightness by operator; change Kuiper to Amazon LEO\n\n* Constellation brightness vs altitude plots; plot download buttons",
+          "timestamp": "2026-09-17T15:07:56-07:00",
+          "tree_id": "0f2ef4d2ef989cf95cbb9a2cd7eb4b012be56e2c",
+          "url": "https://github.com/iausathub/score/commit/e9ff16a00b079865e8500cace01caa34df287c76"
+        },
+        "date": 1789682953971,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 56.97138684227335,
+            "unit": "iter/sec",
+            "range": "stddev: 0.011686988843369961",
+            "extra": "mean: 17.552670830508724 msec\nrounds: 59"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 205.29144216377074,
+            "unit": "iter/sec",
+            "range": "stddev: 0.000319392689659085",
+            "extra": "mean: 4.871123654546947 msec\nrounds: 55"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 1.3179467951278732,
+            "unit": "iter/sec",
+            "range": "stddev: 0.06758008143782629",
+            "extra": "mean: 758.7559708000015 msec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 1.5104485044194766,
+            "unit": "iter/sec",
+            "range": "stddev: 0.05651775542490902",
+            "extra": "mean: 662.0550101999925 msec\nrounds: 5"
           }
         ]
       }
