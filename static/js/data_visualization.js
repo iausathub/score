@@ -421,7 +421,7 @@ function makeAltitudeChart(canvasId, chartData, theme, uniform) {
                 legend: { display: false },
                 tooltip: {
                     // Only the bubble dataset (index 2) drives tooltips.
-                    mode: 'point',
+                    mode: 'nearest',
                     intersect: true,
                     filter: (item) => item.datasetIndex === 2,
                     callbacks: {
