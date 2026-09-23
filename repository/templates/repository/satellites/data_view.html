@@ -105,7 +105,7 @@
               <div class="row">
                 <div class="col-md-6">
                   <p><strong>Number of Observations:</strong> <span id="num_observations">{{ num_observations }}</span></p>
-                  <p><strong>Average Magnitude:</strong> <span id="average_magnitude">{{ average_magnitude }}</span></p>
+                  <p><strong>Average Magnitude:</strong> <span id="average_magnitude">{{ average_magnitude|default_if_none:"N/A" }}</span></p>
                 </div>
                 <div class="col-md-6">
                   <p><strong>Most Recent Observation:</strong> <span id="last_observation_date">{{ most_recent_observation_date }}</span></p>

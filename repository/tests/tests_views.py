@@ -100,6 +100,36 @@ class TestViews(TestCase):
         self.assertContains(response, self.satellite.sat_name)
         self.assertContains(response, self.satellite.sat_number)
 
+    @patch("repository.views.get_satellite_metadata", return_value=None)
+    def test_satellite_detail_view_all_null_magnitudes(self, mock_metadata):
+        # Regression: a satellite whose observations all have a null
+        # apparent_mag makes Avg("apparent_mag") return None, which used to
+        # crash the view with "type NoneType doesn't define __round__ method".
+        satellite = Satellite.objects.create(
+            sat_name="STARLINK-99999",
+            sat_number=99999,
+            date_added=timezone.now(),
+        )
+        Observation.objects.create(
+            obs_time_utc=self.obs_date,
+            obs_email="abc@def.com",
+            satellite_id=satellite,
+            location_id=self.location,
+            date_added=self.obs_date,
+            obs_time_uncert_sec=5,
+            apparent_mag=None,
+            apparent_mag_uncert=None,
+            obs_mode="VISUAL",
+            obs_filter="CLEAR",
+            instrument="none",
+            obs_orc_id=["0123-4567-8910-1112"],
+        )
+
+        response = self.client.get(reverse("satellite-data-view", args=[99999]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTemplateUsed(response, "repository/satellites/data_view.html")
+        self.assertIsNone(response.context["average_magnitude"])
+
     def test_observer_obs_list_view(self):
         response = self.client.get(
             reverse("observer-view", args=["0123-4567-8910-1112"])
