@@ -18,6 +18,23 @@ class UploadError(Exception):
     pass
 
 
+def format_validation_error(exc: ValidationError) -> str:
+    """Render a Django ValidationError as a readable, human-friendly message.
+
+    Used so a rejected observation reports *why* it was rejected (e.g. a missing
+    ORCID) instead of the raw ValidationError dict repr.
+    """
+    if hasattr(exc, "message_dict"):
+        parts = []
+        for field, messages in exc.message_dict.items():
+            label = "Notes" if field == "__all__" else field
+            parts.append(f"{label}: {' '.join(messages)}")
+        return " | ".join(parts)
+    if hasattr(exc, "messages"):
+        return " ".join(exc.messages)
+    return str(exc)
+
+
 def is_potentially_discrepant(additional_data: SatCheckerData) -> bool:
     return additional_data.alt_deg is not None and (
         additional_data.alt_deg < -3 or additional_data.illuminated is False
@@ -432,159 +449,180 @@ def process_upload_api(
             )
             continue
 
-        satellite = get_or_create_satellite(
-            obs_data["satellite_number"], obs_data["satellite_name"], additional_data
-        )
+        try:
+            satellite = get_or_create_satellite(
+                obs_data["satellite_number"],
+                obs_data["satellite_name"],
+                additional_data,
+            )
 
-        location, loc_created = Location.objects.get_or_create(
-            obs_lat_deg=obs_data["obs_lat_deg"],
-            obs_long_deg=obs_data["obs_long_deg"],
-            obs_alt_m=obs_data["obs_alt_m"],
-            defaults={
-                "obs_lat_deg": obs_data["obs_lat_deg"],
-                "obs_long_deg": obs_data["obs_long_deg"],
-                "obs_alt_m": obs_data["obs_alt_m"],
-                "date_added": timezone.now(),
-            },
-        )
+            location, loc_created = Location.objects.get_or_create(
+                obs_lat_deg=obs_data["obs_lat_deg"],
+                obs_long_deg=obs_data["obs_long_deg"],
+                obs_alt_m=obs_data["obs_alt_m"],
+                defaults={
+                    "obs_lat_deg": obs_data["obs_lat_deg"],
+                    "obs_long_deg": obs_data["obs_long_deg"],
+                    "obs_alt_m": obs_data["obs_alt_m"],
+                    "date_added": timezone.now(),
+                },
+            )
 
-        observation, obs_created = Observation.objects.get_or_create(
-            obs_time_utc=obs_data["obs_time_utc"],
-            obs_time_uncert_sec=obs_data["obs_time_uncert_sec"],
-            apparent_mag=obs_data["apparent_mag"],
-            apparent_mag_uncert=obs_data["apparent_mag_uncert"],
-            limiting_magnitude=obs_data["limiting_magnitude"],
-            instrument=obs_data["instrument"],
-            obs_mode=obs_data["obs_mode"].upper(),
-            obs_filter=obs_data["obs_filter"],
-            obs_email=obs_data["obs_email"],
-            obs_orc_id=obs_data["obs_orc_id"],
-            sat_ra_deg=obs_data["sat_ra_deg"] if obs_data["sat_ra_deg"] else None,
-            sat_dec_deg=obs_data["sat_dec_deg"] if obs_data["sat_dec_deg"] else None,
-            sigma_2_ra=obs_data["sigma_2_ra"] if obs_data["sigma_2_ra"] else None,
-            sigma_ra_sigma_dec=(
-                obs_data["sigma_ra_sigma_dec"]
-                if obs_data["sigma_ra_sigma_dec"]
-                else None
-            ),
-            sigma_2_dec=obs_data["sigma_2_dec"] if obs_data["sigma_2_dec"] else None,
-            range_to_sat_km=(
-                obs_data["range_to_sat_km"] if obs_data["range_to_sat_km"] else None
-            ),
-            range_to_sat_uncert_km=(
-                obs_data["range_to_sat_uncert_km"]
-                if obs_data["range_to_sat_uncert_km"]
-                else None
-            ),
-            range_rate_sat_km_s=(
-                obs_data["range_rate_sat_km_s"]
-                if obs_data["range_rate_sat_km_s"]
-                else None
-            ),
-            range_rate_sat_uncert_km_s=(
-                obs_data["range_rate_sat_uncert_km_s"]
-                if obs_data["range_rate_sat_uncert_km_s"]
-                else None
-            ),
-            comments=obs_data["comments"] if obs_data["comments"] else None,
-            data_archive_link=(
-                obs_data["data_archive_link"] if obs_data["data_archive_link"] else None
-            ),
-            mpc_code=(
-                obs_data["mpc_code"].strip().upper() if obs_data["mpc_code"] else None
-            ),
-            phase_angle=additional_data.phase_angle,
-            range_to_sat_km_satchecker=additional_data.range_to_sat,
-            range_rate_sat_km_s_satchecker=additional_data.range_rate,
-            sat_ra_deg_satchecker=additional_data.sat_ra_deg,
-            sat_dec_deg_satchecker=additional_data.sat_dec_deg,
-            ddec_deg_s_satchecker=additional_data.ddec_deg_s,
-            dra_cosdec_deg_s_satchecker=additional_data.dra_cosdec_deg_s,
-            alt_deg_satchecker=additional_data.alt_deg,
-            az_deg_satchecker=additional_data.az_deg,
-            sat_altitude_km_satchecker=(additional_data.sat_altitude_km),
-            solar_elevation_deg_satchecker=additional_data.solar_elevation_deg,
-            solar_azimuth_deg_satchecker=additional_data.solar_azimuth_deg,
-            illuminated=additional_data.illuminated,
-            potentially_discrepant=potentially_discrepant,
-            satellite_id=satellite,
-            location_id=location,
-            defaults={
-                "obs_time_utc": obs_data["obs_time_utc"],
-                "obs_time_uncert_sec": obs_data["obs_time_uncert_sec"],
-                "apparent_mag": obs_data["apparent_mag"],
-                "apparent_mag_uncert": obs_data["apparent_mag_uncert"],
-                "limiting_magnitude": obs_data["limiting_magnitude"],
-                "instrument": obs_data["instrument"],
-                "obs_mode": obs_data["obs_mode"].upper(),
-                "obs_filter": obs_data["obs_filter"],
-                "obs_email": obs_data["obs_email"],
-                "obs_orc_id": obs_data["obs_orc_id"],
-                "sat_ra_deg": (
-                    obs_data["sat_ra_deg"] if obs_data["sat_ra_deg"] else None
-                ),
-                "sat_dec_deg": (
+            observation, obs_created = Observation.objects.get_or_create(
+                obs_time_utc=obs_data["obs_time_utc"],
+                obs_time_uncert_sec=obs_data["obs_time_uncert_sec"],
+                apparent_mag=obs_data["apparent_mag"],
+                apparent_mag_uncert=obs_data["apparent_mag_uncert"],
+                limiting_magnitude=obs_data["limiting_magnitude"],
+                instrument=obs_data["instrument"],
+                obs_mode=obs_data["obs_mode"].upper(),
+                obs_filter=obs_data["obs_filter"],
+                obs_email=obs_data["obs_email"],
+                obs_orc_id=obs_data["obs_orc_id"],
+                sat_ra_deg=obs_data["sat_ra_deg"] if obs_data["sat_ra_deg"] else None,
+                sat_dec_deg=(
                     obs_data["sat_dec_deg"] if obs_data["sat_dec_deg"] else None
                 ),
-                "sigma_2_ra": (
-                    obs_data["sigma_2_ra"] if obs_data["sigma_2_ra"] else None
-                ),
-                "sigma_ra_sigma_dec": (
+                sigma_2_ra=obs_data["sigma_2_ra"] if obs_data["sigma_2_ra"] else None,
+                sigma_ra_sigma_dec=(
                     obs_data["sigma_ra_sigma_dec"]
                     if obs_data["sigma_ra_sigma_dec"]
                     else None
                 ),
-                "sigma_2_dec": (
+                sigma_2_dec=(
                     obs_data["sigma_2_dec"] if obs_data["sigma_2_dec"] else None
                 ),
-                "range_to_sat_km": (
+                range_to_sat_km=(
                     obs_data["range_to_sat_km"] if obs_data["range_to_sat_km"] else None
                 ),
-                "range_to_sat_uncert_km": (
+                range_to_sat_uncert_km=(
                     obs_data["range_to_sat_uncert_km"]
                     if obs_data["range_to_sat_uncert_km"]
                     else None
                 ),
-                "range_rate_sat_km_s": (
+                range_rate_sat_km_s=(
                     obs_data["range_rate_sat_km_s"]
                     if obs_data["range_rate_sat_km_s"]
                     else None
                 ),
-                "range_rate_sat_uncert_km_s": (
+                range_rate_sat_uncert_km_s=(
                     obs_data["range_rate_sat_uncert_km_s"]
                     if obs_data["range_rate_sat_uncert_km_s"]
                     else None
                 ),
-                "comments": obs_data["comments"] if obs_data["comments"] else None,
-                "data_archive_link": (
+                comments=obs_data["comments"] if obs_data["comments"] else None,
+                data_archive_link=(
                     obs_data["data_archive_link"]
                     if obs_data["data_archive_link"]
                     else None
                 ),
-                "mpc_code": (
+                mpc_code=(
                     obs_data["mpc_code"].strip().upper()
                     if obs_data["mpc_code"]
                     else None
                 ),
-                "phase_angle": additional_data.phase_angle,
-                "range_to_sat_km_satchecker": additional_data.range_to_sat,
-                "range_rate_sat_km_s_satchecker": additional_data.range_rate,
-                "sat_ra_deg_satchecker": additional_data.sat_ra_deg,
-                "sat_dec_deg_satchecker": additional_data.sat_dec_deg,
-                "ddec_deg_s_satchecker": additional_data.ddec_deg_s,
-                "dra_cosdec_deg_s_satchecker": additional_data.dra_cosdec_deg_s,
-                "alt_deg_satchecker": additional_data.alt_deg,
-                "az_deg_satchecker": additional_data.az_deg,
-                "sat_altitude_km_satchecker": (additional_data.sat_altitude_km),
-                "solar_elevation_deg_satchecker": (additional_data.solar_elevation_deg),
-                "solar_azimuth_deg_satchecker": additional_data.solar_azimuth_deg,
-                "illuminated": additional_data.illuminated,
-                "potentially_discrepant": potentially_discrepant,
-                "satellite_id": satellite,
-                "location_id": location,
-                "date_added": timezone.now(),
-            },
-        )
+                phase_angle=additional_data.phase_angle,
+                range_to_sat_km_satchecker=additional_data.range_to_sat,
+                range_rate_sat_km_s_satchecker=additional_data.range_rate,
+                sat_ra_deg_satchecker=additional_data.sat_ra_deg,
+                sat_dec_deg_satchecker=additional_data.sat_dec_deg,
+                ddec_deg_s_satchecker=additional_data.ddec_deg_s,
+                dra_cosdec_deg_s_satchecker=additional_data.dra_cosdec_deg_s,
+                alt_deg_satchecker=additional_data.alt_deg,
+                az_deg_satchecker=additional_data.az_deg,
+                sat_altitude_km_satchecker=(additional_data.sat_altitude_km),
+                solar_elevation_deg_satchecker=additional_data.solar_elevation_deg,
+                solar_azimuth_deg_satchecker=additional_data.solar_azimuth_deg,
+                illuminated=additional_data.illuminated,
+                potentially_discrepant=potentially_discrepant,
+                satellite_id=satellite,
+                location_id=location,
+                defaults={
+                    "obs_time_utc": obs_data["obs_time_utc"],
+                    "obs_time_uncert_sec": obs_data["obs_time_uncert_sec"],
+                    "apparent_mag": obs_data["apparent_mag"],
+                    "apparent_mag_uncert": obs_data["apparent_mag_uncert"],
+                    "limiting_magnitude": obs_data["limiting_magnitude"],
+                    "instrument": obs_data["instrument"],
+                    "obs_mode": obs_data["obs_mode"].upper(),
+                    "obs_filter": obs_data["obs_filter"],
+                    "obs_email": obs_data["obs_email"],
+                    "obs_orc_id": obs_data["obs_orc_id"],
+                    "sat_ra_deg": (
+                        obs_data["sat_ra_deg"] if obs_data["sat_ra_deg"] else None
+                    ),
+                    "sat_dec_deg": (
+                        obs_data["sat_dec_deg"] if obs_data["sat_dec_deg"] else None
+                    ),
+                    "sigma_2_ra": (
+                        obs_data["sigma_2_ra"] if obs_data["sigma_2_ra"] else None
+                    ),
+                    "sigma_ra_sigma_dec": (
+                        obs_data["sigma_ra_sigma_dec"]
+                        if obs_data["sigma_ra_sigma_dec"]
+                        else None
+                    ),
+                    "sigma_2_dec": (
+                        obs_data["sigma_2_dec"] if obs_data["sigma_2_dec"] else None
+                    ),
+                    "range_to_sat_km": (
+                        obs_data["range_to_sat_km"]
+                        if obs_data["range_to_sat_km"]
+                        else None
+                    ),
+                    "range_to_sat_uncert_km": (
+                        obs_data["range_to_sat_uncert_km"]
+                        if obs_data["range_to_sat_uncert_km"]
+                        else None
+                    ),
+                    "range_rate_sat_km_s": (
+                        obs_data["range_rate_sat_km_s"]
+                        if obs_data["range_rate_sat_km_s"]
+                        else None
+                    ),
+                    "range_rate_sat_uncert_km_s": (
+                        obs_data["range_rate_sat_uncert_km_s"]
+                        if obs_data["range_rate_sat_uncert_km_s"]
+                        else None
+                    ),
+                    "comments": obs_data["comments"] if obs_data["comments"] else None,
+                    "data_archive_link": (
+                        obs_data["data_archive_link"]
+                        if obs_data["data_archive_link"]
+                        else None
+                    ),
+                    "mpc_code": (
+                        obs_data["mpc_code"].strip().upper()
+                        if obs_data["mpc_code"]
+                        else None
+                    ),
+                    "phase_angle": additional_data.phase_angle,
+                    "range_to_sat_km_satchecker": additional_data.range_to_sat,
+                    "range_rate_sat_km_s_satchecker": additional_data.range_rate,
+                    "sat_ra_deg_satchecker": additional_data.sat_ra_deg,
+                    "sat_dec_deg_satchecker": additional_data.sat_dec_deg,
+                    "ddec_deg_s_satchecker": additional_data.ddec_deg_s,
+                    "dra_cosdec_deg_s_satchecker": additional_data.dra_cosdec_deg_s,
+                    "alt_deg_satchecker": additional_data.alt_deg,
+                    "az_deg_satchecker": additional_data.az_deg,
+                    "sat_altitude_km_satchecker": (additional_data.sat_altitude_km),
+                    "solar_elevation_deg_satchecker": (
+                        additional_data.solar_elevation_deg
+                    ),
+                    "solar_azimuth_deg_satchecker": additional_data.solar_azimuth_deg,
+                    "illuminated": additional_data.illuminated,
+                    "potentially_discrepant": potentially_discrepant,
+                    "satellite_id": satellite,
+                    "location_id": location,
+                    "date_added": timezone.now(),
+                },
+            )
+        except ValidationError as e:
+            reject_observation(idx, obs_data, format_validation_error(e))
+            continue
+        except Exception as e:
+            reject_observation(idx, obs_data, str(e))
+            continue
 
         obs_ids.append(observation.id)
         if obs_created:

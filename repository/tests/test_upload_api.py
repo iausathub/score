@@ -647,3 +647,106 @@ def test_process_upload_api_progress_task(mocker):
     assert last_call.kwargs["meta"]["percent"] == 100
     assert last_call.kwargs["meta"]["current"] == 10
     assert last_call.kwargs["meta"]["total"] == 10
+
+
+def _valid_satchecker_mock(mocker):
+    mock_satchecker = mocker.Mock()
+    mock_satchecker.alt_deg = 15.0
+    mock_satchecker.illuminated = True
+    mock_satchecker.phase_angle = 15.0
+    mock_satchecker.range_to_sat = 500.0
+    mock_satchecker.range_rate = 0.1
+    mock_satchecker.sat_ra_deg = 180.0
+    mock_satchecker.sat_dec_deg = 45.0
+    mock_satchecker.ddec_deg_s = 0.01
+    mock_satchecker.dra_cosdec_deg_s = 0.02
+    mock_satchecker.az_deg = 270.0
+    mock_satchecker.satellite_name = "TEST SAT"
+    mock_satchecker.intl_designator = "2024-001A"
+    mock_satchecker.sat_altitude_km = 400.0
+    mock_satchecker.solar_elevation_deg = -10.0
+    mock_satchecker.solar_azimuth_deg = 180.0
+    return mock_satchecker
+
+
+def _observation_payload(obs_time, **overrides):
+    payload = {
+        "satellite_name": "TEST SAT",
+        "satellite_number": 12345,
+        "obs_time_utc": obs_time,
+        "obs_time_uncert_sec": 0.1,
+        "instrument": "TEST-SCOPE",
+        "obs_mode": "CCD",
+        "obs_filter": "Clear",
+        "obs_email": "test@example.com",
+        "obs_orc_id": ["0000-0000-0000-0000"],
+        "obs_lat_deg": 20.0,
+        "obs_long_deg": -155.0,
+        "obs_alt_m": 3000.0,
+        "limiting_magnitude": 18.0,
+        "apparent_mag": 6,
+        "apparent_mag_uncert": 1,
+        "sat_ra_deg": None,
+        "sat_dec_deg": None,
+        "sigma_2_ra": None,
+        "sigma_2_dec": None,
+        "sigma_ra_sigma_dec": None,
+        "range_to_sat_km": None,
+        "range_to_sat_uncert_km": None,
+        "range_rate_sat_km_s": None,
+        "range_rate_sat_uncert_km_s": None,
+        "comments": None,
+        "data_archive_link": None,
+        "mpc_code": None,
+    }
+    payload.update(overrides)
+    return payload
+
+
+@pytest.mark.django_db
+def test_process_upload_api_missing_orcid_does_not_crash_batch(mocker):
+    """A missing/empty ORCID must reject only that observation, not crash the
+    whole batch (regression for the un-guarded get_or_create in the API task)."""
+    mocker.patch("celery_progress.backend.ProgressRecorder.set_progress")
+    mocker.patch("repository.tasks.send_confirmation_email")
+    mocker.patch.object(process_upload_api, "update_state")
+    mocker.patch(
+        "repository.tasks.add_additional_data",
+        return_value=_valid_satchecker_mock(mocker),
+    )
+
+    obs_time = timezone.datetime(2024, 1, 1, 0, 0, 0, tzinfo=dt_timezone.utc)
+
+    observations_data = [
+        # No ORCID -> empty list, which the model rejects as required.
+        _observation_payload(obs_time, satellite_number=12345, obs_orc_id=[]),
+        # Valid observation that must still be saved.
+        _observation_payload(
+            obs_time,
+            satellite_number=54321,
+            obs_orc_id=["0000-0000-0000-0000"],
+        ),
+    ]
+
+    # Before the fix this raised ValidationError and killed the task.
+    result = process_upload_api(
+        observations_data,
+        timezone.now().isoformat(),
+        "test@example.com",
+        False,
+    )
+
+    assert result["status"] == "PARTIAL_SUCCESS"
+    assert result["summary"]["total"] == 2
+    assert result["summary"]["created"] == 1
+    assert result["summary"]["rejected"] == 1
+
+    # The valid observation was saved.
+    assert len(result["obs_ids"]) == 1
+
+    # The rejected one carries a readable reason naming the ORCID field.
+    assert len(result["rejected_obs"]) == 1
+    rejected = result["rejected_obs"][0]
+    assert rejected["index"] == 0
+    assert "obs_orc_id" in rejected["error"]
+    assert "blank" in rejected["error"].lower()

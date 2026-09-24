@@ -71,6 +71,7 @@ def index(request):
         "task_id": None,
         "error": None,
         "recaptcha_public_key": settings.RECAPTCHA_PUBLIC_KEY,
+        "carto_api_key": settings.CARTO_API_KEY,
     }
 
     # Make sure that the progress bar is shown only if the page was redirected
