@@ -51,3 +51,15 @@ RECAPTCHA_PUBLIC_KEY = get_secret("score-settings")["recaptcha-public"]  # noqa:
 RECAPTCHA_PRIVATE_KEY = get_secret("score-settings")["recaptcha-private"]  # noqa: F405
 
 CARTO_API_KEY = get_secret("score-settings")["carto-api-key"]  # noqa: F405
+
+# TEMP: CARTO_API_KEY diagnostics. If this marker is ABSENT from the pod logs but
+# the base.py probe is present, the image's production.py is being overridden by a
+# mounted (stale) copy that lacks the CARTO_API_KEY line.
+from score.carto_debug import probe  # noqa: E402
+
+probe("production.py: IMAGE VERSION loaded (has CARTO_API_KEY line)")
+print(
+    "[CARTO-DEBUG] production.py: CARTO_API_KEY setting "
+    f"nonempty={bool(CARTO_API_KEY)} len={len(CARTO_API_KEY) if CARTO_API_KEY else 0}",
+    flush=True,
+)

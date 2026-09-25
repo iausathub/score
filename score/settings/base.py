@@ -25,6 +25,10 @@ def get_secret_env(secret_name):
         return score_prod_db
 
     if secret_name == "score-settings":  # noqa: S105
+        from score.carto_debug import probe  # TEMP: CARTO_API_KEY diagnostics
+
+        probe("base.get_secret_env: reading 'score-settings' via env vars")
+
         score_settings = {
             "recaptcha-public": os.environ.get("RECAPTCHA_PUBLIC_KEY"),
             "recaptcha-private": os.environ.get("RECAPTCHA_PRIVATE_KEY"),
