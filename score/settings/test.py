@@ -47,3 +47,5 @@ ADMINS = get_secret("score-settings")["admins"]  # noqa: F405
 
 RECAPTCHA_PUBLIC_KEY = get_secret("score-settings")["recaptcha-public"]  # noqa: F405
 RECAPTCHA_PRIVATE_KEY = get_secret("score-settings")["recaptcha-private"]  # noqa: F405
+
+CARTO_API_KEY = get_secret("score-settings")["carto-api-key"]  # noqa: F405

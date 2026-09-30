@@ -31,6 +31,7 @@ def get_secret_env(secret_name):
             "server-email": os.environ.get("EMAIL_HOST_USER"),
             "temp-gmail-pw": os.environ.get("EMAIL_HOST_PASSWORD"),
             "admins": os.environ.get("ADMINS"),
+            "carto-api-key": os.environ.get("CARTO_API_KEY"),
         }
 
         return score_settings

@@ -198,7 +198,7 @@
           prefix: '<a href="https://leafletjs.com/reference.html">Leaflet</a> | © <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, © <a href="https://carto.com/attribution">CARTO</a>'
       }).addTo(map);
 
-      var positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+      var positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png?key={{ carto_api_key }}', {
           attribution: ''
       }).addTo(map);
 
