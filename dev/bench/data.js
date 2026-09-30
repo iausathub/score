@@ -1,5 +1,5 @@
 window.BENCHMARK_DATA = {
-  "lastUpdate": 1789749655745,
+  "lastUpdate": 1790792847155,
   "repoUrl": "https://github.com/iausathub/score",
   "entries": {
     "Benchmark": [
@@ -1872,6 +1872,58 @@ window.BENCHMARK_DATA = {
             "unit": "iter/sec",
             "range": "stddev: 0.057600616960608496",
             "extra": "mean: 710.761346600006 msec\nrounds: 5"
+          }
+        ]
+      },
+      {
+        "commit": {
+          "author": {
+            "email": "michelle.dadighat@noirlab.edu",
+            "name": "Michelle Dadighat",
+            "username": "mdadighat"
+          },
+          "committer": {
+            "email": "noreply@github.com",
+            "name": "GitHub",
+            "username": "web-flow"
+          },
+          "distinct": true,
+          "id": "da251d1d7fffca1f6a6c9e2129e45c458cce5164",
+          "message": "Merge pull request #136 from iausathub/develop\n\nAdd Carto API key; fix for satellite pages if only obs are non-detections",
+          "timestamp": "2026-09-30T20:25:51+02:00",
+          "tree_id": "582bdd0bf00c1be1018ecabeee3f39eeb974a55c",
+          "url": "https://github.com/iausathub/score/commit/da251d1d7fffca1f6a6c9e2129e45c458cce5164"
+        },
+        "date": 1790792846613,
+        "tool": "pytest",
+        "benches": [
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_satellite_query",
+            "value": 70.5019076000505,
+            "unit": "iter/sec",
+            "range": "stddev: 0.011721795241078104",
+            "extra": "mean: 14.184013369863537 msec\nrounds: 73"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_view_satellite_observations",
+            "value": 252.52496604089472,
+            "unit": "iter/sec",
+            "range": "stddev: 0.00021730979482424508",
+            "extra": "mean: 3.9600044925382027 msec\nrounds: 67"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_observations",
+            "value": 0.754819940964657,
+            "unit": "iter/sec",
+            "range": "stddev: 0.10520630569714985",
+            "extra": "mean: 1.324819265800005 sec\nrounds: 5"
+          },
+          {
+            "name": "repository/tests/test_benchmark.py::test_benchmark_api_satellite_observations",
+            "value": 0.7821610318388456,
+            "unit": "iter/sec",
+            "range": "stddev: 0.07734884716952897",
+            "extra": "mean: 1.2785091040000025 sec\nrounds: 5"
           }
         ]
       }
