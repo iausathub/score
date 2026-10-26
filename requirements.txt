@@ -20,7 +20,7 @@ click-plugins==1.1.1
 click-repl==0.3.0
 coverage==7.4.0
 cryptography==50.0.0
-distlib==0.3.8
+distlib==0.4.3
 Django==5.2.16
 django-anymail==13.0
 django-appconf==1.0.6
@@ -39,7 +39,7 @@ django-upgrade==1.20.0
 djangorestframework==3.17.2
 dnspython==2.8.0
 email-validator==2.3.0
-filelock==3.20.3
+filelock==3.24.2
 gunicorn==23.0.0
 identify==2.5.33
 idna==3.15
@@ -92,6 +92,6 @@ typing_extensions==4.12.2
 tzdata==2024.1
 urllib3==2.7.0
 vine==5.1.0
-virtualenv==20.36.1
+virtualenv==21.14.13
 wcwidth==0.2.13
 whitenoise==6.7.0
