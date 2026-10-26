@@ -20,7 +20,7 @@ click-plugins==1.1.1
 click-repl==0.3.0
 coverage==7.4.0
 cryptography==50.0.0
-distlib==0.3.8
+distlib==0.4.3
 Django==5.2.16
 django-anymail==13.0
 django-appconf==1.0.6
