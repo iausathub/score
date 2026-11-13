@@ -10,7 +10,7 @@ boto3==1.43.68
 botocore==1.43.68
 celery==5.3.6
 celery-progress==0.3
-certifi==2024.7.4
+certifi==2026.10.18
 cffi==2.1.1
 cfgv==3.4.0
 charset-normalizer==3.3.2
