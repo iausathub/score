@@ -89,3 +89,11 @@ Testing and linting are run as part of the GitHub actions on every commit, and a
 <a name="license"></a>
 ## License
 This project is licensed under the BSD 3-Clause License - see the [LICENSE](LICENSE) file for details.
+
+<a name="ai"></a>
+## AI Usage
+Portions of the code in this repository were developed with the
+assistance of AI tools (Claude Code). All
+AI-assisted code was reviewed by NOIRLab engineering staff in accordance
+with NOIRL-POL-006 and the Software Engineering Team AI Use Procedure.
+
